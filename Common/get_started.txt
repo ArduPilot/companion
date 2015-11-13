@@ -1,6 +1,9 @@
 SETUP COMPANION COMPUTER
 Silvio Revelli - 4gmetry.voltarobots.com - silvio@voltarobots.com
-__________________________________________________________________
+_________________________________________________________________________
+
+The very first actions to setup an Ubuntu OS to communicate with PixHawk
+_________________________________________________________________________
 
 sudo apt-get install python-pip
 pip install numpy
@@ -22,6 +25,7 @@ sudo mavproxy.py --master=/dev/ttyUSB0 --baudrate 1500000 (this should be the sa
 # FORWARDING TELEMETRY - VPN
 # Please replace "192.168.1.106" with your ground station IP 
 #(If you connect through Pixhawk USB - not a grat idea - use ttyACM0 instead of ttyUSB0)
+# Select the folder with your VPN Profile
 # sudo openvpn --config /./home/odroid/Desktop/client.ovpn &
 # sudo mavproxy.py --master=/dev/ttyUSB0 --baudrate 1500000 --out=192.168.1.106:14550 
 
