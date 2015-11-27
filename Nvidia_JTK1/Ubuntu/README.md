@@ -1,6 +1,6 @@
-John Lian  - john.lian@pleiades.ca
+<!-- John Lian  - john.lian@pleiades.ca -->
 
-Alexandre Willame - alexandre.willame@pleiades.ca
+<!-- Alexandre Willame - alexandre.willame@pleiades.ca -->
 
 ## Guide to set up NVIDIA TK1 to communicate with Pixhawk
 
@@ -21,7 +21,7 @@ This will allow you to connect TK1 to the Jetson via `ttyTHS0`
 
 ### Ubuntu setup
 
-To run have a `mavproxy` session running please run
+To have a `mavproxy` session running please run
 
 ```bash
 $ sudo apt-get install python-opencv python-wxgtk python-pip python-dev
