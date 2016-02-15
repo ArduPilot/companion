@@ -45,7 +45,8 @@ cmake -D CMAKE_BUILD_TYPE=RELEASE \
 	-D OPENCV_EXTRA_MODULES_PATH=~/opencv_contrib-3.0.0/modules \
 	-D BUILD_EXAMPLES=ON ..
 make -j4
-sudo make installsudo ldconfig
+sudo make install
+sudo ldconfig
 
 # install red balloon finder
 sudo apt-get install screen
