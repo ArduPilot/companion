@@ -48,6 +48,12 @@ make -j4
 sudo make install
 sudo ldconfig
 
+# picamera (likely already included from opencv)
+sudo pip install "picamera[array]"
+
+# cherrypy web server (used by red balloon finder)
+sudo pip install cherrypy
+
 # install red balloon finder
 sudo apt-get install screen
 sudo apt-get install git
