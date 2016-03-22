@@ -4,7 +4,5 @@
 
 # For PixHawk or other connected via USB on Raspberry Pi 2
 mavproxy.py --master /dev/ttyACM0,115200
-            --master /dev/ttyAMA0,57600
-            --master /dev/ttyS0,57600
             --out udpin:localhost:9000 \
             --out udpbcast:169.254.255.255:14550
