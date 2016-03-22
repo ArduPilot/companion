@@ -1,5 +1,7 @@
 # companion
 
+This repository is the Blue Robotics version of the `diydrones/companion` repository. Currently, this repository only provides updated companion scripts for the Raspberry Pi Computer.
+
 Companion computer startup scripts and examples.
 
 This repo is where you can contribute both feedback about (issues) and improvements to (PRs) ArduPilot companion computer support.
