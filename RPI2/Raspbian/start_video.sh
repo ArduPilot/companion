@@ -17,11 +17,11 @@
 #          --qp 10 \
 #          --framerate 30 \
 #          --awb off \
-#          --fl \
+#          -fl \
 #          --timeout 0 \
 #          --output - | \
 #          gst-launch-1.0 -v fdsrc ! h264parse ! rtph264pay config-interval=10 pt=96 ! \
-#          udpsink host=192.168.2.1 port=5000
+#          udpsink host=169.254.2.1 port=5000
 
 # Reliable 720p stream with fairly low latency (200ms)
 
@@ -32,11 +32,11 @@
 #          --qp 10 \
 #          --framerate 30 \
 #          --awb off \
-#          --fl \
+#          -fl \
 #          --timeout 0 \
 #          --output - | \
 #          gst-launch-1.0 -v fdsrc ! h264parse ! rtph264pay config-interval=10 pt=96 ! \
-#          udpsink host=192.168.2.1 port=5000   
+#          udpsink host=169.254.2.1 port=5000   
 
 # 1080p stream with some latency (300ms)
 
@@ -47,11 +47,11 @@
 #          --qp 10 \
 #          --framerate 30 \
 #          --awb off \
-#          --fl \
+#          -fl \
 #          --timeout 0 \
 #          --output - | \
 #          gst-launch-1.0 -v fdsrc ! h264parse ! rtph264pay config-interval=10 pt=96 ! \
-#          udpsink host=192.168.2.1 port=5000                 
+#          udpsink host=169.254.2.1 port=5000                 
 
 # 1080p stream with some latency for wide angle RasPi camera (300ms)
 
@@ -61,11 +61,11 @@ raspivid --nopreview \
          --qp 10 \
          --framerate 30 \
          --awb off \
-         --fl \
+         -fl \
          --timeout 0 \
          --output - | \
          gst-launch-1.0 -v fdsrc ! h264parse ! rtph264pay config-interval=10 pt=96 ! \
-         udpsink host=192.168.2.1 port=5000
+         udpsink host=169.254.2.1 port=5000
 
 # 4K stream with latency (standard RasPiCam only)
 
@@ -75,8 +75,8 @@ raspivid --nopreview \
 #          --qp 10 \
 #          --framerate 15 \
 #          --awb off \
-#          --fl \
+#          -fl \
 #          --timeout 0 \
 #          --output - | \
 #          gst-launch-1.0 -v fdsrc ! h264parse ! rtph264pay config-interval=10 pt=96 ! \
-#          udpsink host=192.168.2.1 port=5000     
+#          udpsink host=169.254.2.1 port=5000     
