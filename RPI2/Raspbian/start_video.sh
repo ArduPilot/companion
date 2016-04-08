@@ -43,6 +43,7 @@ raspivid --nopreview \
          --bitrate 17000000 \
          --framerate 15 \
          --awb off \
+         --exposure night \
          -fl \
          --timeout 0 \
          --output - | \
