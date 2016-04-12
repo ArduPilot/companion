@@ -9,7 +9,7 @@ sudo apt-get upgrade
 sudo rpi-update
 
 # install python and pip
-sudo apt-get install python-pip
+sudo apt-get install python-dev python-pip
 
 # install dronekit
 sudo pip install dronekit dronekit-sitl # also installs pymavlink
@@ -17,3 +17,6 @@ sudo pip install mavproxy
 
 # live video related packages
 sudo apt-get install gstreamer1.0
+
+# Disable camera LED
+sudo sed '$a disable_camera_led=1' /boot/config.txt
