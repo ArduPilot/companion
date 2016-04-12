@@ -40,14 +40,17 @@
 
 raspivid --nopreview \
          --mode 2 \
-         --bitrate 17000000 \
-         --framerate 15 \
+         --bitrate 20000000 \
+         --framerate 30 \
+         --intra 3 \
+         --roi 0.03,0.03,0.97,0.97 \
          --awb off \
+         --exposure fixedfps \
          -fl \
          --timeout 0 \
          --output - | \
          gst-launch-1.0 -v fdsrc ! h264parse ! rtph264pay config-interval=10 pt=96 ! \
-         udpsink host=169.254.2.1 port=5000
+         udpsink host=169.254.2.1 port=5600
 
 # 4K stream with latency (standard RasPiCam only)
 
