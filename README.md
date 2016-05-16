@@ -21,4 +21,4 @@ Root
 ```  
 ## Key links
 
-* [Companion Computers](http://dev.ardupilot.com/wiki/companion-computers/) (Dev Wiki)
+* [Companion Computers](http://ardupilot.org/dev/docs/companion-computers.html) (Dev Wiki)
