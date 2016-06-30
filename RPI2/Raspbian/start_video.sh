@@ -6,61 +6,31 @@
 # - Auto white balance is disabled
 # - Video stream is flushed to minimize latency
 # - Framerate is maximized
-# - Port 5000 is used for compatibility with QGroundControl
+# - Port 5600 is used for compatibility with QGroundControl
 
 # Low-latency, low resolution stream (100ms)
 
 # raspivid --nopreview \
 #          --width 640 \
 #          --height 480 \
-#          --bitrate 5000000
-#          --framerate 30 \
-#          --awb off \
-#          -fl \
-#          --timeout 0 \
-#          --output - | \
-#          gst-launch-1.0 -v fdsrc ! h264parse ! rtph264pay config-interval=10 pt=96 ! \
-#          udpsink host=169.254.2.1 port=5000
-
-# Reliable 720p stream with fairly low latency (200ms)
-
-# raspivid --nopreview \
-#          --width 1280 \
-#          --height 720 \
 #          --bitrate 10000000
-#          --framerate 30 \
+#          -fps 30 \
 #          --awb off \
 #          -fl \
 #          --timeout 0 \
 #          --output - | \
 #          gst-launch-1.0 -v fdsrc ! h264parse ! rtph264pay config-interval=10 pt=96 ! \
-#          udpsink host=169.254.2.1 port=5000   
+#          udpsink host=169.254.2.1 port=5600
 
-# 1080p stream with some latency for wide angle RasPi camera (300ms)
+# 1080p stream with some latency for RasPi camera (250ms on RPi3)
 
 raspivid --nopreview \
          --mode 2 \
-         --bitrate 20000000 \
-         --framerate 30 \
-         --intra 3 \
-         --roi 0.03,0.03,0.97,0.97 \
-         --awb off \
-         --exposure fixedfps \
+         --bitrate 25000000 \
+       	 --intra 3 \
+       	 --awb auto \
          -fl \
          --timeout 0 \
          --output - | \
          gst-launch-1.0 -v fdsrc ! h264parse ! rtph264pay config-interval=10 pt=96 ! \
          udpsink host=169.254.2.1 port=5600
-
-# 4K stream with latency (standard RasPiCam only)
-
-# raspivid --nopreview \
-#          --mode 2 \
-#          --bitrate 25000000
-#          --framerate 15 \
-#          --awb off \
-#          -fl \
-#          --timeout 0 \
-#          --output - | \
-#          gst-launch-1.0 -v fdsrc ! h264parse ! rtph264pay config-interval=10 pt=96 ! \
-#          udpsink host=169.254.2.1 port=5000     
