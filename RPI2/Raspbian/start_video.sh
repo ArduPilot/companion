@@ -27,11 +27,11 @@
 
 raspivid --nopreview \
          --mode 5 \
-         --bitrate 50000000 \
+         --bitrate 25000000 \
        	 --intra 3 \
        	 --awb auto \
          -fl \
          --timeout 0 \
          --output - | \
          gst-launch-1.0 -v fdsrc ! h264parse ! rtph264pay config-interval=10 pt=96 ! \
-         udpsink host=169.254.2.1 port=5600
+         udpsink host=192.168.2.1 port=5600
