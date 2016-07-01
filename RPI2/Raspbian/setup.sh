@@ -26,3 +26,7 @@ sudo apt-get install -y gstreamer1.0
 
 # Disable camera LED
 sudo sed '$a disable_camera_led=1' /boot/config.txt
+
+# Add these lines to /etc/rc.local
+#screen -dm -S mavproxy /home/pi/companion/RPI2/Raspbian/start_mavproxy_telem_splitter.sh
+#screen -dm -S video /home/pi/companion/RPI2/Raspbian/start_video.sh
