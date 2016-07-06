@@ -27,7 +27,7 @@
 
 raspivid --nopreview \
          --mode 5 \
-         --bitrate 25000000 \
+         --bitrate 20000000 \
        	 --intra 3 \
        	 --awb auto \
          -fl \
