@@ -20,7 +20,7 @@
 #          --timeout 0 \
 #          --output - | \
 #          gst-launch-1.0 -v fdsrc ! h264parse ! rtph264pay config-interval=10 pt=96 ! \
-#          udpsink host=169.254.2.1 port=5600
+#          udpsink host=192.168.2.1 port=5600
 
 # HD Stream with some latency for RasPi camera (250ms on RPi3)
 # Use mode 2 for 1080p @ 15 fps and mode 5 for 922p @ 40 fps

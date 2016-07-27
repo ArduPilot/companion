@@ -2,7 +2,7 @@
 # is available to a companion computer and external GCSs via UDP. This broadcasts so that
 # multiple IP addresses can received the telemetry.
 
-# For PixHawk or other connected via USB on Raspberry Pi 2
+# For PixHawk or other connected via USB on Raspberry Pi
 mavproxy.py --master /dev/ttyACM0,115200 \
             --out udpin:localhost:9000 \
             --out udpbcast:192.168.2.255:14550
