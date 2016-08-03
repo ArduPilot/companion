@@ -6,8 +6,8 @@ import time
 from optparse import OptionParser
 
 parser = OptionParser()
-parser.add_option("-url","--url",dest="url",help="Firmware URL")
-parser.add_option("-px4","--px4",dest="px4file",help="Firmware File Stream")
+parser.add_option("-u","--url",dest="url",help="Firmware URL")
+parser.add_option("-p","--px4",dest="px4file",help="Firmware File Stream")
 (options,args) = parser.parse_args()
 
 # Get firmware from stdin if possible
