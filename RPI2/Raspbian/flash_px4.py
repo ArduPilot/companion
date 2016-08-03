@@ -2,6 +2,7 @@
 
 import os
 import urllib
+import time
 
 # Stop screen session with mavproxy
 print "Stopping mavproxy"
