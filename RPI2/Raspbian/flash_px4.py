@@ -3,33 +3,39 @@
 import os
 import urllib
 import time
+import sys
 from optparse import OptionParser
 
 parser = OptionParser()
-parser.add_option("-u","--url",dest="url",help="Firmware URL")
-parser.add_option("-p","--px4",dest="px4file",help="Firmware File Stream")
+parser.add_option("--url",dest="url",help="Firmware download URL (optional)")
+parser.add_option("--stdin",action="store_true",dest="fromStdin",default=False,help="Expect input from stdin")
+parser.add_option("--frame",dest="frame",default="vectored",help="ArduSub frame type for automatical download (optional)")
 (options,args) = parser.parse_args()
 
 # Get firmware from stdin if possible
 print "Trying to read file from stdin..."
-fileFromStdIn = False
-fileIn = sys.stdin.read()
-if result:
-		file = open("tmp/ArduSub-v2.px4","w")
-		file.write(fileIn)
-		file.close()
-		fileFromStdIn = True
-		print "Got firmware file from stdin!"
+if options.fromStdin:
+                fileIn = sys.stdin.read()
+                if fileIn:
+                                file = open("/tmp/ArduSub-v2.px4","w")
+                                file.write(fileIn)
+                                file.close()
+                                print "Got firmware file from stdin!"
 
 # Stop screen session with mavproxy
 print "Stopping mavproxy"
 os.system("sudo screen -X -S mavproxy quit")
 
 # Download most recent firmware
-if not fileFromStdIn:
-		print "Downloading latest ArduSub firmware..."
-		firmwarefile = urllib.URLopener()
-		firmwarefile.retrieve("http://firmware.ardusub.com/Sub/latest/PX4-vectored/ArduSub-v2.px4", "/tmp/ArduSub-v2.px4")
+firmwareURL = "http://firmware.ardusub.com/Sub/latest/PX4-"+options.frame+"/ArduSub-v2.px4"
+if options.url:
+                firmwareURL = options.url
+                print "Downloading latest ArduSub firmware from URL..."
+else:
+                print "Downloading latest ArduSub "+options.frame+" firmware..."
+if not options.fromStdin:
+                firmwarefile = urllib.URLopener()
+                firmwarefile.retrieve(firmwareURL, "/tmp/ArduSub-v2.px4")
 
 # Download flashing script
 print "Downloading px4 flashing tool..."
@@ -42,7 +48,7 @@ os.system("python -u /tmp/px_uploader.py --port /dev/ttyACM0 /tmp/ArduSub-v2.px4
 
 # Wait a few seconds
 print "Waiting to restart mavproxy..."
-time.sleep(5)
+time.sleep(10)
 
 # Start screen session with mavproxy
 print "Restarting mavproxy"
