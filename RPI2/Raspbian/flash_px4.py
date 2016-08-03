@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python -u
 
 import os
 import urllib
@@ -23,8 +23,11 @@ print "Flashing Pixhawk..."
 os.system("python /tmp/px_uploader.py --port /dev/ttyACM0 /tmp/ArduSub-v2.px4")
 
 # Wait a few seconds
+print "Waiting to restart mavproxy..."
 time.sleep(5)
 
 # Start screen session with mavproxy
 print "Restarting mavproxy"
 os.system("sudo screen -dm -S mavproxy /home/pi/companion/RPI2/Raspbian/start_mavproxy_telem_splitter.sh")
+
+print "Complete!"
