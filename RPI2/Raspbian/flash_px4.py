@@ -20,7 +20,7 @@ firmwarefile.retrieve("https://raw.githubusercontent.com/PX4/Firmware/master/Too
 
 # Flash Pixhawk
 print "Flashing Pixhawk..."
-os.system("python /tmp/px_uploader.py --port /dev/ttyACM0 /tmp/ArduSub-v2.px4")
+os.system("python -u /tmp/px_uploader.py --port /dev/ttyACM0 /tmp/ArduSub-v2.px4")
 
 # Wait a few seconds
 print "Waiting to restart mavproxy..."
