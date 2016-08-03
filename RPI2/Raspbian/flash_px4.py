@@ -3,15 +3,33 @@
 import os
 import urllib
 import time
+from optparse import OptionParser
+
+parser = OptionParser()
+parser.add_option("-url","--url",dest="url",help="Firmware URL")
+parser.add_option("-px4","--px4",dest="px4file",help="Firmware File Stream")
+(options,args) = parser.parse_args()
+
+# Get firmware from stdin if possible
+print "Trying to read file from stdin..."
+fileFromStdIn = False
+fileIn = sys.stdin.read()
+if result:
+		file = open("tmp/ArduSub-v2.px4","w")
+		file.write(fileIn)
+		file.close()
+		fileFromStdIn = True
+		print "Got firmware file from stdin!"
 
 # Stop screen session with mavproxy
 print "Stopping mavproxy"
 os.system("sudo screen -X -S mavproxy quit")
 
 # Download most recent firmware
-print "Downloading latest ArduSub firmware..."
-firmwarefile = urllib.URLopener()
-firmwarefile.retrieve("http://firmware.ardusub.com/Sub/latest/PX4-vectored/ArduSub-v2.px4", "/tmp/ArduSub-v2.px4")
+if not fileFromStdIn:
+		print "Downloading latest ArduSub firmware..."
+		firmwarefile = urllib.URLopener()
+		firmwarefile.retrieve("http://firmware.ardusub.com/Sub/latest/PX4-vectored/ArduSub-v2.px4", "/tmp/ArduSub-v2.px4")
 
 # Download flashing script
 print "Downloading px4 flashing tool..."
