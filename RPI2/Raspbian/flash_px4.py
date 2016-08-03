@@ -21,6 +21,9 @@ firmwarefile.retrieve("https://raw.githubusercontent.com/PX4/Firmware/master/Too
 print "Flashing Pixhawk..."
 os.system("python /tmp/px_uploader.py --port /dev/ttyACM0 /tmp/ArduSub-v2.px4")
 
+# Wait a few seconds
+time.sleep(5)
+
 # Start screen session with mavproxy
 print "Restarting mavproxy"
 os.system("sudo screen -dm -S mavproxy /home/pi/companion/RPI2/Raspbian/start_mavproxy_telem_splitter.sh")
