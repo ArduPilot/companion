@@ -27,8 +27,8 @@
 
 raspivid --nopreview \
          --mode 5 \
-         --bitrate 25000000 \
-         --intra 3 \
+         --bitrate 15000000 \
+         --intra 1 \
          --awb auto \
          --brightness 55 \
          --saturation 10 \
