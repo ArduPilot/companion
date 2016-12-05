@@ -1,0 +1,54 @@
+# TX1 setup script for use as companion computer
+
+# STEP1 : install NVidia image onto TX1 (skip this step if you already have a factory image (created in Step2) for the current release of JetPack
+#
+# Connect TX1 via USB to Ubuntu machine and put TX1 into bootloader mode:
+#    Hold Force Recovery button (aka "REC"), press Reset button(aka "RST"), Release Force Recovery button
+#    On Ubuntu machine "lsusb", and look for "NVidia Corp"
+#
+# Install JetPack on an Ubuntu 14.04 machine, while connected to the internet:
+# mkdir JetPack-2.3.1
+# download https://developer.nvidia.com/embedded/dlc/jetpack-l4t-2_3_1 (nvidia login required)
+# chmod +x JetPack-L4T-2.3.1-linux-x64.run
+# from the directory you want JetPack installed into (i.e. JetPack-2.3.1) run ./JetPack-L4T-2.3.1-linux-x64.run
+#    select Jetson TX1 Development Kit and Ubuntu Host
+#    On JetPack L4T Component Manager:
+#        - Custom
+#        * Common: no action
+#        * CUDA Toolkit for Ubuntu 14.04: no action
+#        * OpenCV for Tegra on Ubuntu 14.04: no action
+#        * For Jetson TX1 64bit: mixed
+#           * Linux for Tegra (TX1 64bit): install
+#              * Driver for OS: install
+#              * File System: install
+#        * Post Install: mixed
+#           * Flash OS: install
+#           * CUDA Toolkit for L4T: install
+#           * Compile CUDA Samples: no action
+#           * PerfKit: install
+#           * TensorRT(GIE 1.0 RC): install
+#           * Multimedia API package: no action
+#           * cuDNN Package: install
+#           * OpenCV for Tegra: no action
+#        * VisionWorks on TX1 Target: no action
+#    Click Next, and Accept All
+#    "Network Layout" screen should appear:
+#       Select "Device accesses Internet via router/switch", Next
+#       Select network adapter to use to connect to TX (i.e. eth0 if your Ubuntu machine uses eth0 to access your local internet)
+#       when "Post Installation Jetson TX1, Following actions will be performed at this stage.." screen appears click Next
+#    Black screen, "Please put your device to Force USB Recovery Mode", press <Enter>
+#       Eventually, "Finished Flashing OS, Please press Reset button on device, Press Enter key to continue" will be displayed, press <Enter>
+#
+# STEP2 : Download image from TX1
+#    put TX1 into bootloader mode: Hold Force Recovery button (aka "REC"), press Reset button(aka "RST"), Release Force Recovery button
+#    cd to directory where JetPack was installed (i.e. JetPack-2.3.1)
+#    cd 64_TX1/Linux_for_Tegra_64_tx1/bootloader
+#    copy in download_image.sh from this repo
+#    ./download_image.sh tx1_image_jetpack231_factory.img    <-- image will be saved to this file.  this will take about 1hour
+#
+# STEP3 : install packages on TX1
+#    power on the TX1
+#    log onto TX1 as ubuntu/ubuntu
+#    cd ~
+#    wget https://github.com/ArduPilot/companion/tree/master/Nvidia_JTX1/Ubuntu/2_install_packages.sh --no-check-certificate
+#    ./2_install_packages.sh
