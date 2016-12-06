@@ -49,6 +49,6 @@
 # STEP3 : install packages on TX1
 #    power on the TX1
 #    log onto TX1 as ubuntu/ubuntu
-#    cd ~
-#    wget https://github.com/ArduPilot/companion/tree/master/Nvidia_JTX1/Ubuntu/2_install_packages.sh --no-check-certificate
+#    cd ~/Downloads
+#    wget https://raw.githubusercontent.com/ArduPilot/companion/master/Nvidia_JTX1/Ubuntu/2_install_packages.sh --no-check-certificate
 #    ./2_install_packages.sh
