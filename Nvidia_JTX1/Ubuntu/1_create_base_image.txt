@@ -29,7 +29,7 @@
 #           * TensorRT(GIE 1.0 RC): install
 #           * Multimedia API package: no action
 #           * cuDNN Package: install
-#           * OpenCV for Tegra: no action
+#           * OpenCV for Tegra: install
 #        * VisionWorks on TX1 Target: no action
 #    Click Next, and Accept All
 #    "Network Layout" screen should appear:
@@ -49,6 +49,10 @@
 # STEP3 : install packages on TX1
 #    power on the TX1
 #    log onto TX1 as ubuntu/ubuntu
-#    cd ~/Downloads
-#    wget https://raw.githubusercontent.com/ArduPilot/companion/master/Nvidia_JTX1/Ubuntu/2_install_packages.sh --no-check-certificate
+#    open terminal
+#    cd ~
+#    mkdir GitHub
+#    cd ~/GitHub
+#    git clone https://github.com/ArduPilot/companion.git
+#    cd companion/Nvidia_JTX1/Ubuntu
 #    ./2_install_packages.sh

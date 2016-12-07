@@ -27,4 +27,4 @@ echo "manual" | sudo tee -a /etc/init/network-manager.override
 # create /etc/rc.local file to automatically start hostapd on each reboot
 sudo cp rc.local /etc
 # make sure /etc/rc.local is executable
-chmod a+x /etc/rc.local
+sudo chmod a+x /etc/rc.local
