@@ -14,6 +14,7 @@ sudo pip -y install dronekit dronekit-sitl # also installs pymavlink
 
 # install mavproxy
 sudo pip -y install mavproxy
+sudo apt-get -y install screen
 
 # live video related packages
 sudo apt-get -y install gstreamer1.0
