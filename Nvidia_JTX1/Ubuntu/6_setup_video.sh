@@ -4,7 +4,10 @@
 
 # setup live video via http (complements of Krita from NII)
 # install and build http-launch
-sudo apt-get install git build-essential dpkg-dev flex bison autoconf autotools-dev automake liborc-dev autopoint libtool gtk-doc-tools libgstreamer1.0-dev
+sudo apt-get install -y git build-essential dpkg-dev flex bison autoconf autotools-dev automake liborc-dev autopoint libtool gtk-doc-tools libgstreamer1.0-dev
+
+# store current directory
+pushd .
 
 mkdir ~/GitHub
 cd ~/GitHub
@@ -15,6 +18,9 @@ export PKG_CONFIG_PATH=/home/ubuntu/GitHub/http-launch/out/lib/pkgconfig
 ./configure --prefix=/home/ubuntu/GitHub/http-launch/out
 make
 make install
+
+# return to stored directory
+popd
 
 # copy startup scripts
 mkdir ~/start_video
