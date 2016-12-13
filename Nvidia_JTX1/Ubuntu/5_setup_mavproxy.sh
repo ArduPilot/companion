@@ -2,11 +2,27 @@
 
 # this script sets up mavproxy
 
-# auto start mavproxy
-mkdir ~/start_mavproxy
-cp start_mavproxy.sh ~/start_mavproxy
-cp autostart_mavproxy.sh ~/start_mavproxy
-   
-# add line below to bottom of /etc/rc.local to call $HOME/start_mavproxy/autostart_mavproxy.sh
-echo "sudo -H -u ubuntu /bin/bash -c '/home/ubuntu/start_mavproxy/autostart_mavproxy.sh'" | sudo tee -a /etc/rc.local
+if [ $(id -u) -ne 0 ]; then
+   echo >&2 "Must be run as root"
+   exit 1
+fi
 
+set -e
+set -x
+
+sudo -u ubuntu -H bash <<'EOF'
+set -e
+set -x
+
+# auto start mavproxy
+MAVPROXY_HOME=~/start_mavproxy
+if [ ! -d $MAVPROXY_HOME ]; then
+    mkdir $MAVPROXY_HOME
+fi
+cp start_mavproxy.sh $MAVPROXY_HOME/
+cp autostart_mavproxy.sh $MAVPROXY_HOME/
+EOF
+
+# add line below to bottom of /etc/rc.local to call start script
+LINE="sudo -H -u ubuntu /bin/bash -c '~ubuntu/start_mavproxy/autostart_mavproxy.sh'"
+perl -pe "s%^exit 0%$LINE\\n\\nexit 0%" -i /etc/rc.local

@@ -2,30 +2,48 @@
 
 # this script sets up the live video streaming
 
+if [ $(id -u) -ne 0 ]; then
+   echo >&2 "Must be run as root"
+   exit 1
+fi
+
+set -e
+set -x
+
 # setup live video via http (complements of Krita from NII)
 # install and build http-launch
 sudo apt-get install -y git build-essential dpkg-dev flex bison autoconf autotools-dev automake liborc-dev autopoint libtool gtk-doc-tools libgstreamer1.0-dev
 
-# store current directory
-pushd .
+sudo -u ubuntu -H bash <<'EOF'
+set -e
+set -x
 
-mkdir ~/GitHub
-cd ~/GitHub
-git clone https://github.com/sdroege/http-launch
-cd http-launch
-export PKG_CONFIG_PATH=/home/ubuntu/GitHub/http-launch/out/lib/pkgconfig
-./autogen.sh
-./configure --prefix=/home/ubuntu/GitHub/http-launch/out
-make
-make install
+GITHUB_DIR=~/GitHub
+if [ ! -d "$GITHUB_DIR" ]; then
+    mkdir "$GITHUB_DIR"
+fi
 
-# return to stored directory
+pushd $GITHUB_DIR
+ git clone https://github.com/sdroege/http-launch
+ pushd http-launch
+  export PKG_CONFIG_PATH="$GITHUB_DIR/http-launch/out/lib/pkgconfig"
+  ./autogen.sh
+  ./configure --prefix="$GITHUB_DIR/http-launch/out"
+  make
+  make install
+ popd
 popd
 
 # copy startup scripts
-mkdir ~/start_video
-cp start_video.sh ~/start_video
-cp autostart_video.sh ~/start_video
+VIDEO_HOME=~/start_video
+if [ ! -d "$VIDEO_HOME" ]; then
+  mkdir "$VIDEO_HOME"
+fi
+cp start_video.sh "$VIDEO_HOME/"
+cp autostart_video.sh "$VIDEO_HOME/"
+EOF
 
-# add line below to bottom of /etc/rc.local to call $HOME/start_mavproxy/autostart_mavproxy.sh
-echo "sudo -H -u ubuntu /bin/bash -c '/home/ubuntu/start_video/autostart_video.sh'" | sudo tee -a /etc/rc.local
+# add line below to bottom of /etc/rc.local to start video support
+echo "" | sudo tee -a /etc/rc.local
+LINE="sudo -H -u ubuntu /bin/bash -c '~ubuntu/start_video/autostart_video.sh'"
+perl -pe "s%^exit 0%$LINE\\n\\nexit 0%" -i /etc/rc.local
