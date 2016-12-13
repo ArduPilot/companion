@@ -1,9 +1,0 @@
-#!/bin/sh
-PATH=/sbin:/usr/sbin:/usr/bin:/bin:$PATH
-dhclient eth0
-ifconfig wlan0 10.0.1.1/24 up
-/etc/init.d/hostapd start
-service dnsmasq force-reload
-
-# turn off TX1 USB auto suspend
-echo -1 > /sys/module/usbcore/parameters/autosuspend
