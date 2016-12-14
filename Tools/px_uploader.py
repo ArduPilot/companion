@@ -602,7 +602,7 @@ try:
                             up.send_reboot()
 
                             # wait for the reboot, without we might run into Serial I/O Error 5
-                            time.sleep(0.5)
+                            time.sleep(0.1)
 
                             # always close the port
                             up.close()
@@ -628,7 +628,7 @@ try:
                     sys.exit(0)
 
             # Delay retries to < 20 Hz to prevent spin-lock from hogging the CPU
-            time.sleep(0.05)
+            time.sleep(0.01)
 
 # CTRL+C aborts the upload/spin-lock by interrupt mechanics
 except KeyboardInterrupt:
