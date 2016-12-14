@@ -12,39 +12,48 @@ parser.add_option("--stdin",action="store_true",dest="fromStdin",default=False,h
 parser.add_option("--frame",dest="frame",default="vectored",help="ArduSub frame type for automatical download (optional)")
 (options,args) = parser.parse_args()
 
-# Get firmware from stdin if possible
-print "Trying to read file from stdin..."
 if options.fromStdin:
+                # Get firmware from stdin if possible
+                print "Trying to read file from stdin..."
+                
                 fileIn = sys.stdin.read()
+
                 if fileIn:
                                 file = open("/tmp/ArduSub-v2.px4","w")
                                 file.write(fileIn)
                                 file.close()
-                                print "Got firmware file from stdin!"
-
+                                print "Got firmware file from stdin!"      
+                else:
+                                error("Read error on stdin!")
+else:
+                # Download most recent firmware
+                firmwareURL = "http://firmware.ardusub.com/Sub/latest/PX4-"+options.frame+"/ArduSub-v2.px4"
+                if options.url:
+                                firmwareURL = options.url
+                                print "Downloading latest ArduSub firmware from URL..."
+                else:
+                                print "Downloading latest ArduSub "+options.frame+" firmware..."
+                
+                try:
+                                firmwarefile = urllib.URLopener()
+                                firmwarefile.retrieve(firmwareURL, "/tmp/ArduSub-v2.px4")
+                
+                except Exception as e:
+                                print(e)
+                                print "Error downloading firmware! Do you have an internet connection? Try 'ping ardusub.com'"
+                                exit(1)
+                                
+                
 # Stop screen session with mavproxy
 print "Stopping mavproxy"
 os.system("sudo screen -X -S mavproxy quit")
 
-# Download most recent firmware
-firmwareURL = "http://firmware.ardusub.com/Sub/latest/PX4-"+options.frame+"/ArduSub-v2.px4"
-if options.url:
-                firmwareURL = options.url
-                print "Downloading latest ArduSub firmware from URL..."
-else:
-                print "Downloading latest ArduSub "+options.frame+" firmware..."
-if not options.fromStdin:
-                firmwarefile = urllib.URLopener()
-                firmwarefile.retrieve(firmwareURL, "/tmp/ArduSub-v2.px4")
-
-# Download flashing script
-print "Downloading px4 flashing tool..."
-firmwarefile = urllib.URLopener()
-firmwarefile.retrieve("https://raw.githubusercontent.com/PX4/Firmware/master/Tools/px_uploader.py", "/tmp/px_uploader.py")
-
 # Flash Pixhawk
 print "Flashing Pixhawk..."
-os.system("python -u /tmp/px_uploader.py --port /dev/ttyACM0 /tmp/ArduSub-v2.px4")
+if(os.system("python -u /home/pi/companion/Tools/px_uploader.py --port /dev/ttyACM0 /tmp/ArduSub-v2.px4") != 0):
+                print "Error flashing pixhawk! Do you have most recent version of companion? Try 'git pull' or scp."
+                exit(1)
+                
 
 # Wait a few seconds
 print "Waiting to restart mavproxy..."
