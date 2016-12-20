@@ -1,0 +1,3 @@
+Vagrantfile and build-image.sh are used to build a base image
+
+Other scripts in this directory are run on edison once it has booted

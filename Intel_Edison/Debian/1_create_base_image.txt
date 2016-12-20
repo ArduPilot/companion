@@ -1,0 +1,81 @@
+# edison setup script for use as companion computer
+
+# STEP1 : bring up Vagrant virtual machine (this builds an entire
+  Yocto image, so takes quite some time)
+
+# e.g. on Linux:
+pushd Intel_Edison/Debian
+time vagrant up
+
+
+# STEP2 : copy edison-src/out/linux64/build/toFlash directory back to host computer
+
+#e.g. On Linux:
+rsync -aPH vagrant@edison:edison-src/out/linux64/build/toFlash/ /tmp/edison-ToFlash
+
+# where "edison" is either a resolvable hostname or an ip address.
+#  The virtual machine does do mDNS, so it may just resolve for you.
+
+# STEP3 : run flashall.bat or flashall.sh from that directory on host computer
+
+# e.g. on Linux:
+pushd /tmp/edison-ToFlash
+time sudo ./flashall.sh
+
+# the sudo, sadly, is necessary.  Google for it.
+
+
+
+# STEP4 : install packages
+#    power on the edison
+#    log onto edison
+#      e.g. on linux
+screen /dev/ttyUSB0 115200
+# username/password is user/password
+
+sudo rm -f /etc/apt/apt.conf.d/50proxy # may not be available
+
+# at this point, MY LINUX HOST has a network interface corresponding
+#  to the USB CDC device provided by edison.  I added an address and
+#  NAT rule - on the host machine - to provide internet access to
+#  edison:
+
+IFACE=enp0s20u2u2c2
+sudo ip a a 192.168.2.1/24 dev $IFACE
+sudo iptables -t nat -A POSTROUTING --source 192.168.2.15/24 -j SNAT --to-source 192.168.1.196
+
+# for whatever reason the FS doesnt match the partition:
+sudo resize2fs /dev/mmcblk0p8
+
+# mount the home partition on boot:
+echo "/dev/mmcblk0p10     /home       auto    noauto,comment=systemd.automount,nosuid,nodev,noatime,discard     1   1" | sudo tee -a /etc/fstab
+sudo mount /home # make sure that worked
+sudo reboot # just to ensure we're starting clean
+
+echo "nameserver 8.8.8.8" | sudo dd of=/etc/resolv.conf
+sudo ip r a default dev usb0 via 192.168.2.1
+sudo apt-get -f -y install # fix some package issues first
+sudo apt-get update
+sudo apt-get install -y ntpdate
+sudo ntpdate -s ntp.iinet.net.au
+sudo apt-get install -y git
+
+# proceed to install packages:
+cd ~ 
+sudo chown -R user.user $PWD # correct permissions
+mkdir GitHub
+pushd ~/GitHub
+git clone https://github.com/ArduPilot/companion.git
+pushd companion/Intel_Edison/Debian
+sudo ./2_install_packages.sh
+sudo ./3_wifi_access_point.sh
+sudo reboot # wifi up needs a reboot
+sudo ./6_setup_cmavnode.sh
+sudo ./7_dflogger.sh
+sudo ./5_setup_mavproxy.sh
+
+# REMEMBER: set the serial baud rate on the other side of the
+#  telemetry link to 921600!
+# on a PixHawk2 with an Edison inside:
+# param set SERIAL2_BAUD 921600
+# param set LOG_BACKEND_TYPE 3
