@@ -1,0 +1,63 @@
+#!/bin/bash
+
+# this script sets up the dataflash-over-mvalink logger
+
+# must be started in the Companion Compute dflogger directory
+if [ $(id -u) -ne 0 ]; then
+   echo >&2 "Must be run as root"
+   exit 1
+fi
+
+if [ -z "$NORMAL_USER" ]; then
+    echo 'NORMAL_USER must be set (e.g. "pi" or "ubuntu")'
+    exit 1
+fi
+
+if [ -z "$TELEM_SERIAL_PORT" ]; then
+    echo 'TELEM_SERIAL_PORT must be set (e.g. "/dev/ttyS1" or "/dev/ttyMFD1")'
+    exit 1
+fi
+
+set -e
+set -x
+
+apt-get install -y build-essential libjsoncpp-dev
+if apt-cache search libjsoncpp1 | grep libjsoncpp1; then
+    apt-get install -y libjsoncpp1
+else
+    apt-get install -y libjsoncpp0
+fi
+
+sudo -u $NORMAL_USER -H bash <<EOF
+set -e
+set -x
+
+DFLOGGER_HOME="\$HOME/dflogger"
+if [ ! -d "\$DFLOGGER_HOME" ]; then
+    mkdir \$DFLOGGER_HOME
+fi
+
+pushd ~/GitHub
+ rm -rf dronekit-la
+ git clone --recurse-submodules http://github.com/peterbarker/dronekit-la
+ pushd dronekit-la
+  time make dataflash_logger
+  cp dataflash_logger \$DFLOGGER_HOME/
+ popd
+popd
+
+cp start_dflogger.sh \$DFLOGGER_HOME/
+cp autostart_dflogger.sh \$DFLOGGER_HOME/
+cp dflogger.conf \$DFLOGGER_HOME/dflogger.conf
+if [ ! -d "\$DFLOGGER_HOME/dataflash" ]; then
+  mkdir \$DFLOGGER_HOME/dataflash
+fi
+
+perl -pe 's%/dev/ttyTHS1%$TELEM_SERIAL_PORT%' -i \$DFLOGGER_HOME/dflogger.conf
+perl -pe 's%ubuntu%$NORMAL_USER%' -i \$DFLOGGER_HOME/dflogger.conf
+
+EOF
+
+# add line below to bottom of /etc/rc.local to start dataflash-logger
+LINE="sudo -H -u $NORMAL_USER /bin/bash -c '~$NORMAL_USER/dflogger/autostart_dflogger.sh'"
+perl -pe "s%^exit 0%$LINE\\n\\nexit 0%" -i /etc/rc.local
