@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# RPi2 setup script for use as companion computer
-
 if [ $(id -u) -ne 0 ]; then
    echo >&2 "Must be run as root"
    exit 1
@@ -10,24 +8,8 @@ fi
 set -e
 set -x
 
-# update RPI to latest versions
-apt-get update
-apt-get dist-upgrade -y
-# rpi-update   # not present on lite image
-
-# install python
-apt-get install -y python-pip python-dev
-
-# install dronekit
-pip install dronekit dronekit-sitl # also installs pymavlink
-#sudo apt-get install screen python-wxgtk2.8 python-matplotlib python-opencv python-pip python-numpy python-dev libxml2-dev libxslt-dev
-pip install mavproxy
-
 # live video related packages
 apt-get install -y gstreamer1.0
-
-# access point packages
-apt-get install -y hostapd isc-dhcp-server
 
 # opencv - see http://www.pyimagesearch.com/2015/10/26/how-to-install-opencv-3-on-raspbian-jessie/
 apt-get install -y build-essential git cmake pkg-config
@@ -77,22 +59,3 @@ apt-get install -y screen git
 # picamera (likely already included from opencv)
 pip install "picamera[array]"
 
-# cherrypy web server (used by red balloon finder)
-pip install cherrypy
-
-# install red balloon finder
-
-sudo -u pi -H bash <<'EOF'
-set -e
-set -x
-
-if [ ! -d ~/GitHub ]; then
-  mkdir ~/GitHub
-fi
-cd ~/GitHub
-git clone https://github.com/rmackay9/ardupilot-balloon-finder
-EOF
-
-
-# clean up
-apt-get autoremove -y
