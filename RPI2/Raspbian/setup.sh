@@ -29,6 +29,7 @@ sudo apt-get install -y git
 git clone https://github.com/bluerobotics/companion.git /home/pi/companion
 
 # Disable camera LED
+sudo sed -i '\%disable_camera_led=1%d' /boot/config.txt
 sudo sed -i '$a disable_camera_led=1' /boot/config.txt
 
 # add startup commands to /etc/rc.local
