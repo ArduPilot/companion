@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [ $(id -u) -ne 0 ]; then
+   echo >&2 "Must be run as root"
+   exit 1
+fi
+
+set -e
+set -x
+
+apt-get install -y \
+	strace \
+	ltrace \
+	tcpdump \
+	lsof \
+	mlocate
