@@ -13,3 +13,5 @@ set -x
 pushd ../../Common/Ubuntu/dflogger/
  ./install_dflogger
 popd
+
+echo "Success"

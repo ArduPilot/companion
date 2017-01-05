@@ -7,6 +7,9 @@
 # https://www.raspberrypi.org/downloads/raspbian/ (lite image)
 
 # Flash image onto SD card per instructions linked from that page
+# on linux this will look something like:
+# time (sudo dd if=2016-11-25-raspbian-jessie-lite.img of=/dev/sdb && sync)
+# (~7 mintes)
 
 # Boot Raspberry Pi.
 
@@ -14,9 +17,6 @@
 # enable ssh:
 sudo systemctl enable ssh
 sudo systemctl start ssh
-
-# change pi's password:
-sudo passwd pi
 
 # install git
 sudo apt-get install -y git
@@ -41,5 +41,15 @@ popd
 
 popd
 
-sudo apt-get autoremove
+sudo apt-get autoremove -y
 sudo apt-get clean
+rm $HOME/dflogger/dataflash/*
+time (sudo dd if=/dev/zero of=$HOME/zeroes; sudo rm -f $HOME/zeroes)
+sudo poweroff
+
+# on a host machine with the SD card from RPi present:
+TIMESTAMP="$(date -u '+%Y%m%d%H%M%S')"
+FILENAME="rpi-companion-$TIMESTAMP.img"
+time (sudo dd if=/dev/sdb of=$FILENAME) # ~1G/minute
+xz -e "$FILENAME"
+ls -l "$FILENAME.xz"

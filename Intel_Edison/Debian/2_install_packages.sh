@@ -14,3 +14,5 @@ set -x
 ../../Common/Ubuntu/install_packages.sh
 
 sudo apt-get install -y psmisc
+
+echo "Success"

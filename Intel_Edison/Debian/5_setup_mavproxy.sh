@@ -8,3 +8,5 @@ set -x
 pushd ../../Common/Ubuntu/mavproxy
 ./setup_mavproxy.sh
 popd
+
+echo "Success"
