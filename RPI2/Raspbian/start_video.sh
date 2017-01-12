@@ -16,6 +16,7 @@
 #          --bitrate 10000000
 #          -fps 30 \
 #          --awb off \
+#          -roi 0.02,0.0,0.81,0.85 \
 #          -fl \
 #          --timeout 0 \
 #          --output - | \
@@ -35,6 +36,7 @@ raspivid --nopreview \
          --sharpness 50 \
          --contrast 15 \
          --drc medium \
+         -roi 0.02,0.0,0.81,0.85 \
          -fl \
          --timeout 0 \
          --output - | \
