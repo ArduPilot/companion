@@ -55,3 +55,4 @@
 #    git clone https://github.com/ArduPilot/companion.git
 #    cd companion/Nvidia_JTX1/Ubuntu
 #    sudo ./2_install_packages.sh
+#    sudo ./3_wifi_access_point.sh
