@@ -22,4 +22,4 @@ Root
 ## Key links
 
 * [Companion Computers](http://ardupilot.org/dev/docs/companion-computers.html) (Dev Wiki)
-* [Gitter chat](https://badges.gitter.im/ArduPilot/companion.svg)
+* [Gitter chat](https://gitter.im/ArduPilot/companion)
