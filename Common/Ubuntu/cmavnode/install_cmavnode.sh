@@ -37,7 +37,7 @@ pushd ~/GitHub
  rm -rf cmavnode
  git clone --recurse-submodules https://github.com/peterbarker/cmavnode
  pushd cmavnode
-  git checkout routing
+  git checkout apsync
   cmake CMakeLists.txt
   time (make | cat)
   cp cmavnode \$CMAVNODE_HOME
