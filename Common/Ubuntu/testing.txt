@@ -1,0 +1,8 @@
+Testing regime for new image:
+-----------------------------
+Is there an AP?
+Can you connect to the AP?
+Is cmavnode running?
+Is dataflash_logger running and creating logfiles?
+Is mavproxy running?
+Can you connect using a GCS using the broadcast packets from mavproxy?
