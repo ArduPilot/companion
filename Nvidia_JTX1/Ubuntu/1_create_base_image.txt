@@ -38,14 +38,14 @@
 #    Black screen, "Please put your device to Force USB Recovery Mode", press <Enter>
 #       Eventually, "Finished Flashing OS, Please press Reset button on device, Press Enter key to continue" will be displayed, press <Enter>
 #
-# STEP2 : Download image from TX1
+# STEP2 : Download base image from TX1
 #    put TX1 into bootloader mode: Hold Force Recovery button (aka "REC"), press Reset button(aka "RST"), Release Force Recovery button
 #    cd to directory where JetPack was installed (i.e. JetPack-2.3.1)
 #    cd 64_TX1/Linux_for_Tegra_64_tx1/bootloader
 #    copy in download_image.sh from this repo
 #    ./download_image.sh tx1_image_jetpack231_factory.img    <-- image will be saved to this file.  this will take about 1hour and 40 minutes
 #
-# STEP3 : install packages on TX1
+# Step 3 : install packages on TX1
 #    power on the TX1
 #    log onto TX1 as ubuntu/ubuntu
 #    open terminal
@@ -54,5 +54,30 @@
 #    cd ~/GitHub
 #    git clone https://github.com/ArduPilot/companion.git
 #    cd companion/Nvidia_JTX1/Ubuntu
+#    sudo ./ensure_rc_local.sh
+#    sudo ./disable_console.sh
 #    sudo ./2_install_packages.sh
 #    sudo ./3_wifi_access_point.sh
+#    sudo ./4_setup_other.sh
+#    sudo ./6_setup_video.sh
+#    sudo ./8_setup_cmavnode.sh
+#    sudo ./7_dflogger.sh
+#    sudo ./5_setup_mavproxy.sh
+
+
+# Step 4: cleanup
+killall -9 cmavnode mavproxy.py dataflash_logger
+rm $HOME/.ssh/authorized_keys
+rm $HOME/dflogger/dataflash/*
+sudo apt-get autoremove -y
+sudo apt-get clean
+sudo dd if=/dev/zero of=/zeroes; sudo rm /zeroes
+
+
+# Step 5: download apsync image from TX1:
+#    put TX1 into bootloader mode: Hold Force Recovery button (aka "REC"), press Reset button(aka "RST"), Release Force Recovery button
+#    cd to directory where JetPack was installed (i.e. JetPack-2.3.1)
+#    cd 64_TX1/Linux_for_Tegra_64_tx1/bootloader
+#    run download_image.sh from this repo:
+#    TIMESTAMP=`date '+%Y%m%d%H%M%S'`
+#    ./download_image.sh tx1-apsync-$TIMESTAMP.img    <-- image will be saved to this file.  this will take about 1hour and 40 minutes
