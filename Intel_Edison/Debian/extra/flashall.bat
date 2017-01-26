@@ -125,15 +125,15 @@ if %errorlevel% neq 0 ( exit /b %errorlevel%)
 
 
 echo Flashing boot partition ^(kernel^)
-call:flash-command --alt boot -D "%BASE_DIR%edison-image-companion-boot.hddimg"
+call:flash-command --alt boot -D "%BASE_DIR%edison-image-apsync-boot.hddimg"
 if %errorlevel% neq 0 ( exit /b %errorlevel%)
 
 echo Flashing rootfs, ^(it can take up to 5 minutes... Please be patient^)
-call:flash-command --alt rootfs -D "%BASE_DIR%edison-image-companion-root.ext4"
+call:flash-command --alt rootfs -D "%BASE_DIR%edison-image-apsync-root.ext4"
 if %errorlevel% neq 0 ( exit /b %errorlevel% )
 
 echo Flashing home, ^(it can take up to 5 minutes... Please be patient^)
-call:flash-command --alt home -D "%BASE_DIR%edison-image-companion-home.ext4" -R
+call:flash-command --alt home -D "%BASE_DIR%edison-image-apsync-home.ext4" -R
 if %errorlevel% neq 0 ( exit /b %errorlevel% )
 ::		 be careful with the above; the -R resets the device, so must be on the last command
 
