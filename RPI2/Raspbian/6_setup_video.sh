@@ -54,8 +54,6 @@ EOF
 #  ldconfig
 # popd
 
-apt-get install -y screen git
-
 # picamera (likely already included from opencv)
 pip install "picamera[array]"
 
