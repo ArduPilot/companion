@@ -21,8 +21,12 @@ if [ ! -d $MAVPROXY_HOME ]; then
 fi
 cp start_mavproxy.sh $MAVPROXY_HOME/
 cp autostart_mavproxy.sh $MAVPROXY_HOME/
-EOF
 
+cat >>$HOME/.mavinit.scr <<EOF2
+set moddebug 3
+EOF2
+
+EOF
 # add line below to bottom of /etc/rc.local to call start script note
 # that the line is commented out by default, as cmavnode should
 # probably be used where convenient, as MAVProxy can use an inordinate
