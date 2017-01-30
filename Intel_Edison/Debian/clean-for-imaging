@@ -1,0 +1,26 @@
+#!/bin/bash
+
+if [ $(id -u) -ne 0 ]; then
+   echo >&2 "Must be run as root"
+   exit 1
+fi
+
+set -e
+set -x
+
+. config.env
+
+pushd ../../Common/Ubuntu/
+ ./clean-for-imaging
+popd
+
+for dirpath in /home /boot /; do
+ echo "dirpath=$dirpath"
+ filepath="$dirpath/zeroes"
+ echo "filepath=$filepath"
+ time dd if=/dev/zero of="$filepath" || true
+ rm -f $filepath
+done
+
+
+echo "Success"
