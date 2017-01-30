@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -e
+set -x
+
+. config.env
+
+../../Common/Ubuntu/set-hostname
+
+perl -pe 's/edison/apsync/' -i /etc/hosts
