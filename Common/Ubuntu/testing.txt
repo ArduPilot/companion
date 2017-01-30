@@ -1,8 +1,18 @@
 Testing regime for new image:
 -----------------------------
-Is there an AP?
-Can you connect to the AP?
-Is cmavnode running?
-Is dataflash_logger running and creating logfiles?
-Is mavproxy running?
-Can you connect using a GCS using the broadcast packets from mavproxy?
+# Check if AP exists
+
+# Connect to AP
+
+# ssh into device
+ssh apsync@10.0.1.128
+
+# Check "screen -list" includes cmavnode, DataFlashLogger and MAVProxy:
+screen -list
+
+# make sure dflogger is creating dataflash logs:
+watch ls dflogger/dataflash -l
+
+# Can you connect using a GCS using the broadcast packets from mavproxy?
+# on host machine:
+mavproxy.py --mav10
