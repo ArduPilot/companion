@@ -9,7 +9,7 @@
 # Flash image onto SD card per instructions linked from that page
 # on linux this will look something like:
 # time (sudo dd if=2016-11-25-raspbian-jessie-lite.img of=/dev/sdb && sync)
-# (~7 mintes)
+# (~7 minutes)
 
 # Boot Raspberry Pi.
 
@@ -17,6 +17,10 @@
 # enable ssh:
 sudo systemctl enable ssh
 sudo systemctl start ssh
+
+# create an apsync user:
+sudo useradd -s /bin/bash -m -U -G sudo,netdev,users,dialout,video apsync
+sudo passwd apsync # apsync
 
 # install git
 sudo apt-get install -y git
@@ -28,28 +32,34 @@ git clone https://github.com/ArduPilot/companion
 
 # run the installation scripts:
 pushd companion/RPI2/Raspbian || echo "Failed"
+sudo ./set-hostname   # reset the machine's hostname
 sudo ./2_install_packages.sh || echo "Failed"
 sudo ./2_setup_uart.sh || echo "Failed"
 sudo ./2_use_networkmanager.sh || echo "Failed"
-sudo ./3_wifi_access_point.sh || echo "Failed"   # reboot required before AP will work
-sudo ./6_setup_cmavnode.sh || echo "Failed"
-sudo ./7_dflogger.sh || echo "Failed"
-sudo ./6_setup_video.sh || echo "Failed"
-sudo ./8_red_balloon_finder.sh || echo "Failed"
-sudo ./5_setup_mavproxy.sh
+sudo ./3_wifi_access_point.sh || echo "Failed"
+sudo reboot   # reboot required before AP will work
+time sudo ./6_setup_cmavnode.sh || echo "Failed" # ~9m
+time sudo ./7_dflogger.sh || echo "Failed" # 13m
+time sudo ./6_setup_video.sh || echo "Failed"  # 30m
+time sudo ./8_red_balloon_finder.sh || echo "Failed" # 18s
+time sudo ./5_setup_mavproxy.sh # 2s
+time sudo ./clean-for-imaging # 11m
 popd
 
 popd
 
-sudo apt-get autoremove -y
-sudo apt-get clean
-rm $HOME/dflogger/dataflash/*
-time (sudo dd if=/dev/zero of=$HOME/zeroes; sudo rm -f $HOME/zeroes)
+sudo reboot
+
+# test image by following testing.txt
+
 sudo poweroff
 
 # on a host machine with the SD card from RPi present:
 TIMESTAMP="$(date -u '+%Y%m%d%H%M%S')"
-FILENAME="rpi-companion-$TIMESTAMP.img"
+FILENAME="apsync-rpi-$TIMESTAMP.img"
 time (sudo dd if=/dev/sdb of=$FILENAME) # ~1G/minute
-xz -e "$FILENAME"
-ls -l "$FILENAME.xz"
+time xz -e "$FILENAME"  #~47m
+COMPRESSED="$FILENAME.xz"
+ls -l --si "$COMPRESSED" # ~650MB
+
+scp $COMPRESSED autotest@autotest.ardupilot.org:APM/buildlogs/binaries/Companion/next/ # ~53 minutes
