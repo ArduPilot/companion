@@ -7,6 +7,8 @@ if [ $(id -u) -ne 0 ]; then
    exit 1
 fi
 
+. config.env
+
 set -e
 set -x
 
@@ -14,7 +16,7 @@ set -x
 # install and build http-launch
 sudo apt-get install -y git build-essential dpkg-dev flex bison autoconf autotools-dev automake liborc-dev autopoint libtool gtk-doc-tools libgstreamer1.0-dev
 
-sudo -u ubuntu -H bash <<'EOF'
+sudo -u $NORMAL_USER -H bash <<'EOF'
 set -e
 set -x
 
@@ -45,5 +47,5 @@ EOF
 
 # add line below to bottom of /etc/rc.local to start video support
 echo "" | sudo tee -a /etc/rc.local
-LINE="sudo -H -u ubuntu /bin/bash -c '~ubuntu/start_video/autostart_video.sh'"
+LINE="sudo -H -u $NORMAL_USER /bin/bash -c '~$NORMAL_USER/start_video/autostart_video.sh'"
 perl -pe "s%^exit 0%$LINE\\n\\nexit 0%" -i /etc/rc.local
