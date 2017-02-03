@@ -1,0 +1,32 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    {% include 'head.html' %}
+  </head>
+  <body>
+    {% import 'header.html' as header %}
+    <div>
+      <div class='index'>
+        <h1>APSync Configuration</h1>
+	<div class='streaming'>
+	  {% if state.streaming -%}
+	  <p>
+	    Streaming is currently active to IP: {{ state.streaming_to_ip }}
+	  </p>
+          <p>
+            <a class='btn btn-lg btn-danger' href='/streaming_stop'>Stop Streaming to GCS</a>
+          </p>
+	  {% else %}
+          <a class='btn btn-lg btn-success' href='/streaming_start'>Start Streaming to GCS</a>
+	  {% endif -%}
+	  {% if state.streaming_error -%}
+	  <div class='streaming_error'>
+	    {{ state.streaming_error }}
+	  </div>
+	  {% endif -%}
+	</div>
+      </div>
+    </div>
+    {% include 'footer.html' %}
+  </body>
+</html>

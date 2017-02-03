@@ -1,0 +1,23 @@
+#!/bin/bash
+
+set -e
+set -x
+
+function fail() {
+    echo "Fail: $*"
+    exit 1
+}
+
+STREAM_TO_IP=$1
+if test -z "$STREAM_TO_IP"; then
+    fail "Need an IP to stream to"
+fi
+shift
+
+STREAM_TO_PORT=5600
+
+raspivid -t 0 -h 720 -w 1024 -fps 25 -hf -b 2000000 -o - | \
+    gst-launch-1.0 -v fdsrc ! \
+		   h264parse ! \
+		   rtph264pay config-interval=1 pt=96 ! \
+		   udpsink host=$STREAM_TO_IP port=$STREAM_TO_PORT
