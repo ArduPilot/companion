@@ -18,6 +18,10 @@
 sudo systemctl enable ssh
 sudo systemctl start ssh
 
+# enable the camera:
+raspi-config
+# navigate Inerface Options -> Camera and select enable
+
 # create an apsync user:
 sudo useradd -s /bin/bash -m -U -G sudo,netdev,users,dialout,video apsync
 sudo passwd apsync # apsync

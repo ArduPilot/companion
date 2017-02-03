@@ -1,1 +1,9 @@
 - Test according to instructions in ../../Common/Ubuntu/testing.txt
+
+Use a web browser to connect on port 80; make sure start/stop work
+
+Test UDP port 5600 streaming works to:
+ QGC on Linux
+ QGC on Android
+ Tower on Android
+ Mission Planner on Windows
