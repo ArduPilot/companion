@@ -37,10 +37,9 @@ raspivid --nopreview \
          --saturation 10 \
          --sharpness 50 \
          --contrast 15 \
-         --drc medium \
          -roi 0.02,0.0,0.81,0.85 \
          -fl \
          --timeout 0 \
          --output - | \
          gst-launch-1.0 -v fdsrc ! h264parse ! rtph264pay config-interval=10 pt=96 ! \
-         udpsink host=192.168.2.1 port=5700
+         udpsink host=192.168.2.1 port=5600
