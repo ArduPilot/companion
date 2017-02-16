@@ -14,6 +14,8 @@ sudo rpi-update
 # install python and pip
 sudo apt-get install -y python-dev python-pip
 
+sudo pip install future
+
 # install MAVLink tools
 sudo pip install mavproxy dronekit dronekit-sitl # also installs pymavlink
 
