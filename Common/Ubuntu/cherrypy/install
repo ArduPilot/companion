@@ -5,6 +5,11 @@ if [ $(id -u) -ne 0 ]; then
    exit 1
 fi
 
+if [ -z "$START_UDP_STREAM_SCRIPT" ]; then
+   echo >&2 "START_UDP_STREAM_SCRIPT must be set"
+   exit 1
+fi
+
 set -e
 set -x
 
@@ -19,13 +24,21 @@ SCRIPT_HOME=~/start_cherrypy
 if [ ! -d $SCRIPT_HOME ]; then
     mkdir $SCRIPT_HOME
 fi
-cp start_udp_stream $SCRIPT_HOME/
 cp start_cherrypy.sh $SCRIPT_HOME/
 cp autostart_cherrypy.sh $SCRIPT_HOME/
 cp apsync.py $SCRIPT_HOME/
 cp -a html $SCRIPT_HOME/
 
 EOF
+
+sudo -u $NORMAL_USER -H bash <<EOF
+set -e
+set -x
+
+cp $START_UDP_STREAM_SCRIPT ~/start_cherrypy
+
+EOF
+
 
 # add line below to bottom of /etc/rc.local to call start script
 LINE="sudo -H -u $NORMAL_USER /bin/bash -c '~$NORMAL_USER/start_cherrypy/autostart_cherrypy.sh'"
