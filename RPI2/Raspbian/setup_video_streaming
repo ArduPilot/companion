@@ -10,6 +10,8 @@ set -x
 
 . config.env
 
+export START_UDP_STREAM_SCRIPT="$PWD/start_udp_stream"
+
 pushd ../../Common/Ubuntu/cherrypy
  ./install
 popd
