@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if [ $(id -u) -ne 0 ]; then
+   echo >&2 "Must be run as root"
+   exit 1
+fi
+
+set -e
+set -x
+
+. config.env
+
+export START_UDP_STREAM_SCRIPT="$PWD/start_udp_stream"
+
+pushd ../../Common/Ubuntu/cherrypy
+ ./install
+popd

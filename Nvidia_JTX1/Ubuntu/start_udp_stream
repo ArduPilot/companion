@@ -1,0 +1,27 @@
+#!/bin/bash
+
+set -e
+set -x
+
+function fail() {
+    echo "Fail: $*"
+    exit 1
+}
+
+STREAM_TO_IP=$1
+if test -z "$STREAM_TO_IP"; then
+    fail "Need an IP to stream to"
+fi
+shift
+
+STREAM_TO_PORT=5600
+
+SOURCE_DEVICE=/dev/video0
+
+gst-launch-1.0 -v \
+    v4l2src device=$SOURCE_DEVICE ! \
+    'video/x-raw,framerate=30/1' ! \
+    omxh264enc ! \
+    'video/x-h264, stream-format=(string)byte-stream' ! \
+    rtph264pay ! \
+    udpsink host=$STREAM_TO_IP port=$STREAM_TO_PORT

@@ -75,6 +75,7 @@ sudo ./6_setup_video.sh
 time sudo ./8_setup_cmavnode.sh # ~4m
 time sudo ./7_dflogger.sh # ~210s
 sudo ./5_setup_mavproxy.sh
+sudo ./setup-video-streaming
 
 # reboot and test image according to testing.txt
 sudo reboot
