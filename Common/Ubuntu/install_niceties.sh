@@ -14,7 +14,8 @@ apt-get install -y \
 	tcpdump \
 	lsof \
 	mlocate \
-	v4l-utils
+	v4l-utils \
+	usbutils
 
 
 Working video to qgc et al
