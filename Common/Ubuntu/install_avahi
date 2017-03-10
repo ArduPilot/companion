@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# this script installs avahi so when connected to the APSync AP you
+#  can "ssh apsync"
+
+if [ $(id -u) -ne 0 ]; then
+   echo >&2 "Must be run as root"
+   exit 1
+fi
+
+set -e
+set -x
+
+sudo apt-get install -y avahi-daemon
