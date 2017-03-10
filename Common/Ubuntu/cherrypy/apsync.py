@@ -9,8 +9,10 @@ Simple interface to control various aspects of the APSync Companion Computer ima
 
 import os
 import sys
+import string
 import time
 import traceback
+import threading
 
 import cherrypy
 import jinja2
@@ -31,6 +33,10 @@ cherrypy_conf = {
 
 class APSync(object):
 
+    class VideoStreamerState(object):
+        def __init__(self):
+            self.filepath = "/tmp/cmavnode-links.txt"
+
     def __init__(self):
         self.port = 8000
         self.host = '0.0.0.0'
@@ -40,8 +46,11 @@ class APSync(object):
         self.streaming_error = None
         self.streaming_to_ip = None
 
+        self.video_streamer_state = APSync.VideoStreamerState()
+
     def run(self):
         self.run_web_server()
+        self.run_video_stream_starter()
 
         print 'Waiting for cherrypy engine...'
         cherrypy.engine.block()
@@ -58,6 +67,92 @@ class APSync(object):
         print('''Server will be bound on %s:%u''' % (self.host,self.port))
 
         cherrypy.engine.start()
+
+    def video_streamer_get_stats(self):
+        ret = {}
+        try:
+            fh = file(self.video_streamer_state.filepath, "r")
+        except OSError as e:
+            print("Caught exception opening %s: %s" % (self.video_streamer_state.filepath, repr(e)))
+            return {}
+        for line in fh.readlines():
+            (address, count_str) = string.split(line, sep=" ")
+            count = int(count_str)
+            if address.find('.255') != -1:
+                # ignore any broadcast addresses
+                continue
+            if address.find("14550") == -1:
+                # ignore any non-14550 lines for now
+                continue
+            ret[address] = count
+        fh.close()
+        return ret
+
+    def video_stream_starter_main(self):
+        '''Monitor a file in /tmp/ for telemtry traffic (currently written by
+        cmavnode), possibly redirect video stream out that way
+        '''
+        winner = None
+        while winner is None:
+            stats = self.video_streamer_get_stats()
+            winner_count = 0
+            for address in stats.keys():
+                if winner is None or stats[address] > winner_count:
+                    winner = address
+                    winner_count = stats[address]
+            time.sleep(1) # run at 1Hz
+        (ip,port) = string.split(address, sep=':')
+        print("Starting video stream to ip (%s)" % ip)
+        self.stream_video_to_ip(ip)
+
+    def run_video_stream_starter(self):
+        '''start a thread for responsible for starting video stream'''
+        video_stream_starter_thread = threading.Thread(name='video_stream_starter_main', target=self.video_stream_starter_main)
+        video_stream_starter_thread.start()
+
+    def close_all_fds(self):
+        for i in range(3, 256):
+            try:
+                os.close(i)
+            except OSError as e:
+                if e.errno != 9:
+                    print("Exception on close of fd=%u: %s" % (i, repr(e)))
+
+    def streaming_start_child(self, to_ip):
+        args = [ os.path.join(local_path, "start_udp_stream") ]
+        args.append(to_ip)
+        self.close_all_fds()
+        out = os.open("/tmp/streaming.stdout", os.O_WRONLY|os.O_CREAT|os.O_TRUNC)
+        err = os.open("/tmp/streaming.stderr", os.O_WRONLY|os.O_CREAT|os.O_TRUNC)
+        os.dup2(out, 1)
+        os.dup2(err, 2)
+        x = os.execv(args[0], args)
+        sys.exit(1)
+
+    def stream_video_to_ip(self, to_ip):
+        if not self.streaming:
+            try:
+                pid = os.fork()
+                if pid == 0:
+                    # child
+                    os.setsid()
+                    try:
+                        self.streaming_start_child(to_ip) # does not return
+                    except Exception as e:
+                        print("streaming_start_child failed: %s" % str(e))
+                        traceback.print_stack()
+                    sys.exit(1)
+                # parent
+                self.streaming_pid = pid
+            except Exception as e:
+                print("Create-Child failed: %s" % str(e))
+                traceback.print_stack()
+                return
+
+        self.streaming = True
+        self.streaming_error = None
+        self.streaming_to_ip = to_ip
+
 
 class Templates:
     def __init__(self, apsync):
@@ -89,50 +184,9 @@ class APSyncActions(object):
         return self.templates.index()
 
 
-    def close_all_fds(self):
-        for i in range(3, 256):
-            try:
-                os.close(i)
-            except OSError as e:
-                if e.errno != 9:
-                    print("Exception on close of fd=%u: %s" % (i, repr(e)))
-
-    def streaming_start_child(self, to_ip):
-        args = [ os.path.join(local_path, "start_udp_stream") ]
-        args.append(to_ip)
-        self.close_all_fds()
-        out = os.open("/tmp/streaming.stdout", os.O_WRONLY|os.O_CREAT|os.O_TRUNC)
-        err = os.open("/tmp/streaming.stderr", os.O_WRONLY|os.O_CREAT|os.O_TRUNC)
-        os.dup2(out, 1)
-        os.dup2(err, 2)
-        x = os.execv(args[0], args)
-        sys.exit(1)
-
     @cherrypy.expose
     def streaming_start(self):
-        to_ip = str(cherrypy.request.remote.ip)
-        if not self.apsync.streaming:
-            try:
-                pid = os.fork()
-                if pid == 0:
-                    # child
-                    os.setsid()
-                    try:
-                        self.streaming_start_child(to_ip) # does not return
-                    except Exception as e:
-                        print("streaming_start_child failed: %s" % str(e))
-                        traceback.print_stack()
-                    sys.exit(1)
-                # parent
-                self.apsync.streaming_pid = pid
-            except Exception as e:
-                print("Create-Child failed: %s" % str(e))
-                traceback.print_stack()
-                return
-
-        self.apsync.streaming = True
-        self.apsync.streaming_error = None
-        self.apsync.streaming_to_ip = to_ip
+        self.apsync.stream_video_to_ip(str(cherrypy.request.remote.ip))
         return self.templates.index()
 
     @cherrypy.expose
