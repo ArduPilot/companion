@@ -6,14 +6,17 @@ cd $HOME
 
 # Update package lists and current packages
 sudo apt-get update
-sudo apt-get upgrade -y
+sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -yq
 
 # Update Raspberry Pi
-sudo apt-get install -y rpi-update
-sudo rpi-update
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -yq rpi-update
+sudo rpi-update -y
 
 # install python and pip
-sudo apt-get install -y python-dev python-pip
+sudo apt-get install -y python-dev python-pip python-libxml2
+
+# dependencies
+sudo apt-get install -y libxml2-dev libxslt1-dev
 
 sudo pip install future
 
