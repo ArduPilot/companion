@@ -15,4 +15,5 @@ apt-get install -y \
 	lsof \
 	mlocate \
 	v4l-utils \
-	usbutils
+	usbutils \
+	tree
