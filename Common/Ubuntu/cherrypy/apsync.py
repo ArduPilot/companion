@@ -46,6 +46,8 @@ class APSync(object):
         self.streaming_error = None
         self.streaming_to_ip = None
 
+        self.no_streaming_flagfile = "apsync.py-no-streaming-flagfile"
+
         self.video_streamer_state = APSync.VideoStreamerState()
 
     def run(self):
@@ -92,6 +94,10 @@ class APSync(object):
         '''Monitor a file in /tmp/ for telemtry traffic (currently written by
         cmavnode), possibly redirect video stream out that way
         '''
+        while not self.auto_streaming_enabled():
+#            print("Auto streaming currently disabled")
+            time.sleep(1)
+
         winner = None
         while winner is None:
             stats = self.video_streamer_get_stats()
@@ -153,6 +159,18 @@ class APSync(object):
         self.streaming_error = None
         self.streaming_to_ip = to_ip
 
+    def set_auto_streaming(self, enable):
+        if enable:
+            if os.path.exists(self.no_streaming_flagfile):
+                os.unlink(self.no_streaming_flagfile)
+        else:
+            fd = os.open(self.no_streaming_flagfile, os.O_CREAT|os.O_WRONLY)
+            os.close(fd)
+
+    def auto_streaming_enabled(self):
+        if os.path.exists(self.no_streaming_flagfile):
+            return False
+        return True
 
 class Templates:
     def __init__(self, apsync):
@@ -168,6 +186,7 @@ class Templates:
         opts['streaming'] = self.apsync.streaming
         opts['streaming_error'] = self.apsync.streaming_error
         opts['streaming_to_ip'] = self.apsync.streaming_to_ip
+        opts['auto_streaming'] = self.apsync.auto_streaming_enabled()
         return self.render_template('index', opts)
 
     def render_template(self, template_name, opts):
@@ -182,7 +201,6 @@ class APSyncActions(object):
     @cherrypy.expose
     def index(self):
         return self.templates.index()
-
 
     @cherrypy.expose
     def streaming_start(self):
@@ -204,6 +222,16 @@ class APSyncActions(object):
             self.apsync.streaming_pid = None
             self.apsync.streaming_to_ip = None
 
+        return self.templates.index()
+
+    @cherrypy.expose
+    def auto_streaming_enable(self):
+        self.apsync.set_auto_streaming(True)
+        return self.templates.index()
+
+    @cherrypy.expose
+    def auto_streaming_disable(self):
+        self.apsync.set_auto_streaming(False)
         return self.templates.index()
 
 print 'Launching APSync...'

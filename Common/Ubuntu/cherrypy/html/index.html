@@ -8,6 +8,9 @@
     <div>
       <div class='index'>
         <h1>APSync Configuration</h1>
+	<div class='refresh'>
+          <a class='btn btn-lg btn-lg' href='/index'>Refresh</a>
+	</div>
 	<div class='streaming'>
 	  {% if state.streaming -%}
 	  <p>
@@ -23,6 +26,17 @@
 	  <div class='streaming_error'>
 	    {{ state.streaming_error }}
 	  </div>
+	  {% endif -%}
+	  {% if state.auto_streaming -%}
+	    Auto-streaming-video is currently enabled
+          <p>
+            <a class='btn btn-lg btn-danger' href='/auto_streaming_disable'>Disable Auto Streaming</a>
+          </p>
+	  {% else %}
+	    Auto-streaming-video is currently disabled
+          <p>
+            <a class='btn btn-lg btn-success' href='/auto_streaming_enable'>Enable Auto Streaming</a>
+          </p>
 	  {% endif -%}
 	</div>
       </div>
