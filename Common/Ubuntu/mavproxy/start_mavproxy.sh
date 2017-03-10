@@ -8,6 +8,7 @@ set -x
 #    - udp connection on port 9000 for use by other processes
 #    - udp broadcast connection to allow multiple GCSs to connect to the flight controller via mavproxy
 mavproxy.py \
+    --source-system 217 \
     --master localhost:14655 \
     --out udpin:localhost:9000 \
     --out udpbcast:10.0.1.255:14550 \
