@@ -2,6 +2,7 @@
 
 # RPi2 setup script for use as companion computer. This script is simplified for use with
 # the ArduSub code.
+cd $HOME
 
 # Update package lists and current packages
 sudo apt-get update
@@ -16,15 +17,27 @@ sudo apt-get install -y python-dev python-pip
 
 sudo pip install future
 
+# install git
+sudo apt-get install -y git
+    
+# download and install pymavlink from source in order to have up to date ArduSub support
+git clone https://github.com/mavlink/mavlink.git $HOME/mavlink
+
+pushd mavlink
+git submodule init && git submodule update --recursive
+pushd pymavlink
+sudo python setup.py build install
+popd
+popd
+
 # install MAVLink tools
 sudo pip install mavproxy dronekit dronekit-sitl # also installs pymavlink
 
 # install screen
 sudo apt-get install -y screen
 
-# install git, and clone bluerobotics companion repository
-sudo apt-get install -y git
-git clone https://github.com/bluerobotics/companion.git /home/pi/companion
+# clone bluerobotics companion repository
+git clone https://github.com/bluerobotics/companion.git $HOME/companion
 
 # Disable camera LED
 sudo sed -i '\%disable_camera_led=1%d' /boot/config.txt
@@ -37,8 +50,8 @@ sudo sed -i '$a start_x=1' /boot/config.txt
 sudo sed -i '$a gpu_mem=128' /boot/config.txt
 
 # add startup commands to /etc/rc.local
-S1='screen -dm -S mavproxy /home/pi/companion/RPI2/Raspbian/start_mavproxy_telem_splitter.sh'
-S2='/home/pi/companion/RPI2/Raspbian/start_video.sh'
+S1="screen -dm -S mavproxy $HOME/companion/RPI2/Raspbian/start_mavproxy_telem_splitter.sh"
+S2="$HOME/companion/RPI2/Raspbian/start_video.sh"
 
 # this will produce desired result if this script has been run already,
 # and commands are already in place
@@ -51,4 +64,6 @@ sudo sed -i -e "\%$S1%d" \
 /etc/rc.local
 
 # compile and install gstreamer 1.8 from source
-/home/pi/companion/RPI2/Raspbian/setup_gst.sh
+if [ "$1" = "gst" ]; then
+    $HOME/companion/RPI2/Raspbian/setup_gst.sh
+fi
