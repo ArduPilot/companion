@@ -4,7 +4,12 @@ import os
 import urllib
 import time
 import sys
+import signal
 from optparse import OptionParser
+
+def timeout(signum, frame):
+    print 'Timed out waiting for firmware on stdin!'
+    exit(1)
 
 parser = OptionParser()
 parser.add_option("--url",dest="url",help="Firmware download URL (optional)")
@@ -16,7 +21,10 @@ if options.fromStdin:
                 # Get firmware from stdin if possible
                 print "Trying to read file from stdin..."
                 
+                signal.signal(signal.SIGALRM, timeout)
+                signal.alarm(5)
                 fileIn = sys.stdin.read()
+                signal.alarm(0)
 
                 if fileIn:
                                 file = open("/tmp/ArduSub-v2.px4","w")
