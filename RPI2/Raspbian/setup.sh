@@ -30,6 +30,12 @@ git clone https://github.com/bluerobotics/companion.git /home/pi/companion
 sudo sed -i '\%disable_camera_led=1%d' /boot/config.txt
 sudo sed -i '$a disable_camera_led=1' /boot/config.txt
 
+# Enable RPi camera interface
+sudo sed -i '\%start_x=%d' /boot/config.txt
+sudo sed -i '\%gpu_mem=%d' /boot/config.txt
+sudo sed -i '$a start_x=1' /boot/config.txt
+sudo sed -i '$a gpu_mem=128' /boot/config.txt
+
 # add startup commands to /etc/rc.local
 S1='screen -dm -S mavproxy /home/pi/companion/RPI2/Raspbian/start_mavproxy_telem_splitter.sh'
 S2='/home/pi/companion/RPI2/Raspbian/start_video.sh'
