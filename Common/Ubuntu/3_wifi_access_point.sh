@@ -27,10 +27,6 @@ interface=wlan0
 dhcp-range=10.0.1.129,10.0.1.138,12h
 EOF
 
-systemctl disable networking
-systemctl enable NetworkManager
-systemctl start NetworkManager
-systemctl stop networking
 sudo systemctl disable dnsmasq
 
 nmcli connection add type wifi ifname wlan0 con-name $APNAME ssid $SSID
