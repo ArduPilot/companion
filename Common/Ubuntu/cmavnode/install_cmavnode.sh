@@ -31,17 +31,18 @@ fi
 cp start_cmavnode.sh \$CMAVNODE_HOME/
 cp autostart_cmavnode.sh \$CMAVNODE_HOME/
 cp cmavnode.conf \$CMAVNODE_HOME/
+cp log.conf \$CMAVNODE_HOME
 perl -pe 's%/dev/ttyUSB0%$TELEM_SERIAL_PORT%' -i \$CMAVNODE_HOME/cmavnode.conf
 
 pushd ~/GitHub
  rm -rf cmavnode
  git clone --recurse-submodules https://github.com/peterbarker/cmavnode
  pushd cmavnode
-  git checkout apsync
+  git checkout apsync-new
+  git submodule update --init
   cmake CMakeLists.txt
   time (make | cat)
   cp cmavnode \$CMAVNODE_HOME
-  cp log.conf \$CMAVNODE_HOME
  popd
 popd
 
