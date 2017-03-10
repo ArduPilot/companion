@@ -9,7 +9,7 @@ from optparse import OptionParser
 parser = OptionParser()
 parser.add_option("--url",dest="url",help="Firmware download URL (optional)")
 parser.add_option("--stdin",action="store_true",dest="fromStdin",default=False,help="Expect input from stdin")
-parser.add_option("--frame",dest="frame",default="vectored",help="ArduSub frame type for automatical download (optional)")
+parser.add_option("--latest",action="store_true",dest="latest",default=False,help="Upload latest development firmware")
 (options,args) = parser.parse_args()
 
 if options.fromStdin:
@@ -27,12 +27,15 @@ if options.fromStdin:
                                 error("Read error on stdin!")
 else:
                 # Download most recent firmware
-                firmwareURL = "http://firmware.ardusub.com/Sub/latest/PX4-"+options.frame+"/ArduSub-v2.px4"
                 if options.url:
                                 firmwareURL = options.url
-                                print "Downloading latest ArduSub firmware from URL..."
+                                print "Downloading ArduSub firmware from %s" % firmwareURL
+                elif options.latest:
+                                firmwareURL = "http://firmware.us.ardupilot.org/Sub/latest/PX4/ArduSub-v2.px4"
+                                print "Downloading latest ArduSub firmware from %s" % firmwareURL
                 else:
-                                print "Downloading latest ArduSub "+options.frame+" firmware..."
+                                firmwareURL = "http://firmware.us.ardupilot.org/Sub/stable/PX4/ArduSub-v2.px4"
+                                print "Downloading stable ArduSub firmware from %s" % firmwareURL
                 
                 try:
                                 firmwarefile = urllib.URLopener()
