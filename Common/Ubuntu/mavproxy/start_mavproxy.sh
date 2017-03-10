@@ -11,5 +11,4 @@ mavproxy.py \
     --source-system 217 \
     --master localhost:14655 \
     --out udpin:localhost:9000 \
-    --out udpbcast:10.0.1.255:14550 \
     --mav10
