@@ -13,6 +13,25 @@ screen -list
 # make sure dflogger is creating dataflash logs:
 watch ls dflogger/dataflash -l
 
-# Can you connect using a GCS using the broadcast packets from mavproxy?
+# Can you connect using a GCS using the broadcast packets on port 14550?
 # on host machine:
-mavproxy.py --mav10
+mavproxy.py --mav10 --master :14550
+
+# can you connect to to the AP using a mobile phone and/or tablet?
+
+# Test Each of Tower on Android, QGC on Android, QGC on Linux, MP on Windows:
+ # can you connect to the vehicle?
+ # can you control the vehicle?
+ Test UDP port 5600 streaming works to:
+  QGC on Linux
+  QGC on Android
+  Tower on Android
+  Mission Planner on Windows
+
+
+
+# Video Streaming testing:
+ Use a web browser to connect on port 8000; make sure start/stop work
+ Ensure autostart/stop works
+
+
