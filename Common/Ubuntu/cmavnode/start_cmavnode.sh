@@ -3,4 +3,4 @@
 set -e
 set -x
 
-./cmavnode -f cmavnode.conf
+./cmavnode -i -f cmavnode.conf
