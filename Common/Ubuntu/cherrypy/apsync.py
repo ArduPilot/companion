@@ -74,7 +74,7 @@ class APSync(object):
         ret = {}
         try:
             fh = file(self.video_streamer_state.filepath, "r")
-        except OSError as e:
+        except Exception as e:
             print("Caught exception opening %s: %s" % (self.video_streamer_state.filepath, repr(e)))
             return {}
         for line in fh.readlines():
