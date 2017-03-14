@@ -10,5 +10,4 @@ set -x
 mavproxy.py \
     --source-system 217 \
     --master localhost:14655 \
-    --out udpin:localhost:9000 \
     --mav10
