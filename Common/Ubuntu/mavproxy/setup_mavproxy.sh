@@ -31,5 +31,5 @@ EOF
 # that the line is commented out by default, as cmavnode should
 # probably be used where convenient, as MAVProxy can use an inordinate
 # amount of CPU.
-LINE="sudo -H -u $NORMAL_USER /bin/bash -c '~$NORMAL_USER/start_mavproxy/autostart_mavproxy.sh'"
+LINE="# sudo -H -u $NORMAL_USER /bin/bash -c '~$NORMAL_USER/start_mavproxy/autostart_mavproxy.sh'"
 perl -pe "s%^exit 0%$LINE\\n\\nexit 0%" -i /etc/rc.local
