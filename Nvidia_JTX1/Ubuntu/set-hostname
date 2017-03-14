@@ -7,4 +7,4 @@ set -x
 
 ../../Common/Ubuntu/set-hostname
 
-perl -pe 's/tagra-ubuntu/apsync/' -i /etc/hosts
+perl -pe 's/tegra-ubuntu/apsync/' -i /etc/hosts
