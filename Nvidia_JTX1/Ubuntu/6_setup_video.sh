@@ -47,5 +47,5 @@ EOF
 
 # add line below to bottom of /etc/rc.local to start video support
 echo "" | sudo tee -a /etc/rc.local
-LINE="sudo -H -u $NORMAL_USER /bin/bash -c '~$NORMAL_USER/start_video/autostart_video.sh'"
+LINE="# sudo -H -u $NORMAL_USER /bin/bash -c '~$NORMAL_USER/start_video/autostart_video.sh'"
 perl -pe "s%^exit 0%$LINE\\n\\nexit 0%" -i /etc/rc.local
