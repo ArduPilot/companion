@@ -11,25 +11,26 @@
 # time (sudo dd if=2017-03-02-raspbian-jessie-lite.img of=/dev/sdb && sync)
 # (~7 minutes)
 
-# Boot Raspberry Pi.  Initial setup is easier if you can ssh into the
-#  vehicle from an existing desktop environment.  Use the ethernet
-#  connection for this.
+# Boot Raspberry Pi.
 
 # Log in on the RPi console and:
 # enable ssh:
 sudo systemctl enable ssh
 sudo systemctl start ssh
 
-# enable the camera:
-sudo raspi-config
-# navigate Interfacing Options -> P1 Camera
-# select yes and confirm, reboot
+#Setup is easier if you can ssh into the vehicle from an existing
+#  desktop environment.  Use the ethernet connection for this.
 
 # create an apsync user:
 sudo useradd -s /bin/bash -m -U -G sudo,netdev,users,dialout,video apsync
 sudo passwd apsync # apsync
 
 # at this point logout of "pi" and log back in as "apsync"!
+
+# enable the camera:
+sudo raspi-config
+# navigate Interfacing Options -> P1 Camera
+# select yes and confirm, reboot
 
 # install git
 sudo apt-get install -y git
@@ -54,19 +55,17 @@ sudo nmcli connection up WiFiAP #  apparently required first time!
 pushd GitHub/companion/RPI2/Raspbian || echo "Failed"
 time sudo ./6_setup_cmavnode.sh || echo "Failed" # ~9m
 time sudo ./7_dflogger.sh || echo "Failed" # 13m
-time sudo ./6_setup_video.sh || echo "Failed"  #301m
+time sudo ./6_setup_video.sh || echo "Failed"  #31m
 time sudo ./setup_video_streaming || echo "Failed"  # 1m
 time sudo ./8_red_balloon_finder.sh || echo "Failed" # 18s
 time sudo ./5_setup_mavproxy.sh # 2s
-time sudo ./clean-for-imaging # 11m
 popd
 
 popd
-
-sudo poweroff
 
 # test image by following testing.txt
 
+pushd GitHub/companion/RPI2/Raspbian && time sudo ./clean-for-imaging # 11m
 sudo poweroff
 
 # on a host machine with the SD card from RPi present:
@@ -74,8 +73,8 @@ TIMESTAMP="$(date -u '+%Y%m%d%H%M%S')"
 FILENAME="apsync-rpi-$TIMESTAMP.img"
 DEVICE=/dev/sdc
 time (sudo dd if=$DEVICE of=$FILENAME) # ~1G/minute
-date; time xz -e "$FILENAME"  #~47m
+date; time xz --verbose -e "$FILENAME"  #~47m
 COMPRESSED="$FILENAME.xz"
-ls -l --si "$COMPRESSED" # ~650MB
+ls -l --si "$COMPRESSED" # ~870MB
 
-scp $COMPRESSED autotest@autotest.ardupilot.org:APM/buildlogs/binaries/Companion/next/ # ~53 minutes
+rsync -aP $COMPRESSED autotest@autotest.ardupilot.org:APM/buildlogs/binaries/Companion/next/$COMPRESSED # ~53 minutes
