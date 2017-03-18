@@ -14,7 +14,7 @@ pushd ../../Common/Ubuntu/
  ./clean-for-imaging
 popd
 
-rm /home/pi/.ssh/authorized_keys
+rm -f /home/pi/.ssh/authorized_keys
 
 dd if=/dev/zero of=$HOME/zeroes || true
 rm -f $HOME/zeroes
