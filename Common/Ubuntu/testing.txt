@@ -1,5 +1,7 @@
 Testing regime for new image:
 -----------------------------
+# make sure ethernet is unplugged!
+
 # Check if AP exists
 
 # Connect to AP
@@ -7,7 +9,7 @@ Testing regime for new image:
 # ssh into device
 ssh apsync@10.0.1.128
 
-# Check "screen -list" includes cmavnode, DataFlashLogger and MAVProxy:
+# Check "screen -list" includes cmavnode, DataFlashLogger:
 screen -list
 
 # make sure dflogger is creating dataflash logs:
