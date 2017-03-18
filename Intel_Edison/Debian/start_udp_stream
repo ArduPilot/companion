@@ -1,0 +1,40 @@
+#!/bin/bash
+
+set -e
+set -x
+
+function fail() {
+    echo "Fail: $*"
+    exit 1
+}
+
+STREAM_TO_IP=$1
+if test -z "$STREAM_TO_IP"; then
+    fail "Need an IP to stream to"
+fi
+shift
+
+STREAM_TO_PORT=5600
+
+SOURCE_DEVICE=/dev/video0
+
+gst-launch-1.0 -v \
+    v4l2src device=$SOURCE_DEVICE ! \
+    'video/x-raw,framerate=10/1,width=160,height=120' ! \
+    x264enc ! \
+    'video/x-h264, stream-format=(string)byte-stream' ! \
+    rtph264pay ! \
+    udpsink host=$STREAM_TO_IP port=$STREAM_TO_PORT
+
+exit(1)
+
+# Edison's USB is extremely picky about power
+# Must use external powered USB hub
+# the hub had to be powered directly from my laptop, not from the laptop's docking station
+# the USB plug is tricky!  Unles you choose a good cable, you may find that the data lines are not connected!
+# only specific powered hubs are detected (I have a "Genesys"-based hub
+# the right-hand-side micro-usb port is used (near Hex logo)
+# only specific cameras are detected
+# I have a little cheap red camera that is not detecxted
+# My CoolPix 930 is detected
+#  - but needs to be re-plugged to detect
