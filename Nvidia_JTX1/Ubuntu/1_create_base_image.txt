@@ -39,12 +39,19 @@
 #       Eventually, "Finished Flashing OS, Please press Reset button on device, Press Enter key to continue" will be displayed, press <Enter>
 #
 # STEP1B: if you want to re-use a factory image (e.g. one downloaded in STEP2):
-#   
-#   TEGRAFLASH=~/64_TX1/Linux_for_Tegra_64_tx1/bootloader/tegraflash.py
-#   APPLET=~/64_TX1/Linux_for_Tegra_64_tx1/bootloader/nvtboot_recovery.bin
-#   sudo $TEGRAFLASH --bl cboot.bin --applet $APPLET --chip 0x21 --cmd "write APP $IMAGENAME"  # about 60m
+#   (possibly bring up Vagrant virtual machine)
+TEGRAFLASH=~/64_TX1/Linux_for_Tegra_64_tx1/bootloader/tegraflash.py
+ls $TEGRAFLASH
+APPLET=~/64_TX1/Linux_for_Tegra_64_tx1/bootloader/nvtboot_recovery.bin
+ls $APPLET
+CBOOT=/vagrant/image-factory-20170112/cboot.bin
+ls $CBOOT
+IMAGE_NAME="/vagrant/image-factory-20170112/image_jetpack_factory.img" # (e.g.)
+IMAGE_NAME="apsync-tx1-$TIMESTAMP.img" # (e.g.)
+ls $IMAGE_NAME
+sudo $TEGRAFLASH --bl $CBOOT --applet $APPLET --chip 0x21 --cmd "write APP $IMAGE_NAME"  # about 60m
 #
-# STEP2 : Download base image from TX1
+# STEP2 : Download base image from TX1 (e.g. if you want to take a copy of the factory image)
 #    put TX1 into bootloader mode: Hold Force Recovery button (aka "REC"), press Reset button(aka "RST"), Release Force Recovery button
 #    cd to directory where JetPack was installed (i.e. JetPack-2.3.1)
 #    cd 64_TX1/Linux_for_Tegra_64_tx1/bootloader
@@ -53,47 +60,60 @@
 #
 # Step 3 : install packages on TX1
 #    power on the TX1
-#    log onto TX1 as ubuntu/ubuntu
+#    log onto TX1 as ubuntu/ubuntu (you may be able to do this over ethernet using the tegra-ubuntu hostname)
 #    create an apsync user:
 sudo useradd -s /bin/bash -m -U -G sudo,netdev,users,dialout,video apsync
 sudo passwd apsync # apsync
 #    ssh in as apsync, or switch-user to apsync
 #    open terminal
+for x in cuda-l4t jetson_clocks.sh OpenCV4Tegra  tegrastats; do
+  sudo mv /home/ubuntu/$x /home/apsync
+  sudo chown -R apsync.apsync /home/apsync/$x
+done
+
+# change default login user for GUI to apsync:
+sudo perl -pe 's/ubuntu/apsync/' -i /etc/lightdm/lightdm.conf.d/50-nvidia.conf
+
 cd ~
 mkdir GitHub
 pushd GitHub
 git clone https://github.com/ArduPilot/companion.git
 pushd companion/Nvidia_JTX1/Ubuntu
 sudo ./set-hostname   # reset the machine's hostname
-sudo ./remove-unattended-upgrades
+sudo ./remove-unattended-upgrades # 
 sudo ./ensure_rc_local.sh
 sudo ./disable_console.sh
-sudo ./2_install_packages.sh # will fail on gstreamer1.0-vaapi; relax
-sudo ./3_wifi_access_point.sh
-sudo ./4_setup_other.sh
-sudo ./6_setup_video.sh
+time sudo ./2_install_packages.sh
+time sudo ./install_niceties || echo "Failed"
+time sudo ./3_wifi_access_point.sh
+sudo ./4_setup_log_rotation
+time sudo ./6_setup_video.sh
 time sudo ./8_setup_cmavnode.sh # ~4m
 time sudo ./7_dflogger.sh # ~210s
 sudo ./5_setup_mavproxy.sh
-sudo ./setup-video-streaming
+time sudo ./setup-video-streaming # 11s
 
 # reboot and test image according to testing.txt
 sudo reboot
 
 # Step 4: cleanup
-sudo ./clean-for-imaging
+pushd ~/GitHub/companion/Nvidia_JTX1/Ubuntu && sudo ./clean-for-imaging
+
 
 sudo poweroff
 
 # Step 5: download apsync image from TX1:
 #    put TX1 into bootloader mode: Hold Force Recovery button (aka "REC"), press Reset button(aka "RST"), Release Force Recovery button
+watch lsusb
 #    cd to directory where JetPack was installed (i.e. JetPack-2.3.1)
 cd 64_TX1/Linux_for_Tegra_64_tx1/bootloader
 #    run download_image.sh from this repo:
 TIMESTAMP=`date '+%Y%m%d%H%M'`
 IMAGE_NAME="apsync-tx1-$TIMESTAMP.img"
 time /vagrant/download_image.sh "$IMAGE_NAME"  #  <-- image will be saved to this file.  this will take about 1hour and 40 minutes
-time xz -e $IMAGE_NAME # about 2 hours
+ls -l $IMAGE_NAME
+time xz --verbose -e $IMAGE_NAME # about 7.5 hours
 COMPRESSED_IMAGE_NAME="$IMAGE_NAME.xz"
 ls -l --si  $COMPRESSED_IMAGE_NAME
-time scp $COMPRESSED_IMAGE_NAME autotest@autotest.ardupilot.org:APM/buildlogs/binaries/Companion/apsync/beta/ # about 11.5 hours
+# may need to copy cboot.bin into 64_TX1/Linux_for_Tegra_64_tx1/bootloader here
+time rsync -aP $COMPRESSED_IMAGE_NAME autotest@autotest.ardupilot.org:APM/buildlogs/binaries/Companion/next/$COMPRESSED_IMAGE_NAME # about 11.5 hours
