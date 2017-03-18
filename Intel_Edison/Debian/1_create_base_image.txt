@@ -1,3 +1,14 @@
+
+
+
+For next install: patch the kernel to fix OTG:
+
+http://www.intel.com.au/content/www/au/en/support/boards-and-kits/intel-edison-boards/000020081.html
+
+
+
+
+
 # edison setup script for use as companion computer
 
 # STEP1 : bring up Vagrant virtual machine (this builds an entire
@@ -15,20 +26,23 @@ rsync -aPH vagrant@edison:edison-src/out/linux64/build/toFlash/ /tmp/edison-ToFl
 
 # where "edison" is either a resolvable hostname or an ip address for the Vagrant virtual machine
 
+# consider taking a backup of that directory to avoid having to bring up the VM
+
 # STEP3 : run flashall.bat or flashall.sh from that directory on host computer
 
 # e.g. on Linux:
 pushd /tmp/edison-ToFlash
-time sudo ./flashall.sh
+time sudo ./flashall.sh # ~4 minutes
 
-# nb: flashing Edison while in PH2 is possible; check USB connections at PH2
+# nb: flashing Edison while in PH2 is possible; check USB connections at PH2; right-most micro-USB is used for flashing
 
 # STEP4 : install packages
 #    power on the edison
+#    have cable in left-most (console) port of Edison
 #    log onto edison
 #      e.g. on linux
 screen /dev/ttyUSB0 115200
-# username/password is user/edison
+# username/password is user/edison; login prompt can be screwy at first, but login(1) restarting fixes it
 
 sudo rm -f /etc/apt/apt.conf.d/50proxy # may not be available
 
@@ -58,26 +72,31 @@ sudo chown -R user.user ~user # correct permissions
 sudo useradd -s /bin/bash -m -U -G sudo,netdev,users,dialout,video apsync
 sudo passwd apsync # apsync
 
+# add a default route from edison:
+sudo ip r a default dev usb0 via 192.168.2.1
+
 # proceed working as the apsync user:
+ssh apsync@192.168.2.15
 
 echo "nameserver 8.8.8.8" | sudo dd of=/etc/resolv.conf
 sudo ip r a default dev usb0 via 192.168.2.1
-sudo apt-get -f -y install # fix some package issues first
-sudo apt-get update
+time sudo apt-get -f -y install # fix some package issues first, 43s
+time sudo apt-get update # 80s
 sudo apt-get install -y ntpdate # clock needs setting for cert. validation
 sudo ntpdate -s ntp.iinet.net.au
 
 
 # proceed to install packages:
-sudo apt-get install -y git
+time sudo apt-get install -y git  # 2m30
 
 pushd ~ 
 mkdir GitHub
 pushd ~/GitHub
-git clone https://github.com/ArduPilot/companion.git
+time git clone https://github.com/ArduPilot/companion.git
 pushd companion/Intel_Edison/Debian
 sudo ./set-hostname   # reset the machine's hostname
-time sudo ./2_install_packages.sh
+time sudo ./2_install_packages.sh # 20m
+time sudo ./install_niceties || echo "Failed"
 time sudo ./3_wifi_access_point.sh
 sudo reboot # wifi up needs a reboot
 sudo nmcli c u WiFiAP # bring it up once on reboot
@@ -88,6 +107,9 @@ time sudo ./7_dflogger.sh # ~15m
 time sudo ./5_setup_mavproxy.sh # ~3s
 popd
 
+time sudo ./setup_video_streaming || echo "Failed"  # 1m
+time sudo ./install_avahi # 46s
+
 # REMEMBER: set dataflash logging up on the autopilot!
 # on a PixHawk2 with an Edison inside:
 # param set SERIAL2_BAUD 921600
@@ -96,20 +118,22 @@ popd
 # follow instructions in testing.txt to make sure image works!
 
 # take an image:
-sudo ./clean-for-imaging
+pushd ~/GitHub/companion/Intel_Edison/Debian
+time sudo ./clean-for-imaging
 
 # on edison, make filesystems read-only:
 sync; sync; sync; echo u | sudo dd of=/proc/sysrq-trigger
 
-TIMESTAMP=`date '+%Y%m%d%H%M%S'`
-
 # on host:
+TIMESTAMP=`date '+%Y%m%d%H%M%S'`
 APSYNC_TOFLASH="apsync-edison-$TIMESTAMP"
 cp -a edison-ToFlash $APSYNC_TOFLASH
 pushd $APSYNC_TOFLASH
 rm edison-image-edison.ext4 edison-image-edison.hddimg
 
+# on both host and edison:
 HOST_IP=10.0.1.36
+HOST_IP=192.168.2.1
 
 # on host:
 nc -l $HOST_IP 9876 | dd >edison-image-apsync-boot.hddimg
@@ -139,8 +163,9 @@ popd
 # create the tarball:
 TARNAME="$APSYNC_TOFLASH.tar"
 time tar cf $TARNAME $APSYNC_TOFLASH # ~10s
+date
 time xz -e $TARNAME # ~20 minutes
 TARBALL="$TARNAME.xz"
 ls -la --si $TARBALL # ~345MB
-scp $TARBALL autotest@autotest.ardupilot.org:APM/buildlogs/binaries/Companion/next/ # ~53 minutes
+rsync -aP --bwlimit=100k $TARBALL autotest@autotest.ardupilot.org:APM/buildlogs/binaries/Companion/next/ # ~53 minutes
 
