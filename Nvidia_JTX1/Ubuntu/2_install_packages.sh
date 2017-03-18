@@ -10,6 +10,8 @@ set -x
 
 . config.env
 
+sudo apt-get purge -y whoopsie
+
 # install packages common to all
 pushd ../../Common/Ubuntu
  ./install_packages.sh
