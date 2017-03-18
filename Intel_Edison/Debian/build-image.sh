@@ -27,7 +27,18 @@ pushd edison-src
   popd
   perl -pe 's%build_dir=\$top_repo_dir/build%build_dir=\$top_repo_dir/out/linux64/build%' -i meta-intel-edison/utils/create-debian-image.sh
   perl -pe 's%^fsize=.*%fsize=\$((`stat --printf="\%s" toFlash/edison-image-edison.ext4` / 524288 * 2))%' -i meta-intel-edison/utils/create-debian-image.sh
-  time sudo ./meta-intel-edison/utils/create-debian-image.sh  
+
+  # add kernel modules sufficient to have uvcvideo running:
+  INSTALL_CMD='\$CHROOTCMD dpkg -i'
+  MARKER='# Enables USB networking at startup\n'
+  SCRIPT='meta-intel-edison/utils/create-debian-image.sh'
+  KERNEL_VERSION='3.10.17-r0'
+  for MODULENAME in videobuf2-core videobuf2-memops videobuf2-vmalloc uvcvideo ; do
+      MODULE="/tmp/deb/edison/kernel-module-${MODULENAME}_${KERNEL_VERSION}_i386.deb"
+      perl -pe "s%$MARKER%$INSTALL_CMD '$MODULE'\n$MARKER%" -i $SCRIPT
+  done
+
+  time sudo ./meta-intel-edison/utils/create-debian-image.sh --build_dir=out/linux64/build
 popd
 
 # after this script has run:
