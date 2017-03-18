@@ -16,4 +16,5 @@ apt-get install -y \
 	mlocate \
 	v4l-utils \
 	usbutils \
-	tree
+	tree \
+	wireless-tools
