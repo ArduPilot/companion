@@ -1,0 +1,11 @@
+Release 201703
+
+ - RPi is based on 2017-03-02-raspbian-jessie-lite.zip
+ - "niceties" like strace, tcpdump installed by default
+ - cmavnode now does the 14550 broadcast
+ - MAVProxy is no longer started by default
+ - video streaming is automatically started to first connector to :14550
+ - release files:
+  - apsync-rpi-20170314110804.img.xz
+  - apsync-tx1-201703141027.img.xz
+  - apsync-edison-20170316114410.tar.xz
