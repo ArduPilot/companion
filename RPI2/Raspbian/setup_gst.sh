@@ -173,3 +173,4 @@ fi
 
 sudo rm -rf $HOME/src
 
+echo export LD_LIBRARY_PATH=/usr/local/lib/ >> $HOME/.bashrc

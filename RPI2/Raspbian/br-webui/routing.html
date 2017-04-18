@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+	var socket = io();
+
+	socket.on('serial ids', function(data) {
+		var select = document.getElementById("portlist");
+		console.log(data);
+		var lines = data.trim().split('\n');
+		lines.forEach(function(line) {
+			var option = document.createElement('option');
+			option.value = line;
+			option.innerHTML = line;
+			select.appendChild(option);
+			console.log(line);
+		});
+		console.log(lines);
+	})
+
+	function refreshSerialIDs() {
+		socket.emit('get serial ids');
+	}
+</script>
+</head>
+<div>
+	<select id="portlist"></select>
+	<select id="direction">
+		<option>----></option>
+		<option><----</option>
+		<option><---></option>
+	</select> <input id="udpPort"></input>
+</div>
+<div>
+	<button onclick="refreshSerialIDs()">Refresh</button>
+</div>
+</html>

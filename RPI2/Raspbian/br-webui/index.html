@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+	var socket = io();
+	socket.on('terminal output', function(data) {
+		var currentHTML = document.getElementById("terminal-output").innerHTML;
+		document.getElementById("terminal-output").innerHTML = currentHTML + data;
+		document.getElementById("terminal-output").scrollTop = document.getElementById("terminal-output").scrollHeight
+	});
+
+	socket.on('wifi aps', function(data) {
+		var select = document.getElementById("ssid");
+		while (select.hasChildNodes()) {
+			select.removeChild(select.lastChild);
+		}
+		data.forEach(function(line) {
+			var option = document.createElement('option');
+			option.value = line;
+			option.innerHTML = line;
+			select.appendChild(option);
+		});
+	});
+
+	socket.on('internet status', function(data) {
+		console.log(data);
+		var statusIndicator = document.getElementById("internet-status");
+		statusIndicator.innerHTML = data;
+	});
+
+	socket.on('wifi status', function(data) {
+		console.log(data);
+		var statusIndicator = document.getElementById("wifi-status");
+		statusIndicator.innerHTML = data;
+	});
+
+	function joinNetwork() {
+		var select = document.getElementById("ssid");
+		var ssid = select.options[select.selectedIndex].text;
+		socket.emit('join network', {
+			"ssid" : ssid,
+			"password" : document.getElementById('password').value
+		});
+	}
+
+	function updateCompanion() {
+		socket.emit('update companion');
+	}
+
+	function updatePixhawk() {
+		socket.emit('update pixhawk');
+	}
+</script>
+</head>
+<div>
+	<h1>Network Setup</h1>
+</div>
+<div>
+	<h3>WiFi Status:</h3>
+	<strong id="wifi-status">Pending</strong>
+</div>
+<div>
+	<h3>Internet Status:</h3>
+	<div id="internet-status">Pending</div>
+</div>
+<div>
+	<h3>
+		WiFi Network Setup:
+		<div>
+			<h5>WiFi SSID:</h5>
+		</div>
+		<div>
+			<select id="ssid" style="width: 200px;"></select>
+		</div>
+		<div>
+			<h5>Password:</h5>
+		</div>
+		<div>
+			<input id="password" type="password" style="width: 200px;" />
+			<button onclick="joinNetwork()">Join Network</button>
+		</div>
+	</h3>
+</div>
+<div>
+	<h3>Companion Update</h3>
+	<div>
+		<button onclick="updateCompanion()">Update Companion</button>
+	</div>
+</div>
+<div>
+	<h3>Pixhawk Update</h3>
+	<div>
+		<button onclick="updatePixhawk()">Update Pixhawk</button>
+	</div>
+</div>
+<div>
+	<textarea rows="8" cols="80" id="terminal-output">Terminal output</textarea>
+</div>
+<div>
+	<a href="/reboot"><button>Reboot</button></a>
+	<a href="/shutdown"><button>Shutdown</button></a>
+	<a href="/system"><button>System</button></a>
+	<a href="/routing"><button>Routing</button></a>
+</div>
+</html>

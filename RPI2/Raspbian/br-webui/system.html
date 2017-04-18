@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+	var socket = io();
+	socket.on('terminal output', function(data) {
+		var currentHTML = document.getElementById("terminal-output").innerHTML;
+		document.getElementById("terminal-output").innerHTML = currentHTML + data;
+		document.getElementById("terminal-output").scrollTop = document.getElementById("terminal-output").scrollHeight
+	});
+	
+
+	socket.on('companion refs', function(data) {
+		console.log(data);
+		var select = document.getElementById('tags');
+		var lines = data.trim().split('\n');
+		lines.forEach(function(line) {
+			var option = document.createElement('option');
+			option.value = line;
+			option.innerHTML = line;
+			select.appendChild(option);
+			console.log(line);
+		});
+	});
+
+	function updateCompanion() {
+		socket.emit('update companion', document.getElementById('tags').value);
+	}
+
+	function updatePixhawk() {
+		socket.emit('update pixhawk');
+	}
+
+	socket.emit('get companion refs');
+</script>
+</head>
+<div>
+	<h3>Companion Update</h3>
+	<div>
+		<select id="tags"></select>
+		<button onclick="updateCompanion()">Update Companion</button>
+	</div>
+</div>
+<div>
+	<h3>Pixhawk Update</h3>
+	<div>
+		<button onclick="updatePixhawk()">Update Pixhawk</button>
+	</div>
+</div>
+<div>
+	<textarea rows="8" cols="80" id="terminal-output"></textarea>
+</div>
+<div>
+	<a href="/reboot"><button>Reboot</button></a>
+	<a href="/shutdown"><button>Shutdown</button></a>
+	<a href="/system"><button>System</button></a>
+	<a href="/routing"><button>Routing</button></a>
+</div>
+</html>

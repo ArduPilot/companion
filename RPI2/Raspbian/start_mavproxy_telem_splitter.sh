@@ -3,6 +3,7 @@
 # multiple IP addresses can received the telemetry.
 
 # For PixHawk or other connected via USB on Raspberry Pi
+cd /home/pi
 mavproxy.py --master=/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00,115200 \
 	    --source-system=200 \
             --cmd="set heartbeat 0" \
