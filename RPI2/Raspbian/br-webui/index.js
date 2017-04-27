@@ -160,7 +160,7 @@ io.on('connection', function (socket) {
 	}
 	
 	function updateCompanion(tag) {
-		var cmd = child_process.exec('cd /home/pi/companion && git pull -f', function (error, stdout, stderr) {
+		var cmd = child_process.exec('cd /home/pi/companion && git fetch && git checkout ' + tag, function (error, stdout, stderr) {
 			console.log("COMPANION UPDATE");
 			console.log(tag);
 			console.log(error);
