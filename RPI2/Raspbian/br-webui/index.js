@@ -71,7 +71,7 @@ io.on('connection', function (socket) {
 		console.log(data);
 		console.log("python /home/pi/companion/RPI2/Raspbian/udptest.py -b 115200 --ip='192.168.2.2' --port " + data.right + " -l " + data.left + " -d " + data.direction)
 		var cmd = child_process.exec("python /home/pi/companion/RPI2/Raspbian/udptest.py -b 115200 --ip='192.168.2.2' --port " + data.right + " -l " + data.left + " -d " + data.direction, function (error, stdout, stderr) {
-			console.log(stdout + stderr);
+			console.log(stdout + stderr + error);
 		});
 	});
 	

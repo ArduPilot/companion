@@ -30,11 +30,11 @@ while not connected:
 			master = addr
 		
 		if len(udpReceived) > 0:
-			print "Sending "+str(len(udpReceived))+" bytes from UDP to serial"
+			#print "Sending "+str(len(udpReceived))+" bytes from UDP to serial"
 			port.write(udpReceived)
-			for x in udpReceived:
-				print hex(ord(x)),
-			print ""
+# 			for x in udpReceived:
+# 				print hex(ord(x)),
+# 			print ""
 				
 	except:
 		pass
@@ -42,13 +42,13 @@ while not connected:
 	if master is None:
 		continue
 	
-	print 'reading'
+# 	print 'reading'
 	serialReceived = port.read(1024)
 	if len(serialReceived) > 0:
-		print "Sending "+str(len(serialReceived))+" bytes from serial to UDP"
+# 		print "Sending "+str(len(serialReceived))+" bytes from serial to UDP"
 		sock.sendto(serialReceived,master)
-		for x in serialReceived:
-			print hex(ord(x)),
-		print ""
+# 		for x in serialReceived:
+# 			print hex(ord(x)),
+# 		print ""
 	
 	time.sleep(0.01)
