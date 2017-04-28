@@ -69,20 +69,8 @@ io.on('connection', function (socket) {
 	socket.on('setup route', function(data) {
 		console.log("SETUP ROUTE");
 		console.log(data);
-		var route = "";
-		
-		if (data.direction == "right") {
-			route = data.right + ' < ' + data.left;
-		} else if (data.direction == "left") {
-			route = data.right + ' > ' + data.left;
-		} else if (data.direction == "right-left") {
-			route = data.right + ' < ' + data.left + ' > ' + data.left;
-		} else {
-			console.log('Bad direction!');
-		}
-		
-		console.log(route);
-		var cmd = child_process.exec('netcat -ul 192.168.2.2 ' + route, function (error, stdout, stderr) {
+		console.log("python /home/pi/companion/RPI2/Raspbian/udptest.py -b 115200 --ip='192.168.2.2' --port " + data.right + " -l " + data.left + " -d " + data.direction)
+		var cmd = child_process.exec("python /home/pi/companion/RPI2/Raspbian/udptest.py -b 115200 --ip='192.168.2.2' --port " + data.right + " -l " + data.left + " -d " + data.direction, function (error, stdout, stderr) {
 			console.log(stdout + stderr);
 		});
 	});

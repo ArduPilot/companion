@@ -5,21 +5,24 @@ import socket
 import time
 import argparse
 
-UDP_IP = "192.168.2.2"
-UDP_PORT = 8989
-
 parser = argparse.ArgumentParser(description="Connect serial port to UDP port")
-parser.add_argument('-p',dest='serialPort',required=True,help='serial port to connect to')
+parser.add_argument('-l', dest='left', required=True, help='Left hand side of route (serial)')
+parser.add_argument('-b', dest='baudrate', required=True, help='Baud rate for left hand side of route')
+parser.add_argument('--ip', dest='ip', required=True, help='IP address')
+parser.add_argument('--port', dest='port', type=int, required=True, help='UDP port')
+parser.add_argument('-d', dest='direction', required=True, help='Direction to route')
+
 args = parser.parse_args()
 
-port = serial.Serial(args.serialPort,115200,timeout=0)
+port = serial.Serial(args.left, args.baudrate, timeout=0)
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.setblocking(False)
-sock.bind((UDP_IP,UDP_PORT))
+sock.bind((args.ip, args.port))
 
 connected = False
 master = None
+
 while not connected:
 	try:
 		udpReceived, addr = sock.recvfrom(1024)
