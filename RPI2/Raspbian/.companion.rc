@@ -2,3 +2,5 @@ sudo -H -u pi screen -dm -S mavproxy /home/pi/companion/RPI2/Raspbian/start_mavp
 sudo -H -u pi /home/pi/companion/RPI2/Raspbian/start_video.sh
 sudo -H -u pi screen -dm -S webui /home/pi/companion/RPI2/Raspbian/start_webui.sh
 sudo -H -u pi screen -dm -S webterminal /home/pi/companion/RPI2/Raspbian/start_webterminal.sh
+
+stty -F /dev/ttyUSB0 115200 line 0 min 0 time 0 -brkint -icrnl -imaxbel -opost -onlcr -isig -icanon -iexten -echo -echoe -echok -echoctl -echoke
