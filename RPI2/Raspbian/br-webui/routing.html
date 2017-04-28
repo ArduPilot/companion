@@ -19,20 +19,37 @@
 		console.log(lines);
 	})
 
-	function refreshSerialIDs() {
-		socket.emit('get serial ids');
+	function setupRoute() {
+
+		var _left = document.getElementById("portlist");
+		var left = _left.options[_left.selectedIndex].text;
+
+		var _direction = document.getElementById("direction");
+		var direction = _direction.options[_direction.selectedIndex].value;
+
+		var _right = document.getElementById("udpPort");
+		var right = _right.value;
+
+		socket.emit('setup route', {
+			'left' : left,
+			'right' : right,
+			'direction' : direction
+		});
 	}
+	
+	socket.emit('get serial ids');
+
 </script>
 </head>
 <div>
 	<select id="portlist"></select>
 	<select id="direction">
-		<option>----></option>
-		<option><----</option>
-		<option><---></option>
+		<option value="right">----></option>
+		<option value="left"><----</option>
+		<option value="right-left"><---></option>
 	</select> <input id="udpPort"></input>
 </div>
 <div>
-	<button onclick="refreshSerialIDs()">Refresh</button>
+	<button onclick="setupRoute()">Refresh</button>
 </div>
 </html>

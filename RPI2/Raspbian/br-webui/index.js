@@ -66,6 +66,27 @@ io.on('connection', function (socket) {
 		});
 	});
 	
+	socket.on('setup route', function(data) {
+		console.log("SETUP ROUTE");
+		console.log(data);
+		var route = "";
+		
+		if (data.direction == "right") {
+			route = data.right + ' < ' + data.left;
+		} else if (data.direction == "left") {
+			route = data.right + ' > ' + data.left;
+		} else if (data.direction == "right-left") {
+			route = data.right + ' < ' + data.left + ' > ' + data.left;
+		} else {
+			console.log('Bad direction!');
+		}
+		
+		console.log(route);
+		var cmd = child_process.exec('netcat -ul 192.168.2.2 ' + route, function (error, stdout, stderr) {
+			console.log(stdout + stderr);
+		});
+	});
+	
 	socket.on('join network', joinNetwork);
 	
 	socket.on('update companion', function(data) {
