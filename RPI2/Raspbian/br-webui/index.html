@@ -7,7 +7,7 @@
 	socket.on('terminal output', function(data) {
 		var currentHTML = document.getElementById("terminal-output").innerHTML;
 		document.getElementById("terminal-output").innerHTML = currentHTML + data;
-		document.getElementById("terminal-output").scrollTop = document.getElementById("terminal-output").scrollHeight
+		document.getElementById("terminal-output").scrollTop = document.getElementById("terminal-output").scrollHeight;
 	});
 
 	socket.on('wifi aps', function(data) {
@@ -42,15 +42,15 @@
 			"ssid" : ssid,
 			"password" : document.getElementById('password').value
 		});
-	}
+	};
 
 	function updateCompanion() {
 		socket.emit('update companion');
-	}
+	};
 
 	function updatePixhawk() {
 		socket.emit('update pixhawk');
-	}
+	};
 </script>
 </head>
 <div>

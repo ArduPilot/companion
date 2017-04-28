@@ -1,6 +1,8 @@
 var express = require('express');
 var app = express();
 const child_process = require('child_process');
+const dgram = require('dgram');
+
 
 app.use(express.static('public'));
 
@@ -54,30 +56,44 @@ var server = app.listen(2770, function () {
 var io = require('socket.io')(server);
 
 io.on('connection', function (socket) {
+
+	// used in routing setup
 	socket.on('get serial ids', function (data) {
-		var cmd = child_process.exec('ls /dev/tty*', function (error, stdout, stderr) {
-			socket.emit('serial ids', stdout + stderr);
+		var cmd = child_process.exec('ls /dev/serial/by-id/*', function (error, stdout, stderr) {
+			socket.emit('serial ids', stdout);
 		});
 	});
 	
+	// used in routing setup
+	socket.on('routing request', function (data) {
+		var sock = dgram.createSocket('udp4');
+		console.log("ROUTING REQUEST");
+		var message = new Buffer(JSON.stringify(data));
+		sock.send(message, 0, message.length, 18990, '0.0.0.0', function(err, bytes) {
+		    if (err) {
+		    	console.log("ERROR");
+		    	throw err;
+		    }
+		});
+		
+		sock.on('message', (msg, rinfo) => {
+			socket.emit('endpoints', msg.toString());
+		});
+
+	});
+	
+	// used in system setup
 	socket.on('get companion refs', function (data) {
 		var cmd = child_process.exec('git tag', function (error, stdout, stderr) {
 			socket.emit('companion refs', stdout + stderr);
 		});
 	});
 	
-	socket.on('setup route', function(data) {
-		console.log("SETUP ROUTE");
-		console.log(data);
-		console.log("python /home/pi/companion/RPI2/Raspbian/udptest.py -b 115200 --ip='192.168.2.2' --port " + data.right + " -l " + data.left + " -d " + data.direction)
-		var cmd = child_process.exec("python /home/pi/companion/RPI2/Raspbian/udptest.py -b 115200 --ip='192.168.2.2' --port " + data.right + " -l " + data.left + " -d " + data.direction, function (error, stdout, stderr) {
-			console.log(stdout + stderr + error);
-		});
-	});
+
 	
 	socket.on('join network', joinNetwork);
 	
-	socket.on('update companion', function(data) {
+	socket.on('update companion', function (data) {
 		updateCompanion(data);
 	});
 	
@@ -97,9 +113,11 @@ io.on('connection', function (socket) {
 	setInterval( function () {
 		getWiFiStatus();
 	}, 3000);
+
 	
 	// Query internet connectivity
 	function getInternetStatus() {
+		console.log("GET INTERNET STATUS")
 		var cmd = child_process.exec('ping -c1 google.com', function (error, stdout, stderr) {
 			if (error) {
 				socket.emit('internet status', '<h4 style="color:red;">Not Connected</h1>');
@@ -112,7 +130,7 @@ io.on('connection', function (socket) {
 	function getWiFiStatus() {
 		var cmd = child_process.exec('sudo wpa_cli status', function (error, stdout, stderr) {
 			console.log("WIFI STATUS");
-			console.log(stdout + stderr);
+			//console.log(stdout + stderr);
 			if (error) {
 				socket.emit('wifi status', '<h4 style="color:red;">Error: ' + stderr + '</h1>');
 			} else {
@@ -158,7 +176,7 @@ io.on('connection', function (socket) {
 			
 			var networkString = passphrase.toString();
 			networkString = networkString.replace(/\t#.*\n/g, ''); // strip unencrypted password out
-			networkString = networkString.replace(/"/g, '\\"'); // strip unencrypted password out
+			networkString = networkString.replace(/"/g, '\\"'); // escape quotes
 			
 			// Restart the network in the callback
 			cmd = child_process.exec("sudo sh -c \"echo '" + networkString + "' > /etc/wpa_supplicant/wpa_supplicant.conf\"", restart_network); 
