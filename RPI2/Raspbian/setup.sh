@@ -47,8 +47,8 @@ sudo apt-get install -y npm
 # node updater
 sudo npm install n -g
 
-# Get recent version of node for synchronous child_process calls
-sudo n 4.2.6
+# Get recent version of node
+sudo n 5.6.0
 
 # browser based terminal
 sudo npm install tty.js -g
