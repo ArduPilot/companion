@@ -10,7 +10,6 @@
 		document.getElementById("terminal-output").scrollTop = document.getElementById("terminal-output").scrollHeight
 	});
 	
-
 	socket.on('companion refs', function(data) {
 		console.log(data);
 		var select = document.getElementById('tags');
@@ -33,7 +32,6 @@
 	};
 	
 	function updatePixhawkBeta() {
-		
 		updatePixhawk('beta')
 	}
 	
@@ -48,7 +46,6 @@
 		});
 	}
 	
-
 	socket.emit('get companion refs');
 </script>
 </head>
@@ -74,6 +71,6 @@
 	<a href="/reboot"><button>Reboot</button></a>
 	<a href="/shutdown"><button>Shutdown</button></a>
 	<a href="/routing"><button>Routing</button></a>
-	<a href="/network"><button>Network</button></a>
+	<a href="/"><button>Network</button></a>
 </div>
 </html>
