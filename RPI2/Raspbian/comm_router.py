@@ -12,9 +12,6 @@ debug = False
 # load configuration from file
 endpoint.load('routing.conf')
 
-for _endpoint in endpoint.endpoints:
-	print("Loaded %s\toutbound: %s") % (_endpoint.id._endpoint.connections)
-
 # we will listen here for requests
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.setblocking(False)

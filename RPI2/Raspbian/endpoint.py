@@ -54,8 +54,10 @@ class SerialEndpoint(Endpoint):
 		self.active = False
 		
 		# not a socket! just a port
-		self.socket = serial.Serial(port, baudrate, timeout=0)
-		print('%s on %s:%s') % (self.id, port, baudrate)
+		self.socket = serial.Serial()
+		self.socket.port = port
+		self.socket.baudrate = 115200
+		self.socket.timeout = 0
 		
 		
 	def read(self):
