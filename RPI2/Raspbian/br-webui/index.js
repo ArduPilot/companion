@@ -25,47 +25,48 @@ function getNetworks() {
 ////////////////// Routes
 
 // root
-app.get('/', function (req, res) {
+app.get('/', function(req, res) {
 	res.sendFile(__dirname + "/index.html");
 })
 
-app.get('/reboot', function (req, res) {
+app.get('/reboot', function(req, res) {
 	res.redirect('/');
 	child_process.exec('sleep 2 && sudo reboot now');
 });
 
-app.get('/shutdown', function (req, res) {
+app.get('/shutdown', function(req, res) {
 	res.redirect('/');
 	child_process.exec('sleep 2 && sudo shutdown -h now');
 });
 
-app.get('/routing', function (req, res) {
+app.get('/routing', function(req, res) {
 	res.sendFile(__dirname + "/routing.html");
 });
 
-app.get('/system', function (req, res) {
+app.get('/system', function(req, res) {
 	res.sendFile(__dirname + '/system.html');
 });
 
-var server = app.listen(2770, function () {
-	var host = server.address().address
-	var port = server.address().port
-	console.log("App running at http://%s:%s", host, port)
+var server = app.listen(2770, function() {
+	var host = server.address().address;
+	var port = server.address().port;
+	console.log("App running at http://%s:%s", host, port);
 });
 
 var io = require('socket.io')(server);
 
-io.on('connection', function (socket) {
+io.on('connection', function(socket) {
 
 	// used in routing setup
-	socket.on('get serial ids', function (data) {
+	socket.on('get serial ids', function(data) {
 		var cmd = child_process.exec('ls /dev/serial/by-id/*', function (error, stdout, stderr) {
 			socket.emit('serial ids', stdout);
 		});
 	});
 	
+	
 	// used in routing setup
-	socket.on('routing request', function (data) {
+	socket.on('routing request', function(data) {
 		var sock = dgram.createSocket('udp4');
 		console.log("ROUTING REQUEST");
 		var message = new Buffer(JSON.stringify(data));
@@ -82,21 +83,29 @@ io.on('connection', function (socket) {
 
 	});
 	
+	
 	// used in system setup
-	socket.on('get companion refs', function (data) {
+	socket.on('get companion refs', function(data) {
 		var cmd = child_process.exec('git tag', function (error, stdout, stderr) {
 			socket.emit('companion refs', stdout + stderr);
 		});
 	});
 	
-
 	
-	socket.on('join network', joinNetwork);
+	socket.on('get companion version', function(data) {
+		var cmd = child_process.exec('git describe --tags', function( error, stdout, stderr) {
+			socket.emit('companion version', stdout + stderr);
+		});
+	});
 	
-	socket.on('update companion', function (data) {
+	
+	// system setup
+	socket.on('update companion', function(data) {
 		updateCompanion(data);
 	});
 	
+	
+	// system setup
 	socket.on('update pixhawk', function(data) {
 		if (data.option == 'dev') {
 			// Use spawn instead of exec to get callbacks for each line of stderr, stdout
@@ -125,16 +134,26 @@ io.on('connection', function (socket) {
 		});	
 	});
 	
+	
+	// Network setup
+	socket.on('join network', joinNetwork);
+	
+	
+	// Network setup
 	socket.emit('wifi aps', getNetworks());
 	setInterval( function () {
 		socket.emit('wifi aps', getNetworks());
 	}, 5000);
 	
+	
+	// Network setup
 	getInternetStatus();
 	setInterval( function () {
 		getInternetStatus();
 	}, 3000);
 	
+	
+	// Network setup
 	getWiFiStatus();
 	setInterval( function () {
 		getWiFiStatus();
@@ -152,6 +171,7 @@ io.on('connection', function (socket) {
 			}
 		})
 	}
+	
 	
 	function getWiFiStatus() {
 		var cmd = child_process.exec('sudo wpa_cli status', function (error, stdout, stderr) {
@@ -185,6 +205,7 @@ io.on('connection', function (socket) {
 		});
 	}
 	
+	
 	//Restart wifi interface/wpa_supplicant
 	function restart_network(error, stdout, stderr) {
 		console.log(error + stdout + stderr);
@@ -193,6 +214,7 @@ io.on('connection', function (socket) {
 			console.log(error + stdout + stderr);
 		});
 	}
+	
 	
 	function joinNetwork(data) {
 		console.log(data);
@@ -212,6 +234,7 @@ io.on('connection', function (socket) {
 		}
 	}
 	
+	
 	function updateCompanion(tag) {
 		var cmd = child_process.exec('cd /home/pi/companion && git fetch && git checkout ' + tag, function (error, stdout, stderr) {
 			console.log("COMPANION UPDATE");
@@ -219,8 +242,6 @@ io.on('connection', function (socket) {
 			console.log(error);
 			console.log(stdout + stderr);
 			socket.emit('terminal output', stdout + stderr);
-		})
+		});
 	}
-	
-
-})
+});

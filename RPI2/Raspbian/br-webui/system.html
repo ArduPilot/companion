@@ -22,6 +22,10 @@
 			console.log(line);
 		});
 	});
+	
+	socket.on('companion version', function(data) {
+		document.getElementById('companion version').innerHTML = data;
+	});
 
 	function updateCompanion() {
 		socket.emit('update companion', document.getElementById('tags').value);
@@ -39,18 +43,19 @@
 		updatePixhawk('stable')
 	}
 	
-
 	function updatePixhawk(option) {
-		socket.emit('update pixhawk' {
+		socket.emit('update pixhawk', {
 			'option' : option
 		});
 	}
 	
 	socket.emit('get companion refs');
+	socket.emit('get companion version');
 </script>
 </head>
 <div>
-	<h3>Companion Update</h3>
+	<h2>Current Companion Version:</h2>
+	<h3 id="companion version">Companion Update</h3>
 	<div>
 		<select id="tags"></select>
 		<button onclick="updateCompanion()">Update Companion</button>
