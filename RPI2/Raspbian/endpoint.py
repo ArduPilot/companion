@@ -52,33 +52,46 @@ class SerialEndpoint(Endpoint):
 		Endpoint.__init__(self, id, 'serial', connections)
 		self.port = port
 		self.baudrate = baudrate
+		self.active = False
 		
+		# not a socket! just a port
 		self.socket = serial.Serial(port, baudrate, timeout=0)
 		print('%s on %s:%s') % (self.id, port, baudrate)
 		
 	def read(self):
 		try:
+			if not self.socket.is_open:
+				self.socket.open()
+				print('%s on %s:%s') % (self.id, self.port, self.baudrate)
 			data = self.socket.read(1024)
-		except:
+			self.active = True
+		except Exception as e:
+			self.socket.close()
+			self.active = False
+			#print("Error reading serial endpoint: %s") % e
 			return
 		
 		if len(data) > 0:
 			if debug:
+				#this works fine on rpi, but not desktop (ubuntu 16) for some reason
 				#print('%s read %s') % (self.id, data[:25].decode('utf-8'))
 				print('%s read') % self.id
 
-
+			# write data out on all outbound connections
 			for endpoint in self.connections:
 				endpoint.write(data)
-				
+	
+	
 	def write(self, data):
-
 		try:
-			self.socket.write(data)
-			if debug:
-				print('%s write %s') % (self.id, data[:25])
+			if self.socket.is_open:
+				self.socket.write(data)
+				if debug:
+					print('%s write %s') % (self.id, data[:25])
+				
+		# serial.SerialException
 		except Exception as e:
-			print e
+			print("Error writing: %s") % e
 			return
 		
 		
