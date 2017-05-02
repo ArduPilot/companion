@@ -97,7 +97,33 @@ io.on('connection', function (socket) {
 		updateCompanion(data);
 	});
 	
-	socket.on('update pixhawk', updatePixhawk);
+	socket.on('update pixhawk', function(data) {
+		if (data.option == 'dev') {
+			// Use spawn instead of exec to get callbacks for each line of stderr, stdout
+			var cmd = child_process.spawn('/home/pi/companion/RPI2/Raspbian/flash_px4.py', ['--latest']);
+		} else if (data.option == 'beta') {
+			var cmd = child_process.spawn('/home/pi/companion/RPI2/Raspbian/flash_px4.py', ['--url', 'http://firmware.us.ardupilot.org/Sub/beta/PX4/ArduSub-v2.px4']);
+		} else {
+			var cmd = child_process.spawn('/home/pi/companion/RPI2/Raspbian/flash_px4.py');
+		}
+		
+		cmd.stdout.on('data', function (data) {
+			socket.emit('terminal output', data.toString());
+		});
+		
+		cmd.stderr.on('data', function (data) {
+			socket.emit('terminal output', data.toString());
+		});
+		
+		cmd.on('exit', function (code) {
+			console.log('companion update exited with code ' + code.toString());
+		});
+		
+		cmd.on('error', (err) => {
+			console.log('Failed to start child process.');
+			console.log(err);
+		});	
+	});
 	
 	socket.emit('wifi aps', getNetworks());
 	setInterval( function () {
@@ -196,25 +222,5 @@ io.on('connection', function (socket) {
 		})
 	}
 	
-	function updatePixhawk() {
-		// Use spawn instead of exec to get callbacks for each line of stderr, stdout
-		var cmd = child_process.spawn('/home/pi/companion/RPI2/Raspbian/flash_px4.py', ['--latest']);
-		
-		cmd.stdout.on('data', function (data) {
-			socket.emit('terminal output', data.toString());
-		});
-		
-		cmd.stderr.on('data', function (data) {
-			socket.emit('terminal output', data.toString());
-		});
-		
-		cmd.on('exit', function (code) {
-			console.log('companion update exited with code ' + code.toString());
-		});
-		
-		cmd.on('error', (err) => {
-			console.log('Failed to start child process.');
-			console.log(err);
-		});	
-	}
+
 })

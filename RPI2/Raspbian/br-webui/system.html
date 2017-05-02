@@ -27,10 +27,27 @@
 	function updateCompanion() {
 		socket.emit('update companion', document.getElementById('tags').value);
 	}
-
-	function updatePixhawk() {
-		socket.emit('update pixhawk');
+	
+	function updatePixhawkDev() {
+		updatePixhawk('dev');
+	};
+	
+	function updatePixhawkBeta() {
+		
+		updatePixhawk('beta')
 	}
+	
+	function updatePixhawkStable() {
+		updatePixhawk('stable')
+	}
+	
+
+	function updatePixhawk(option) {
+		socket.emit('update pixhawk' {
+			'option' : option
+		});
+	}
+	
 
 	socket.emit('get companion refs');
 </script>
@@ -44,9 +61,11 @@
 </div>
 <div>
 	<h3>Pixhawk Update</h3>
-	<div>
-		<button onclick="updatePixhawk()">Update Pixhawk</button>
-	</div>
+		<div>
+			<button onclick="updatePixhawkDev()">Development</button>
+			<button onclick="updatePixhawkBeta()">Beta</button>
+			<button onclick="updatePixhawkStable()">Stable</button>
+		</div>
 </div>
 <div>
 	<textarea rows="8" cols="80" id="terminal-output"></textarea>
@@ -54,7 +73,7 @@
 <div>
 	<a href="/reboot"><button>Reboot</button></a>
 	<a href="/shutdown"><button>Shutdown</button></a>
-	<a href="/system"><button>System</button></a>
 	<a href="/routing"><button>Routing</button></a>
+	<a href="/network"><button>Network</button></a>
 </div>
 </html>
