@@ -149,7 +149,6 @@ class UDPEndpoint(Endpoint):
 			return
 
 
-			
 	def to_json(self):
 		return {"id": self.id,
 				"type": self.type,
@@ -263,14 +262,20 @@ def get_endpoints():
 
 
 def save(filename):
-	f = open(filename, 'w')
+	f = open(filename, 'w+')
 	f.write(to_json())
+	f.close()
 
 
 def load(filename):
-	f = open(filename, 'r')
-	endpoints = []
-	configuration = json.load(f)
+	try:
+		f = open(filename, 'r')
+		configuration = json.load(f)
+		f.close()
+	except Exception as e:
+		print("Error loading from file %s: %s") % (filename, e)
+		return
+	
 	for endpoint in configuration['endpoints']:
 		try:
 			if endpoint['type'] == 'serial':
