@@ -57,8 +57,6 @@ var io = require('socket.io')(server);
 var networking = io.of('/networking');
 
 networking.on('connection', function(socket) {
-	console.log('networking connected');
-	socket.emit('youre in', "youre in!");
 	
 	// Network setup
 	socket.on('join network', joinNetwork);

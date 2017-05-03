@@ -3,14 +3,11 @@
 <head>
 <script src="/socket.io/socket.io.js"></script>
 <script>
-	var socket = io();
 	var networking = io('/networking');
-	
-	networking.on('youre in', function(data) {
-		console.log(data);
-	});
 
 	networking.on('wifi aps', function(data) {
+		
+		console.log('got wifi aps')
 		var select = document.getElementById("ssid");
 		while (select.hasChildNodes()) {
 			select.removeChild(select.lastChild);
@@ -24,12 +21,14 @@
 	});
 
 	networking.on('internet status', function(data) {
+		console.log('got internet status')
 		console.log(data);
 		var statusIndicator = document.getElementById("internet-status");
 		statusIndicator.innerHTML = data;
 	});
 
 	networking.on('wifi status', function(data) {
+		console.log('got wifi status')
 		console.log(data);
 		var statusIndicator = document.getElementById("wifi-status");
 		statusIndicator.innerHTML = data;
@@ -44,9 +43,21 @@
 		});
 	};
 	
-	setInterval(networking.emit('get internet status'), 3000);
-	setInterval(networking.emit('get wifi status'), 3000);
-	setInterval(networking.emit('get wifi aps'), 6000);
+	networking.emit('get internet status');
+	networking.emit('get wifi status');
+	networking.emit('get wifi aps');
+	
+	setInterval(function() {
+		networking.emit('get internet status');
+	}, 3000);
+	
+	setInterval(function() {
+		networking.emit('get wifi status');
+	}, 3000);
+	
+	setInterval(function() {
+		networking.emit('get wifi aps');
+	}, 6000);
 
 </script>
 </head>
@@ -63,7 +74,7 @@
 </div>
 <div>
 	<h3>
-		WiFi Network Setup:
+		WiFi Network Setup:   </h3>
 		<div>
 			<h5>WiFi SSID:</h5>
 		</div>
@@ -77,13 +88,10 @@
 			<input id="password" type="password" style="width: 200px;" />
 			<button onclick="joinNetwork()">Join Network</button>
 		</div>
-	</h3>
+
 </div>
 <div>
 	<a href="/system"><button>System</button></a>
 	<a href="/routing"><button>Routing</button></a>
 </div>
-<audio controls autoplay>
-    <source src="http://192.168.2.2:5700" type="audio/mpeg"> 
-</audio>
 </html>
