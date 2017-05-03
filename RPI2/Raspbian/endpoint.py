@@ -141,7 +141,7 @@ class UDPEndpoint(Endpoint):
 				self.socket.sendto(data, (self.ip, int(self.port)))
 			
 			if debug:
-# 				print('%s write %s') % (self.id, data[:25])
+				#print('%s write %s') % (self.id, data[:25])
 				print("%s write") % self.id
 
 		except Exception as e:
