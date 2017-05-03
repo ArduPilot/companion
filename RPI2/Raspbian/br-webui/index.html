@@ -4,13 +4,13 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
 	var socket = io();
-	socket.on('terminal output', function(data) {
-		var currentHTML = document.getElementById("terminal-output").innerHTML;
-		document.getElementById("terminal-output").innerHTML = currentHTML + data;
-		document.getElementById("terminal-output").scrollTop = document.getElementById("terminal-output").scrollHeight;
+	var networking = io('/networking');
+	
+	networking.on('youre in', function(data) {
+		console.log(data);
 	});
 
-	socket.on('wifi aps', function(data) {
+	networking.on('wifi aps', function(data) {
 		var select = document.getElementById("ssid");
 		while (select.hasChildNodes()) {
 			select.removeChild(select.lastChild);
@@ -23,13 +23,13 @@
 		});
 	});
 
-	socket.on('internet status', function(data) {
+	networking.on('internet status', function(data) {
 		console.log(data);
 		var statusIndicator = document.getElementById("internet-status");
 		statusIndicator.innerHTML = data;
 	});
 
-	socket.on('wifi status', function(data) {
+	networking.on('wifi status', function(data) {
 		console.log(data);
 		var statusIndicator = document.getElementById("wifi-status");
 		statusIndicator.innerHTML = data;
@@ -38,19 +38,16 @@
 	function joinNetwork() {
 		var select = document.getElementById("ssid");
 		var ssid = select.options[select.selectedIndex].text;
-		socket.emit('join network', {
+		networking.emit('join network', {
 			"ssid" : ssid,
 			"password" : document.getElementById('password').value
 		});
 	};
+	
+	setInterval(networking.emit('get internet status'), 3000);
+	setInterval(networking.emit('get wifi status'), 3000);
+	setInterval(networking.emit('get wifi aps'), 6000);
 
-	function updateCompanion() {
-		socket.emit('update companion');
-	};
-
-	function updatePixhawk() {
-		socket.emit('update pixhawk');
-	};
 </script>
 </head>
 <div>

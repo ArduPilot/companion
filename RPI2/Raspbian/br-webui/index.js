@@ -54,6 +54,96 @@ var server = app.listen(2770, function() {
 });
 
 var io = require('socket.io')(server);
+var networking = io.of('/networking');
+
+networking.on('connection', function(socket) {
+	console.log('networking connected');
+	socket.emit('youre in', "youre in!");
+	
+	// Network setup
+	socket.on('join network', joinNetwork);
+	
+	
+	// Network setup
+	socket.on('get wifi aps', function() {
+		socket.emit('wifi aps', getNetworks());
+	});
+	
+	
+	// Query internet connectivity
+	socket.on('get internet status', function() {
+		console.log("GET INTERNET STATUS")
+		var cmd = child_process.exec('ping -c1 google.com', function (error, stdout, stderr) {
+			if (error) {
+				socket.emit('internet status', '<h4 style="color:red;">Not Connected</h1>');
+			} else {
+				socket.emit('internet status', '<h4 style="color:green;">Connected</h1>');
+			}
+		})
+	});
+	
+	
+	socket.on('get wifi status', function() {
+		var cmd = child_process.exec('sudo wpa_cli status', function (error, stdout, stderr) {
+			console.log("WIFI STATUS");
+			//console.log(stdout + stderr);
+			if (error) {
+				socket.emit('wifi status', '<h4 style="color:red;">Error: ' + stderr + '</h1>');
+			} else {
+				if (stdout.indexOf("DISCONNECTED") > -1) {
+					socket.emit('wifi status', '<h4 style="color:red;">Disconnected</h1>');
+				} else if (stdout.indexOf("SCANNING") > -1) {
+					socket.emit('wifi status', '<h4 style="color:red;">Scanning</h1>');
+				} else if (stdout.indexOf("INACTIVE") > -1) {
+					socket.emit('wifi status', '<h4 style="color:red;">Inactive</h1>');
+				} else {
+					var fields = stdout.split("\n");
+					for (var i in fields) {
+						line = fields[i].split("=");
+						if (line[0] == "ssid") {
+							var ssid = line[1];
+						}
+					}
+					
+					if (stdout.indexOf("HANDSHAKE") > -1) {
+						socket.emit('wifi status', '<h4>Connecting: ' + ssid + '</h1>');
+					} else {
+						socket.emit('wifi status', '<h4 style="color:green;">Connected: ' + ssid + '</h1>');
+					}
+				}
+			}
+		});
+	});
+	
+	
+	//Restart wifi interface/wpa_supplicant
+	function restart_network(error, stdout, stderr) {
+		console.log(error + stdout + stderr);
+		var cmd = child_process.exec('sudo ifdown wlan0 && sudo ifup wlan0', function (error, stdout, stderr) {
+			console.log("NETWORK RESTART");
+			console.log(error + stdout + stderr);
+		});
+	}
+	
+	
+	function joinNetwork(data) {
+		console.log(data);
+		
+		try {
+			var passphrase = child_process.execSync("wpa_passphrase " + data.ssid + " " + data.password);
+			
+			var networkString = passphrase.toString();
+			networkString = networkString.replace(/\t#.*\n/g, ''); // strip unencrypted password out
+			networkString = networkString.replace(/"/g, '\\"'); // escape quotes
+			
+			// Restart the network in the callback
+			cmd = child_process.exec("sudo sh -c \"echo '" + networkString + "' > /etc/wpa_supplicant/wpa_supplicant.conf\"", restart_network); 
+		} catch (e) {
+			console.log("CAUGHT ERROR: ");
+			console.log(e);
+		}
+	}
+});
 
 io.on('connection', function(socket) {
 
@@ -134,105 +224,7 @@ io.on('connection', function(socket) {
 		});	
 	});
 	
-	
-	// Network setup
-	socket.on('join network', joinNetwork);
-	
-	
-	// Network setup
-	socket.emit('wifi aps', getNetworks());
-	setInterval( function () {
-		socket.emit('wifi aps', getNetworks());
-	}, 5000);
-	
-	
-	// Network setup
-	getInternetStatus();
-	setInterval( function () {
-		getInternetStatus();
-	}, 3000);
-	
-	
-	// Network setup
-	getWiFiStatus();
-	setInterval( function () {
-		getWiFiStatus();
-	}, 3000);
 
-	
-	// Query internet connectivity
-	function getInternetStatus() {
-		console.log("GET INTERNET STATUS")
-		var cmd = child_process.exec('ping -c1 google.com', function (error, stdout, stderr) {
-			if (error) {
-				socket.emit('internet status', '<h4 style="color:red;">Not Connected</h1>');
-			} else {
-				socket.emit('internet status', '<h4 style="color:green;">Connected</h1>');
-			}
-		})
-	}
-	
-	
-	function getWiFiStatus() {
-		var cmd = child_process.exec('sudo wpa_cli status', function (error, stdout, stderr) {
-			console.log("WIFI STATUS");
-			//console.log(stdout + stderr);
-			if (error) {
-				socket.emit('wifi status', '<h4 style="color:red;">Error: ' + stderr + '</h1>');
-			} else {
-				if (stdout.indexOf("DISCONNECTED") > -1) {
-					socket.emit('wifi status', '<h4 style="color:red;">Disconnected</h1>');
-				} else if (stdout.indexOf("SCANNING") > -1) {
-					socket.emit('wifi status', '<h4 style="color:red;">Scanning</h1>');
-				} else if (stdout.indexOf("INACTIVE") > -1) {
-					socket.emit('wifi status', '<h4 style="color:red;">Inactive</h1>');
-				} else {
-					var fields = stdout.split("\n");
-					for (var i in fields) {
-						line = fields[i].split("=");
-						if (line[0] == "ssid") {
-							var ssid = line[1];
-						}
-					}
-					
-					if (stdout.indexOf("HANDSHAKE") > -1) {
-						socket.emit('wifi status', '<h4>Connecting: ' + ssid + '</h1>');
-					} else {
-						socket.emit('wifi status', '<h4 style="color:green;">Connected: ' + ssid + '</h1>');
-					}
-				}
-			}
-		});
-	}
-	
-	
-	//Restart wifi interface/wpa_supplicant
-	function restart_network(error, stdout, stderr) {
-		console.log(error + stdout + stderr);
-		var cmd = child_process.exec('sudo ifdown wlan0 && sudo ifup wlan0', function (error, stdout, stderr) {
-			console.log("NETWORK RESTART");
-			console.log(error + stdout + stderr);
-		});
-	}
-	
-	
-	function joinNetwork(data) {
-		console.log(data);
-		
-		try {
-			var passphrase = child_process.execSync("wpa_passphrase " + data.ssid + " " + data.password);
-			
-			var networkString = passphrase.toString();
-			networkString = networkString.replace(/\t#.*\n/g, ''); // strip unencrypted password out
-			networkString = networkString.replace(/"/g, '\\"'); // escape quotes
-			
-			// Restart the network in the callback
-			cmd = child_process.exec("sudo sh -c \"echo '" + networkString + "' > /etc/wpa_supplicant/wpa_supplicant.conf\"", restart_network); 
-		} catch (e) {
-			console.log("CAUGHT ERROR: ");
-			console.log(e);
-		}
-	}
 	
 	
 	function updateCompanion(tag) {
