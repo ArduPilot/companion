@@ -145,6 +145,7 @@ networking.on('connection', function(socket) {
 	}
 });
 
+
 io.on('connection', function(socket) {
 
 	// used in routing setup
@@ -161,10 +162,10 @@ io.on('connection', function(socket) {
 		console.log("ROUTING REQUEST");
 		var message = new Buffer(JSON.stringify(data));
 		sock.send(message, 0, message.length, 18990, '0.0.0.0', function(err, bytes) {
-		    if (err) {
-		    	console.log("ERROR");
-		    	throw err;
-		    }
+			if (err) {
+				console.log("ERROR");
+				throw err;
+			}
 		});
 		
 		sock.on('message', (msg, rinfo) => {
@@ -223,8 +224,6 @@ io.on('connection', function(socket) {
 			console.log(err);
 		});	
 	});
-	
-
 	
 	
 	function updateCompanion(tag) {
