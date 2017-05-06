@@ -57,7 +57,7 @@ else:
                 
 # Stop screen session with mavproxy
 print "Stopping mavproxy"
-os.system("sudo screen -X -S mavproxy quit")
+os.system("screen -X -S mavproxy quit")
 
 # Flash Pixhawk
 print "Flashing Pixhawk..."
@@ -72,6 +72,6 @@ time.sleep(10)
 
 # Start screen session with mavproxy
 print "Restarting mavproxy"
-os.system("sudo screen -dm -S mavproxy /home/pi/companion/RPI2/Raspbian/start_mavproxy_telem_splitter.sh")
+os.system("screen -dm -S mavproxy /home/pi/companion/RPI2/Raspbian/start_mavproxy_telem_splitter.sh")
 
 print "Complete!"
