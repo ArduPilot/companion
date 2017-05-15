@@ -4,7 +4,7 @@
 set -e
 
 BRANCH="1.8"
-if grep -q BCM270 /proc/cpuinfo; then
+if grep -q BCM2 /proc/cpuinfo; then
     echo "RPI BUILD!"
     RPI="1"
 fi
@@ -17,8 +17,8 @@ exec 2>&1
 
 sudo apt-get remove libgstreamer* gstreamer1.0*
 
-# Update and Upgrade the Pi, otherwise the build may fail due to inconsistencies
-grep -q BCM270 /proc/cpuinfo && sudo apt-get update && sudo apt-get upgrade -y --force-yes
+# Update and U#pgrade the Pi, otherwise the build may fail due to inconsistencies
+# grep -q BCM270 /proc/cpuinfo && sudo apt-get update && sudo apt-get upgrade -y --force-yes
 
 # Get the required libraries
 sudo apt-get install -y --force-yes build-essential autotools-dev automake autoconf \
@@ -60,7 +60,7 @@ cd gstreamer
 [ ! -d gst-libav ] && git clone git://anongit.freedesktop.org/git/gstreamer/gst-libav
 [ ! -d gst-omx ] && git clone git://anongit.freedesktop.org/git/gstreamer/gst-omx
 [ ! -d gst-python ] && git clone git://anongit.freedesktop.org/git/gstreamer/gst-python
-[ ! $RPI ] && [ ! -d gstreamer-vaapi ] && git clone git://gitorious.org/vaapi/gstreamer-vaapi.git
+#[ ! $RPI ] && [ ! -d gstreamer-vaapi ] && git clone git://gitorious.org/vaapi/gstreamer-vaapi.git
 
 export LD_LIBRARY_PATH=/usr/local/lib/
 # checkout branch (default=master) and build & install
