@@ -173,7 +173,7 @@ io.on('connection', function(socket) {
 	
 	// used in system setup
 	socket.on('get companion refs', function(data) {
-		var cmd = child_process.exec('git tag', function (error, stdout, stderr) {
+		var cmd = child_process.exec('git ls-remote --tags origin | cut -f2 | cut -f3 -d /', function (error, stdout, stderr) {
 			socket.emit('companion refs', stdout + stderr);
 		});
 	});
