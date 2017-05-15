@@ -54,7 +54,7 @@ sudo n 5.6.0
 sudo npm install tty.js -g
 
 # clone bluerobotics companion repository
-git clone -b webui https://github.com/bluerobotics/companion.git /home/pi/companion
+git clone https://github.com/bluerobotics/companion.git /home/pi/companion
 
 cd /home/pi/companion/RPI2/Raspbian/br-webui
 
