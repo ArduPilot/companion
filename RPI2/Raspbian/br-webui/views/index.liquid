@@ -1,0 +1,98 @@
+{% include ../_includes/header.liquid %}
+
+<script>
+var networking = io('/networking');
+
+networking.on('wifi aps', function(data) {
+
+	console.log('got wifi aps')
+	var select = document.getElementById("ssid");
+	while (select.hasChildNodes()) {
+		select.removeChild(select.lastChild);
+	}
+	data.forEach(function(line) {
+		var option = document.createElement('option');
+		option.value = line;
+		option.innerHTML = line;
+		select.appendChild(option);
+	});
+});
+
+networking.on('internet status', function(data) {
+	console.log('got internet status')
+	console.log(data);
+	var statusIndicator = document.getElementById("internet-status");
+	statusIndicator.innerHTML = data;
+});
+
+networking.on('wifi status', function(data) {
+	console.log('got wifi status')
+	console.log(data);
+	var statusIndicator = document.getElementById("wifi-status");
+	statusIndicator.innerHTML = data;
+});
+
+function joinNetwork() {
+	var select = document.getElementById("ssid");
+	var ssid = select.options[select.selectedIndex].text;
+	networking.emit('join network', {
+		"ssid" : ssid,
+		"password" : document.getElementById('password').value
+	});
+};
+
+networking.emit('get internet status');
+networking.emit('get wifi status');
+networking.emit('get wifi aps');
+
+setInterval(function() {
+	networking.emit('get internet status');
+}, 3000);
+
+setInterval(function() {
+	networking.emit('get wifi status');
+}, 3000);
+
+setInterval(function() {
+	networking.emit('get wifi aps');
+}, 6000);
+
+</script>
+
+<h1>Network Setup</h1>
+
+<div class="row">
+	<div class="col-md-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Wifi Setup</h3>
+			</div>
+			<div class="panel-body">
+				<h3>Wifi SSID:</h3>
+				<select class="form-control" id="ssid" style="width: 200px;"></select>
+				<h3>Password:</h3>
+				<form class="form-inline">
+  				<div class="form-group">
+						<input class="form-control" id="password" type="password" style="width: 200px;" />
+						<button type="button" class="btn btn-primary" onclick="joinNetwork()">Join Network</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Wifi Status</h3>
+			</div>
+			<div class="panel-body">
+				<h3>Wifi Status:</h3>
+				<h4><span id="wifi-status">Pending</span></h4>
+				<h3>Internet Status:</h3>
+				<h4><span id="internet-status">Pending</span></h4>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% include ../_includes/footer.liquid %}

@@ -3,14 +3,36 @@ var app = express();
 const child_process = require('child_process');
 const dgram = require('dgram');
 
-
 app.use(express.static('public'));
+app.use('/js', express.static(__dirname + '/node_modules/bootstrap/dist/js')); // redirect bootstrap JS
+app.use('/js', express.static(__dirname + '/node_modules/jquery/dist')); // redirect JS jQuery
+app.use('/font-awesome', express.static(__dirname + '/node_modules/font-awesome')); // redirect JS jQuery
+app.use('/css', express.static(__dirname + '/node_modules/bootstrap/dist/css')); // redirect CSS bootstrap
+app.use('/style.css', express.static(__dirname + '/style.css')); // redirect CSS bootstrap
+
+var fs = require("fs");
+var expressLiquid = require('express-liquid');
+var options = {
+  // read file handler, optional 
+  includeFile: function (filename, callback) {
+    fs.readFile(filename, 'utf8', callback);
+  },
+  // the base context, optional 
+  context: expressLiquid.newContext(),
+  // custom tags parser, optional 
+  customTags: {},
+  // if an error occurred while rendering, show detail or not, default to false 
+  traceError: false
+};
+app.set('view engine', 'liquid');
+app.engine('liquid', expressLiquid(options));
+app.use(expressLiquid.middleware);
 
 ////////////////// Routes
 
 // root
 app.get('/', function(req, res) {
-	res.sendFile(__dirname + "/index.html");
+	res.render('index',{})
 })
 
 app.get('/reboot', function(req, res) {
@@ -24,11 +46,11 @@ app.get('/shutdown', function(req, res) {
 });
 
 app.get('/routing', function(req, res) {
-	res.sendFile(__dirname + "/routing.html");
+	res.render('routing',{})
 });
 
 app.get('/system', function(req, res) {
-	res.sendFile(__dirname + '/system.html');
+	res.render('system',{})
 });
 
 var server = app.listen(2770, function() {

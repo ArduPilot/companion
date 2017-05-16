@@ -6,7 +6,12 @@
   "main": "index.js",
   "dependencies": {
     "express": "4.15.2",
-    "socket.io": "1.7.3"
+    "socket.io": "1.7.3",
+    "bootstrap": "3.3.7",
+    "jquery": "3.2.1",
+    "express-liquid": "latest",
+    "fs": "latest",
+    "font-awesome": "latest"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

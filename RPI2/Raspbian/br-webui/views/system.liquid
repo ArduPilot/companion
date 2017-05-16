@@ -1,0 +1,105 @@
+{% include ../_includes/header.liquid %}
+
+<script>
+var socket = io();
+socket.on('terminal output', function(data) {
+	var currentHTML = document.getElementById("terminal-output").innerHTML;
+	document.getElementById("terminal-output").innerHTML = currentHTML + data;
+	document.getElementById("terminal-output").scrollTop = document.getElementById("terminal-output").scrollHeight
+});
+
+socket.on('companion refs', function(data) {
+	console.log(data);
+	var select = document.getElementById('tags');
+	var lines = data.trim().split('\n');
+	lines.forEach(function(line) {
+		var option = document.createElement('option');
+		option.value = line;
+		option.innerHTML = line;
+		select.appendChild(option);
+		console.log(line);
+	});
+});
+
+socket.on('companion version', function(data) {
+	document.getElementById('companion version').innerHTML = data;
+});
+
+function updateCompanion() {
+	socket.emit('update companion', document.getElementById('tags').value);
+}
+
+function updatePixhawkDev() {
+	updatePixhawk('dev');
+};
+
+function updatePixhawkBeta() {
+	updatePixhawk('beta')
+}
+
+function updatePixhawkStable() {
+	updatePixhawk('stable')
+}
+
+function updatePixhawk(option) {
+	socket.emit('update pixhawk', {
+		'option' : option
+	});
+}
+
+socket.emit('get companion refs');
+socket.emit('get companion version');
+</script>
+
+<h1>Software Status and Update</h1>
+
+<div class="row">
+	<div class="col-md-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">ArduSub Companion Status</h3>
+			</div>
+			<div class="panel-body">
+				<h3>Version</h3>
+				<span id="companion version">Companion Update</span>
+				<h3>Update</h3>
+				<form class="form-inline">
+					<div class="form-group">
+						<label>Version:</label>
+						<select class="form-control" id="tags"></select>
+					</div>
+					<button type="button" class="btn btn-primary" onclick="updateCompanion()">Update Companion</button>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">TBD</h3>
+			</div>
+			<div class="panel-body">
+
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Pixhawk Firmware Update</h3>
+			</div>
+			<div class="panel-body">
+				<strong>Update to:</strong>
+				<button type="button" class="btn btn-primary" onclick="updatePixhawkDev()">Development</button>
+				<button type="button" class="btn btn-primary" onclick="updatePixhawkBeta()">Beta</button>
+				<button type="button" class="btn btn-primary" onclick="updatePixhawkStable()">Stable</button>
+				<br /><br />
+				<textarea rows="20" cols="120" id="terminal-output"></textarea>
+			</div>
+		</div>
+	</div>
+</div>
+{% include ../_includes/footer.liquid %}

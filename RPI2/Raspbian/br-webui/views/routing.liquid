@@ -1,0 +1,294 @@
+{% include ../_includes/header.liquid %}
+
+<script>
+	var socket = io();
+	var config;
+
+	socket.on('serial ids', function (data) {
+		var select = document.getElementById("serialPorts");
+		var lines = data.trim().split('\n');
+		lines.forEach(function(line) {
+			var option = document.createElement('option');
+			option.value = line;
+			option.innerHTML = line;
+			select.appendChild(option);
+			console.log(line);
+		});
+	});
+	
+	// Populate current endpoint configuration
+	// Routing application responds with current configuration after every request
+	socket.on('endpoints', function (data) {
+		config = JSON.parse(data);
+		var endpoints = document.getElementById('endpoints');
+		
+		endpoints.innerHTML = "";
+
+		var selectEndpoints = document.createElement('select');
+		
+		config.endpoints.forEach(function(endpoint) {
+			console.log(endpoint);
+			var wrap = document.createElement('div')
+			wrap.className = 'well well-sm';
+			endpoints.appendChild(wrap);
+
+			var option = document.createElement('option');
+			option.value = endpoint.id;
+			option.innerHTML = endpoint.id;
+			selectEndpoints.append(option);
+			
+			var h = document.createElement('h3');
+			h.innerHTML = "<span class='label label-default'>"+endpoint.id+"</span>";
+			wrap.appendChild(h);
+			
+			var remove = document.createElement('span');
+			remove.innerHTML = '&nbsp;<i class="fa fa-trash" aria-hidden="true"></i>';
+			remove.onclick = function() { removeEndpoint(endpoint.id) };
+			h.appendChild(remove);
+
+			var ul = document.createElement('dl');
+			ul.className = "dl-horizontal";
+			wrap.appendChild(ul);
+
+			var l = document.createElement('span');
+			l.innerHTML = "<dt>Type</dt><dd>" + endpoint.type + "</dd>";
+			ul.appendChild(l);
+
+			if (endpoint.ip) {
+				var l = document.createElement('span');
+				l.innerHTML = "<dt>IP address</dt><dd>" + endpoint.ip + "</dd>";
+				ul.appendChild(l);
+			}
+
+			var l = document.createElement('span');
+			l.innerHTML = "<dt>Port</dt><dd>" + endpoint.port + "</dd>";
+			ul.appendChild(l);
+			
+			if (endpoint.baudrate) {
+				var l = document.createElement('span');
+				l.innerHTML = "<dt>Baudrate</dt><dd>" + endpoint.baudrate + "</dd>";
+			  ul.appendChild(l);
+			}
+			
+			var label = document.createElement('span');
+			label.innerHTML = "<dt>Outbound Connections</dt>";
+			ul.appendChild(label);
+			endpoint.connections.forEach(function(connection) {
+				var l = document.createElement('dd');
+				l.innerHTML = connection;
+				
+				var button = document.createElement('span');
+				button.innerHTML = '&nbsp;<a href="#"><i class="fa fa-chain-broken" style="color:red" aria-hidden="true"></i></a>';
+				button.onclick = function () {
+					socket.emit('routing request', {
+						'request': 'disconnect endpoints',
+						'source': endpoint.id,
+						'target': connection
+					});
+				};
+				l.appendChild(button);
+				ul.appendChild(l);
+			});
+			wrap.appendChild(ul);
+		})
+		
+		var source = document.getElementById('source');
+		source.innerHTML = selectEndpoints.innerHTML
+		var target = document.getElementById('target');
+		target.innerHTML = selectEndpoints.innerHTML;
+	});
+	
+	// remove endpoint from communication router, active connections are closed
+	function removeEndpoint(id) {
+		socket.emit('routing request', {
+			'request': 'remove endpoint',
+			'id': id
+		});
+	}
+	
+	// Request communication router to connect two endpoints, can be uni or bi directional
+	function connect() {
+		var _type = document.getElementById('direction');
+		var type = _type.options[_type.selectedIndex].value;
+
+		var _source = document.getElementById('source');
+		var source = _source.options[_source.selectedIndex].value;
+		
+		var _target = document.getElementById('target');
+		var target = _target.options[_target.selectedIndex].value;
+
+		if (type == '---->' || type == '<--->') {
+			socket.emit('routing request', {
+				'request': 'connect endpoints',
+				'source': source,
+				'target': target
+			});
+		};
+		
+		if (type == '<----' || type == '<--->') {
+			socket.emit('routing request', {
+				'request': 'connect endpoints',
+				'source': target,
+				'target': source
+			});
+		};
+	}
+
+	// Request communication router to create a new endpoint
+	function addUDPEndpoint() {
+		var port = document.getElementById('udpPort').value;
+
+		var ip = document.getElementById('udpIP').value;
+
+		socket.emit('routing request', {
+			'request' : 'add endpoint',
+			'id' : ip + ":" + port,
+			'type' : 'udp',
+			'port' : port,
+			'ip' : ip,
+			'connections' : []
+		});
+	};
+
+	// Request Communication router to create a new endpoint
+	function addSerialEndpoint() {
+		var _port = document.getElementById('serialPorts');
+		var port = _port.options[_port.selectedIndex].text;
+
+		var baudrate = document.getElementById('baudrate').value;
+
+		socket.emit('routing request', {
+			'request' : 'add endpoint',
+			'id' : port,
+			'type' : 'serial',
+			'port' : port,
+			'baudrate' : baudrate,
+			'connections' : []
+		});
+	};
+	
+	function saveAll() {
+		var filename = '/home/pi/companion/RPI2/Raspbian/SAVED.conf'
+		socket.emit('routing request', {
+			'request' : 'save all',
+			'filename' : filename
+		});
+	};
+	
+	function loadAllSoft() {
+		loadAll(soft=true);
+	};
+	
+	function loadAll(soft=false) {
+		var filename = '/home/pi/companion/RPI2/Raspbian/SAVED.conf'
+		socket.emit('routing request', {
+			'request' : 'load all',
+			'filename' : filename,
+			'soft' : soft
+		});
+	};
+
+	// Populate options on initial load/refresh
+	socket.emit('get serial ids');
+	socket.emit('routing request', {
+		'request': 'get endpoints'
+	});
+</script>
+
+<h1>Routing</h1>
+
+<div class="row">
+	<div class="col-md-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Create Serial Endpoint</h3>
+			</div>
+			<div class="panel-body">
+				<div id="serialConfig">
+					<div class="form-group">
+						<label>Serial Port:</label>
+						<select class="form-control" id="serialPorts"></select>
+					</div>
+					<div class="form-group">
+						<label>Baud Rate:</label>
+						<input type="text" class="form-control" id="baudrate" />
+					</div>
+					<button type="button" class="btn btn-primary" onclick="addSerialEndpoint()" >Add Serial Endpoint</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Create UDP Endpoint</h3>
+			</div>
+			<div class="panel-body">
+				<div id="udpConfig">
+					<div class="form-group">
+						<label>UDP IP Address:</label>
+						<input type="text" class="form-control" id="udpIP"></input>
+					</div>
+					<div class="form-group">
+						<label>UDP Port:</label>
+						<input type="text" class="form-control" id="udpPort"></input>
+					</div>
+					<button type="button" class="btn btn-primary" onclick="addUDPEndpoint()">Add UDP Endpoint</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Create Routes</h3>
+			</div>
+			<div class="panel-body">
+				<form class="form-inline">
+					<div class="form-group">
+						<select class="form-control" id="source"></select>
+						<select class="form-control" id="direction">
+							<option>----></option>
+							<option><----</option>
+							<option><---></option>
+						</select>
+						<select class="form-control" id="target"></select>
+					</div>
+					<button type="button" class="btn btn-primary" onclick="connect()">Connect</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="pull-right">
+	<form class="form-inline">
+		<div class="form-group">
+			<button type="button" class="btn btn-primary" onclick="saveAll()">Save Config</button>
+			<button type="button" class="btn btn-primary" onclick="loadAllSoft()">Load Config (Soft)</button>
+			<button type="button" class="btn btn-primary" onclick="loadAll()">Load Config</button>
+		</div>
+	</form>
+</div>
+
+<br /><br /><br />
+
+<div class="row">
+	<div class="col-md-12">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Endpoints and Routes</h3>
+			</div>
+			<div class="panel-body">
+				<h2>Endpoints:</h2>
+				<div id="endpoints" data-endpoints="654"></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+{% include ../_includes/footer.liquid %}
