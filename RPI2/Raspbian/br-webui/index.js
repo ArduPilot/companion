@@ -70,21 +70,19 @@ networking.on('connection', function(socket) {
 	
 	// Network setup
 	socket.on('get wifi aps', function() {
-		socket.emit('wifi aps', function() {
-			console.log("SCAN Networks");
-			
-			try {
-				var cmd = child_process.execSync('sudo wpa_cli scan');
-				// For some reason this fails once in a while
-				cmd = child_process.execSync('sudo wpa_cli scan_results | grep PSK | cut -f5 | grep .');
-			} catch (e) {
-				console.log("\n\nCAUGHT ERROR:");
-				console.log(e);
-				return "";
-			}
-			
-			return cmd.toString().trim().split("\n");
-		});
+		console.log("SCAN Networks");
+		
+		try {
+			var cmd = child_process.execSync('sudo wpa_cli scan');
+			// For some reason this fails once in a while
+			cmd = child_process.execSync('sudo wpa_cli scan_results | grep PSK | cut -f5 | grep .');
+			socket.emit('wifi aps', cmd.toString().trim().split("\n"));
+		} catch (e) {
+			console.log("\n\nCAUGHT ERROR:");
+			console.log(e);
+			return "";
+		}
+		
 	});
 	
 	
