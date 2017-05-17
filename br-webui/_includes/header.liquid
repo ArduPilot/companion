@@ -4,7 +4,17 @@
 	<script src="/js/jquery.min.js"></script>
 	<script src="/js/bootstrap.min.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
-
+	<script>
+		var socket = io();
+		
+		function reboot() {
+			socket.emit('reboot');
+		}
+		
+		function shutdown() {
+			socket.emit('shutdown');
+		}
+	</script>
 	<link rel="stylesheet" href="/css/bootstrap.min.css">
 	<link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
 	<!-- Custom styles for this template -->
@@ -29,8 +39,8 @@
 					<li><a href="/routing">Routing</a></li>
 				</ul>
 				<form class="navbar-form navbar-right">
-						<button href="/reboot" class="btn btn-primary btn-sm navbar-btn">Reboot</button>
-						<button href="/shutdown" class="btn btn-error btn-sm navbar-btn">Shutdown</button>
+					<button onclick="reboot()" class="btn btn-primary btn-sm navbar-btn">Reboot</button>
+					<button onclick="shutdown()" class="btn btn-error btn-sm navbar-btn">Shutdown</button>
 				</form>
 			</div><!--/.nav-collapse -->
 		</div>

@@ -33,16 +33,6 @@ app.use(expressLiquid.middleware);
 // root
 app.get('/', function(req, res) {
 	res.render('index',{})
-})
-
-app.get('/reboot', function(req, res) {
-	res.redirect('/');
-	child_process.exec('sleep 2 && sudo reboot now');
-});
-
-app.get('/shutdown', function(req, res) {
-	res.redirect('/');
-	child_process.exec('sleep 2 && sudo shutdown -h now');
 });
 
 app.get('/routing', function(req, res) {
@@ -239,6 +229,20 @@ io.on('connection', function(socket) {
 			console.log('Failed to start child process.');
 			console.log(err);
 		});	
+	});
+	
+	socket.on('reboot', function(data) {
+		console.log('REBOOT');
+		child_process.exec('sudo reboot now', function (error, stdout, stderr) {
+			console.log(stdout + stderr);
+		});
+	});
+	
+	socket.on('shutdown', function(data) {
+		console.log('SHUTDOWN');
+		child_process.exec('sudo shutdown -h now', function (error, stdout, stderr) {
+			console.log(stdout + stderr);
+		});
 	});
 	
 	
