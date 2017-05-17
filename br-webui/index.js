@@ -247,12 +247,29 @@ io.on('connection', function(socket) {
 	
 	
 	function updateCompanion(tag) {
-		var cmd = child_process.exec('cd /home/pi/companion && git fetch && git checkout ' + tag, function (error, stdout, stderr) {
-			console.log("COMPANION UPDATE");
-			console.log(tag);
-			console.log(error);
-			console.log(stdout + stderr);
-			socket.emit('terminal output', stdout + stderr);
+		const cmd = child_process.spawn('/home/pi/companion/scripts/update.sh', [tag], {
+			detached: true,
+			stdio: 'ignore'
 		});
+		
+		// Ignore parent exit, we will restart this application after updating
+		cmd.unref();
+		
+		cmd.stdout.on('data', function (data) {
+			socket.emit('terminal output', data.toString());
+		});
+		
+		cmd.stderr.on('data', function (data) {
+			socket.emit('terminal output', data.toString());
+		});
+		
+		cmd.on('exit', function (code) {
+			console.log('companion update exited with code ' + code.toString());
+		});
+		
+		cmd.on('error', (err) => {
+			console.log('Failed to start child process.');
+			console.log(err);
+		});	
 	}
 });

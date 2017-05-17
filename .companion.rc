@@ -1,6 +1,17 @@
-sudo -H -u pi screen -dm -S mavproxy /home/pi/companion/scripts/start_mavproxy_telem_splitter.sh
-sudo -H -u pi /home/pi/companion/scripts/start_video.sh
-sudo -H -u pi screen -dm -S webui /home/pi/companion/scripts/start_webui.sh
-sudo -H -u pi screen -dm -S webterminal /home/pi/companion/scripts/start_webterminal.sh
-sudo -H -u pi screen -dm -S commrouter /home/pi/companion/tools/comm_router.py
-sudo -H -u pi screen -dm -S audio /home/pi/companion/scripts/start_audio.sh
+if [ ! -f /home/pi/.updating ]; then
+	sudo -H -u pi screen -dm -S mavproxy /home/pi/companion/scripts/start_mavproxy_telem_splitter.sh
+	sudo -H -u pi /home/pi/companion/scripts/start_video.sh
+	sudo -H -u pi screen -dm -S webui /home/pi/companion/scripts/start_webui.sh
+	sudo -H -u pi screen -dm -S webterminal /home/pi/companion/scripts/start_webterminal.sh
+	sudo -H -u pi screen -dm -S commrouter /home/pi/companion/tools/comm_router.py
+	sudo -H -u pi screen -dm -S audio /home/pi/companion/scripts/start_audio.sh
+else
+	echo 'UPDATE FAILED!' >> /home/pi/.update_log
+	rm -r /home/pi/.updating
+	cd /home/pi/companion
+	echo 'Reverting to' $(git rev-parse revert-point) >> /home/pi/.update_log
+	git reset --hard revert-point
+	echo 'HEAD is now at' $(git rev-parse HEAD) >> /home/pi/.update_log
+	echo 'Trying to run again...' >> /home/pi/.update_log
+	/home/pi/companion/.companion.rc
+fi
