@@ -222,7 +222,7 @@ io.on('connection', function(socket) {
 		});
 		
 		cmd.on('exit', function (code) {
-			console.log('companion update exited with code ' + code.toString());
+			console.log('pixhawk update exited with code ' + code.toString());
 		});
 		
 		cmd.on('error', (err) => {
