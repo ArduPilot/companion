@@ -1,4 +1,4 @@
 #!/bin/bash
 
-cd $HOME/companion/RPI2/Raspbian/br-webui/
+cd $HOME/companion/br-webui/
 node index.js

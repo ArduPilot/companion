@@ -168,7 +168,7 @@
 	};
 	
 	function saveAll() {
-		var filename = '/home/pi/companion/RPI2/Raspbian/SAVED.conf'
+		var filename = '/home/pi/companion/config/SAVED.conf'
 		socket.emit('routing request', {
 			'request' : 'save all',
 			'filename' : filename
@@ -180,7 +180,7 @@
 	};
 	
 	function loadAll(soft=false) {
-		var filename = '/home/pi/companion/RPI2/Raspbian/SAVED.conf'
+		var filename = '/home/pi/companion/config/SAVED.conf'
 		socket.emit('routing request', {
 			'request' : 'load all',
 			'filename' : filename,

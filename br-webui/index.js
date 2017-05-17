@@ -216,11 +216,11 @@ io.on('connection', function(socket) {
 	socket.on('update pixhawk', function(data) {
 		if (data.option == 'dev') {
 			// Use spawn instead of exec to get callbacks for each line of stderr, stdout
-			var cmd = child_process.spawn('/home/pi/companion/RPI2/Raspbian/flash_px4.py', ['--latest']);
+			var cmd = child_process.spawn('/home/pi/companion/tools/flash_px4.py', ['--latest']);
 		} else if (data.option == 'beta') {
-			var cmd = child_process.spawn('/home/pi/companion/RPI2/Raspbian/flash_px4.py', ['--url', 'http://firmware.us.ardupilot.org/Sub/beta/PX4/ArduSub-v2.px4']);
+			var cmd = child_process.spawn('/home/pi/companion/tools/flash_px4.py', ['--url', 'http://firmware.us.ardupilot.org/Sub/beta/PX4/ArduSub-v2.px4']);
 		} else {
-			var cmd = child_process.spawn('/home/pi/companion/RPI2/Raspbian/flash_px4.py');
+			var cmd = child_process.spawn('/home/pi/companion/tools/flash_px4.py');
 		}
 		
 		cmd.stdout.on('data', function (data) {

@@ -1,6 +1,5 @@
 *~
 *.project
-RPI2/Raspbian/br-webui/node_modules/*
-RPI2/Raspbian/routing.conf
-RPI2/Raspbian/SAVED.conf
+br-webui/node_modules/*
+config/*
 *.pyc

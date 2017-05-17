@@ -61,7 +61,7 @@ os.system("screen -X -S mavproxy quit")
 
 # Flash Pixhawk
 print "Flashing Pixhawk..."
-if(os.system("python -u /home/pi/companion/Tools/px_uploader.py --port /dev/ttyACM0 /tmp/ArduSub-v2.px4") != 0):
+if(os.system("python -u /home/pi/companion/tools/px_uploader.py --port /dev/ttyACM0 /tmp/ArduSub-v2.px4") != 0):
                 print "Error flashing pixhawk! Do you have most recent version of companion? Try 'git pull' or scp."
                 exit(1)
                 
@@ -72,6 +72,6 @@ time.sleep(10)
 
 # Start screen session with mavproxy
 print "Restarting mavproxy"
-os.system("screen -dm -S mavproxy /home/pi/companion/RPI2/Raspbian/start_mavproxy_telem_splitter.sh")
+os.system("screen -dm -S mavproxy /home/pi/companion/scripts/start_mavproxy_telem_splitter.sh")
 
 print "Complete!"

@@ -56,7 +56,7 @@ sudo npm install tty.js -g
 # clone bluerobotics companion repository
 git clone https://github.com/bluerobotics/companion.git /home/pi/companion
 
-cd /home/pi/companion/RPI2/Raspbian/br-webui
+cd $HOME/companion/br-webui
 
 npm install
 
@@ -71,7 +71,7 @@ sudo sed -i '$a start_x=1' /boot/config.txt
 sudo sed -i '$a gpu_mem=128' /boot/config.txt
 
 # source startup script
-S1=". /home/pi/companion/RPI2/Raspbian/.companion.rc"
+S1=". $HOME/companion/.companion.rc"
 
 # this will produce desired result if this script has been run already,
 # and commands are already in place
@@ -83,7 +83,7 @@ sudo sed -i -e "\%$S1%d" \
 
 # compile and install gstreamer 1.8 from source
 if [ "$1" = "gst" ]; then
-    /home/pi/companion/RPI2/Raspbian/setup_gst.sh
+    $HOME/companion/scripts/setup_gst.sh
 fi
 
 sudo reboot now
