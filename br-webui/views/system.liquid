@@ -12,6 +12,11 @@ socket.on('companion version', function(data) {
 	document.getElementById('companion version').innerHTML = data;
 });
 
+socket.on('companion latest', function(data) {
+	console.log('got companion latest');
+	document.getElementById('companion-update').style.display = 'inline';
+});
+
 function updateCompanion() {
 	socket.emit('update companion');
 }
@@ -35,6 +40,7 @@ function updatePixhawk(option) {
 }
 
 socket.emit('get companion version');
+socket.emit('get companion latest');
 </script>
 
 <h1>Software Status and Update</h1>
@@ -47,9 +53,11 @@ socket.emit('get companion version');
 			</div>
 			<div class="panel-body">
 				<h3>Version</h3>
-				<span id="companion version">Companion Update</span>
-				<h3>Update</h3>
-				<button type="button" class="btn btn-primary" onclick="updateCompanion()">Update Companion</button>
+				<span id="companion version">Companion Version</span>
+				<div id="companion-update" style="display:none">
+					<h3>An Update is Available:</h3>
+					<button type="button" class="btn btn-primary" onclick="updateCompanion()">Update Companion</button>
+				</div>
 			</div>
 		</div>
 	</div>
