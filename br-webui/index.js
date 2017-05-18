@@ -181,14 +181,7 @@ io.on('connection', function(socket) {
 	});
 	
 	
-	// used in system setup
-	socket.on('get companion refs', function(data) {
-		var cmd = child_process.exec('git ls-remote --tags origin | cut -f2 | cut -f3 -d /', function (error, stdout, stderr) {
-			socket.emit('companion refs', stdout + stderr);
-		});
-	});
-	
-	
+	// system setup
 	socket.on('get companion version', function(data) {
 		var cmd = child_process.exec('git describe --tags', function( error, stdout, stderr) {
 			socket.emit('companion version', stdout + stderr);
@@ -198,7 +191,29 @@ io.on('connection', function(socket) {
 	
 	// system setup
 	socket.on('update companion', function(data) {
-		updateCompanion(data);
+		const cmd = child_process.spawn('/home/pi/companion/scripts/update.sh', {
+			detached: true,
+		});
+		
+		// Ignore parent exit, we will restart this application after updating
+		cmd.unref();
+		
+		cmd.stdout.on('data', function (data) {
+			socket.emit('terminal output', data.toString());
+		});
+		
+		cmd.stderr.on('data', function (data) {
+			socket.emit('terminal output', data.toString());
+		});
+		
+		cmd.on('exit', function (code) {
+			console.log('companion update exited with code ' + code.toString());
+		});
+		
+		cmd.on('error', (err) => {
+			console.log('Failed to start child process.');
+			console.log(err);
+		});	
 	});
 	
 	
@@ -244,32 +259,4 @@ io.on('connection', function(socket) {
 			console.log(stdout + stderr);
 		});
 	});
-	
-	
-	function updateCompanion(tag) {
-		const cmd = child_process.spawn('/home/pi/companion/scripts/update.sh', [tag], {
-			detached: true,
-			stdio: 'ignore'
-		});
-		
-		// Ignore parent exit, we will restart this application after updating
-		cmd.unref();
-		
-		cmd.stdout.on('data', function (data) {
-			socket.emit('terminal output', data.toString());
-		});
-		
-		cmd.stderr.on('data', function (data) {
-			socket.emit('terminal output', data.toString());
-		});
-		
-		cmd.on('exit', function (code) {
-			console.log('companion update exited with code ' + code.toString());
-		});
-		
-		cmd.on('error', (err) => {
-			console.log('Failed to start child process.');
-			console.log(err);
-		});	
-	}
 });

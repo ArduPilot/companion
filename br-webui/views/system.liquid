@@ -8,30 +8,17 @@ socket.on('terminal output', function(data) {
 	document.getElementById("terminal-output").scrollTop = document.getElementById("terminal-output").scrollHeight
 });
 
-socket.on('companion refs', function(data) {
-	console.log(data);
-	var select = document.getElementById('tags');
-	var lines = data.trim().split('\n');
-	lines.forEach(function(line) {
-		var option = document.createElement('option');
-		option.value = line;
-		option.innerHTML = line;
-		select.appendChild(option);
-		console.log(line);
-	});
-});
-
 socket.on('companion version', function(data) {
 	document.getElementById('companion version').innerHTML = data;
 });
 
 function updateCompanion() {
-	socket.emit('update companion', document.getElementById('tags').value);
+	socket.emit('update companion');
 }
 
 function updatePixhawkDev() {
 	updatePixhawk('dev');
-};
+}
 
 function updatePixhawkBeta() {
 	updatePixhawk('beta')
@@ -47,7 +34,6 @@ function updatePixhawk(option) {
 	});
 }
 
-socket.emit('get companion refs');
 socket.emit('get companion version');
 </script>
 
@@ -63,13 +49,7 @@ socket.emit('get companion version');
 				<h3>Version</h3>
 				<span id="companion version">Companion Update</span>
 				<h3>Update</h3>
-				<form class="form-inline">
-					<div class="form-group">
-						<label>Version:</label>
-						<select class="form-control" id="tags"></select>
-					</div>
-					<button type="button" class="btn btn-primary" onclick="updateCompanion()">Update Companion</button>
-				</form>
+				<button type="button" class="btn btn-primary" onclick="updateCompanion()">Update Companion</button>
 			</div>
 		</div>
 	</div>

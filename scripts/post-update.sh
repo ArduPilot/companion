@@ -3,6 +3,8 @@
 echo 'run npm install' >> /home/pi/.update_log
 cd /home/pi/companion/br-webui && npm install
 
+echo 'Update Complete, refresh your browser'
+
 echo 'quit webui' >> /home/pi/.update_log
 screen -X -S webui quit
 
