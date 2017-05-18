@@ -7,15 +7,33 @@ networking.on('wifi aps', function(data) {
 
 	console.log('got wifi aps')
 	var select = document.getElementById("ssid");
+	
+	if (select.options[select.selectedIndex]) {
+		var currentSSID = select.options[select.selectedIndex].text;
+		console.log('current SSID:' + currentSSID);
+	}
+	
 	while (select.hasChildNodes()) {
 		select.removeChild(select.lastChild);
 	}
+	
+	var index = 0;
+	var newIndex = 0;
+	
 	data.forEach(function(line) {
 		var option = document.createElement('option');
 		option.value = line;
 		option.innerHTML = line;
+		if (currentSSID && line == currentSSID) {
+			newIndex = index;
+			console.log('match! new index:' + index);
+		}
 		select.appendChild(option);
+		index++;
+		console.log(index);
 	});
+	
+	select.selectedIndex = newIndex;
 });
 
 networking.on('internet status', function(data) {
