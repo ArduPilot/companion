@@ -10,7 +10,10 @@ import endpoint
 debug = False
 
 # load configuration from file
-endpoint.load('routing.conf')
+try:
+	endpoint.load('/home/pi/.companion/routing.conf')
+except:
+	pass
 
 # we will listen here for requests
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -70,7 +73,7 @@ while True:
 		sock.sendto(endpoint.to_json(), address)
 		
 		# save current list of endpoints
-		endpoint.save('routing.conf')
+		endpoint.save('/home/pi/.companion/routing.conf')
 		
 	except socket.error as e:
 		continue
