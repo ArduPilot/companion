@@ -71,14 +71,16 @@ sudo sed -i '$a start_x=1' /boot/config.txt
 sudo sed -i '$a gpu_mem=128' /boot/config.txt
 
 # source startup script
-S1=". $HOME/companion/.companion.rc"
+S1="$HOME/companion/scripts/expand_fs.sh"
+S2=". $HOME/companion/.companion.rc"
 
 # this will produce desired result if this script has been run already,
 # and commands are already in place
 # delete S1 if it already exists
 # insert S1 above the first uncommented exit 0 line in the file
 sudo sed -i -e "\%$S1%d" \
--e "0,/^[^#]*exit 0/s%%$S1\n&%" \
+-e "\%$S2%d" \
+-e "0,/^[^#]*exit 0/s%%$S1\n$S2\n&%" \
 /etc/rc.local
 
 # compile and install gstreamer 1.8 from source
