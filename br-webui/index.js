@@ -55,7 +55,29 @@ var networking = io.of('/networking');
 networking.on('connection', function(socket) {
 	
 	// Network setup
-	socket.on('join network', joinNetwork);
+	socket.on('join network', function (data) {
+		console.log('JOIN AP');
+		
+		try {
+			var passphrase = child_process.execSync("wpa_passphrase " + data.ssid + " " + data.password);
+			
+			var networkString = passphrase.toString();
+			networkString = networkString.replace(/\t#.*\n/g, ''); // strip unencrypted password out
+			networkString = networkString.replace(/"/g, '\\"'); // escape quotes
+			
+			// Restart the network in the callback
+			cmd = child_process.exec("sudo sh -c \"echo '" + networkString + "' > /etc/wpa_supplicant/wpa_supplicant.conf\"", function (error, stdout, stderr) {
+				console.log(error + stdout + stderr);
+				var cmd = child_process.exec('sudo ifdown wlan0 && sudo ifup wlan0', function (error, stdout, stderr) {
+					console.log("NETWORK RESTART");
+					console.log(error + stdout + stderr);
+				});
+			}); 
+		} catch (e) {
+			console.log("CAUGHT ERROR: ");
+			console.log(e);
+		}
+	});
 	
 	
 	// Network setup
@@ -120,35 +142,6 @@ networking.on('connection', function(socket) {
 			}
 		});
 	});
-	
-	
-	//Restart wifi interface/wpa_supplicant
-	function restart_network(error, stdout, stderr) {
-		console.log(error + stdout + stderr);
-		var cmd = child_process.exec('sudo ifdown wlan0 && sudo ifup wlan0', function (error, stdout, stderr) {
-			console.log("NETWORK RESTART");
-			console.log(error + stdout + stderr);
-		});
-	}
-	
-	
-	function joinNetwork(data) {
-		console.log(data);
-		
-		try {
-			var passphrase = child_process.execSync("wpa_passphrase " + data.ssid + " " + data.password);
-			
-			var networkString = passphrase.toString();
-			networkString = networkString.replace(/\t#.*\n/g, ''); // strip unencrypted password out
-			networkString = networkString.replace(/"/g, '\\"'); // escape quotes
-			
-			// Restart the network in the callback
-			cmd = child_process.exec("sudo sh -c \"echo '" + networkString + "' > /etc/wpa_supplicant/wpa_supplicant.conf\"", restart_network); 
-		} catch (e) {
-			console.log("CAUGHT ERROR: ");
-			console.log(e);
-		}
-	}
 });
 
 
