@@ -14,6 +14,7 @@ def timeout(signum, frame):
 parser = OptionParser()
 parser.add_option("--url",dest="url",help="Firmware download URL (optional)")
 parser.add_option("--stdin",action="store_true",dest="fromStdin",default=False,help="Expect input from stdin")
+parser.add_option("--file", dest="file", default=None, help="Load from file")
 parser.add_option("--latest",action="store_true",dest="latest",default=False,help="Upload latest development firmware")
 (options,args) = parser.parse_args()
 
@@ -33,6 +34,13 @@ if options.fromStdin:
                                 print "Got firmware file from stdin!"      
                 else:
                                 error("Read error on stdin!")
+elif options.file is not None:
+                try:
+                    print("Attempting upload from file %s") % options.file
+                    open(options.file)
+                except Exception as e:
+                    print("Error opening file %s: %s") % (options.file, e)
+                    exit(1)
 else:
                 # Download most recent firmware
                 if options.url:
@@ -61,7 +69,12 @@ os.system("screen -X -S mavproxy quit")
 
 # Flash Pixhawk
 print "Flashing Pixhawk..."
-if(os.system("python -u /home/pi/companion/tools/px_uploader.py --port /dev/ttyACM0 /tmp/ArduSub-v2.px4") != 0):
+if options.file is not None:
+    if(os.system("python -u /home/pi/companion/tools/px_uploader.py --port /dev/ttyACM0 %s" % options.file) != 0):
+                print "Error flashing pixhawk!"
+                exit(1)
+else:
+    if(os.system("python -u /home/pi/companion/tools/px_uploader.py --port /dev/ttyACM0 /tmp/ArduSub-v2.px4") != 0):
                 print "Error flashing pixhawk! Do you have most recent version of companion? Try 'git pull' or scp."
                 exit(1)
                 

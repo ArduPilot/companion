@@ -1,5 +1,6 @@
 {% include ../_includes/header.liquid %}
 
+<script src="socket.io-file-client.js"></script> 
 <script>
 var socket = io();
 socket.on('terminal output', function(data) {
@@ -26,11 +27,18 @@ function updatePixhawkDev() {
 }
 
 function updatePixhawkBeta() {
-	updatePixhawk('beta')
+	updatePixhawk('beta');
 }
 
 function updatePixhawkStable() {
-	updatePixhawk('stable')
+	updatePixhawk('stable');
+}
+
+function updatePixhawkFile(file) {
+	socket.emit('update pixhawk', {
+		'option': 'file',
+		'file': file
+	});
 }
 
 function updatePixhawk(option) {
@@ -41,6 +49,38 @@ function updatePixhawk(option) {
 
 socket.emit('get companion version');
 socket.emit('get companion latest');
+
+var uploader = new SocketIOFileClient(socket);
+ 
+uploader.on('start', function(fileInfo) {
+    console.log('Start uploading', fileInfo);
+});
+uploader.on('stream', function(fileInfo) {
+    console.log('Streaming... sent ' + fileInfo.sent + ' bytes.');
+});
+uploader.on('complete', function(fileInfo) {
+    console.log('Upload Complete', fileInfo);
+    updatePixhawkFile(fileInfo.name);
+});
+uploader.on('error', function(err) {
+    console.log('Error!', err);
+});
+uploader.on('abort', function(fileInfo) {
+    console.log('Aborted: ', fileInfo);
+});
+
+var form = document.getElementById('form');
+
+function submit(ev) {
+	var fileEl = document.getElementById('file');
+	var uploadIds = uploader.upload(fileEl);
+	
+
+	// setTimeout(function() { 
+		// uploader.abort(uploadIds[0]); 
+		// console.log(uploader.getUploadInfo()); 
+	// }, 1000); 
+};
 </script>
 
 <h1>Software Status and Update</h1>
@@ -70,14 +110,22 @@ socket.emit('get companion latest');
 				<h3 class="panel-title">Pixhawk Firmware Update</h3>
 			</div>
 			<div class="panel-body">
-				<strong>Update to:</strong>
-				<button type="button" class="btn btn-primary" onclick="updatePixhawkDev()">Development</button>
-				<button type="button" class="btn btn-primary" onclick="updatePixhawkBeta()">Beta</button>
-				<button type="button" class="btn btn-primary" onclick="updatePixhawkStable()">Stable</button>
-				<br /><br />
+				<div>
+					<strong>Download and Update (Requires Internet Connection):</strong>
+					<button type="button" class="btn btn-primary" onclick="updatePixhawkDev()">Development</button>
+					<button type="button" class="btn btn-primary" onclick="updatePixhawkBeta()">Beta</button>
+					<button type="button" class="btn btn-primary" onclick="updatePixhawkStable()">Stable</button>
+				</div>
+				<div>
+					<strong>From File:</strong>
+					<input type="submit" class="btn btn-primary" value="Upload" onClick="submit()" style="display:table-cell"/>
+					<input type="file" id="file" style="display:table-cell" enabled/>
+				</div>
+				<br />
 				<textarea rows="20" cols="120" id="terminal-output" style="font-family:monospace"></textarea>
 			</div>
 		</div>
 	</div>
 </div>
+
 {% include ../_includes/footer.liquid %}
