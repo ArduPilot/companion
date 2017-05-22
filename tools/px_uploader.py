@@ -551,6 +551,7 @@ print("If the board does not respond within 1-2 seconds, unplug and re-plug the 
 
 # Spin waiting for a device to show up
 try:
+    start = time.time();
     while True:
             portlist = []
             patterns = args.port.split(",")
@@ -628,6 +629,9 @@ try:
                     sys.exit(0)
 
             # Delay retries to < 20 Hz to prevent spin-lock from hogging the CPU
+            if time.time() > start + 20:
+                print("Timed out trying to catch bootloader!\nPlease try again.")
+                sys.exit(0)
             time.sleep(0.01)
 
 # CTRL+C aborts the upload/spin-lock by interrupt mechanics
