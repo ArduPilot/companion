@@ -5,15 +5,16 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "express": "4.15.2",
-    "socket.io": "1.7.3",
     "bootstrap": "3.3.7",
-    "jquery": "3.2.1",
+    "express": "4.15.2",
     "express-liquid": "latest",
-    "fs": "latest",
     "font-awesome": "latest",
+    "fs": "latest",
+    "jquery": "3.2.1",
+    "socket.io": "1.7.3",
     "socket.io-file": "latest",
-    "socket.io-file-client": "latest"
+    "socket.io-file-client": "latest",
+    "tracer": "^0.8.9"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

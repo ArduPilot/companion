@@ -3,6 +3,7 @@ var app = express();
 const child_process = require('child_process');
 const dgram = require('dgram');
 const SocketIOFile = require('socket.io-file');
+var logger = require('tracer').console();
 
 app.use(express.static('public'));
 app.use('/js', express.static(__dirname + '/node_modules/bootstrap/dist/js')); // redirect bootstrap JS
@@ -51,7 +52,7 @@ app.get('/socket.io-file-client.js', (req, res, next) => {
 var server = app.listen(2770, function() {
 	var host = server.address().address;
 	var port = server.address().port;
-	console.log("App running at http://%s:%s", host, port);
+	logger.log("App running at http://%s:%s", host, port);
 });
 
 var io = require('socket.io')(server);
@@ -61,7 +62,7 @@ networking.on('connection', function(socket) {
 	
 	// Network setup
 	socket.on('join network', function (data) {
-		console.log('JOIN AP');
+		logger.log('join network');
 		
 		try {
 			var passphrase = child_process.execSync("wpa_passphrase " + data.ssid + " " + data.password);
@@ -70,33 +71,34 @@ networking.on('connection', function(socket) {
 			networkString = networkString.replace(/\t#.*\n/g, ''); // strip unencrypted password out
 			networkString = networkString.replace(/"/g, '\\"'); // escape quotes
 			
+			logger.log(networkString);
+			
 			// Restart the network in the callback
 			cmd = child_process.exec("sudo sh -c \"echo '" + networkString + "' > /etc/wpa_supplicant/wpa_supplicant.conf\"", function (error, stdout, stderr) {
-				console.log(error + stdout + stderr);
+				logger.log("sudo sh -c \"echo '" + networkString + "' > /etc/wpa_supplicant/wpa_supplicant.conf\" : ", error + stdout + stderr);
 				var cmd = child_process.exec('sudo ifdown wlan0 && sudo ifup wlan0', function (error, stdout, stderr) {
-					console.log("NETWORK RESTART");
-					console.log(error + stdout + stderr);
+					logger.log("restarting network");
+					logger.log(error + stdout + stderr);
 				});
 			}); 
 		} catch (e) {
-			console.log("CAUGHT ERROR: ");
-			console.log(e);
+			logger.error(e);
 		}
 	});
 	
 	
 	// Network setup
 	socket.on('get wifi aps', function() {
-		console.log("SCAN Networks");
-		
+		logger.log("get wifi aps");
 		try {
 			var cmd = child_process.execSync('sudo wpa_cli scan');
+			logger.log("sudo wpa_cli scan : ", cmd.toString());
 			// For some reason this fails once in a while
 			cmd = child_process.execSync('sudo wpa_cli scan_results | grep PSK | cut -f5 | grep .');
+			logger.log("wpa_cli scan_results: ", cmd.toString());
 			socket.emit('wifi aps', cmd.toString().trim().split("\n"));
 		} catch (e) {
-			console.log("\n\nCAUGHT ERROR:");
-			console.log(e);
+			logger.error(e);
 			return "";
 		}
 		
@@ -105,8 +107,9 @@ networking.on('connection', function(socket) {
 	
 	// Query internet connectivity
 	socket.on('get internet status', function() {
-		console.log("GET INTERNET STATUS")
+		logger.log("get internet status")
 		var cmd = child_process.exec('ping -c1 google.com', function (error, stdout, stderr) {
+			logger.log("ping -c1 google.com : ", error + stdout + stderr);
 			if (error) {
 				socket.emit('internet status', '<h4 style="color:red;">Not Connected</h1>');
 			} else {
@@ -117,9 +120,9 @@ networking.on('connection', function(socket) {
 	
 	
 	socket.on('get wifi status', function() {
+		logger.log("get wifi status");
 		var cmd = child_process.exec('sudo wpa_cli status', function (error, stdout, stderr) {
-			console.log("WIFI STATUS");
-			//console.log(stdout + stderr);
+			logger.log("sudo wpa_cli status : ", error + stdout + stderr);
 			if (error) {
 				socket.emit('wifi status', '<h4 style="color:red;">Error: ' + stderr + '</h1>');
 			} else {
@@ -154,7 +157,9 @@ io.on('connection', function(socket) {
 
 	// used in routing setup
 	socket.on('get serial ids', function(data) {
+		logger.log("get serial ids");
 		var cmd = child_process.exec('ls /dev/serial/by-id/*', function (error, stdout, stderr) {
+			logger.log("ls /dev/serial/by-id/* : ", error + stdout + stderr);
 			socket.emit('serial ids', stdout);
 		});
 	});
@@ -162,12 +167,12 @@ io.on('connection', function(socket) {
 	
 	// used in routing setup
 	socket.on('routing request', function(data) {
+		logger.log("routing request");
 		var sock = dgram.createSocket('udp4');
-		console.log("ROUTING REQUEST");
 		var message = new Buffer(JSON.stringify(data));
 		sock.send(message, 0, message.length, 18990, '0.0.0.0', function(err, bytes) {
 			if (err) {
-				console.log("ERROR");
+				logger.error(err);
 				throw err;
 			}
 		});
@@ -181,6 +186,7 @@ io.on('connection', function(socket) {
 	
 	// system setup
 	socket.on('get companion version', function(data) {
+		logger.log('get companion version');
 		var cmd = child_process.exec('git describe --tags', function(error, stdout, stderr) {
 			socket.emit('companion version', stdout + stderr);
 		});
@@ -189,6 +195,7 @@ io.on('connection', function(socket) {
 	
 	// system setup
 	socket.on('get companion latest', function(data) {
+		logger.log("get companion latest");
 		var cmd = child_process.exec('git tag -d stable >/dev/null; git fetch >/dev/null; git rev-list --left-right --count HEAD...refs/tags/stable | cut -f2', function(error, stdout, stderr) {
 			if (parseInt(stdout) > 0) {
 				socket.emit('companion latest');
@@ -199,6 +206,7 @@ io.on('connection', function(socket) {
 	
 	// system setup
 	socket.on('update companion', function(data) {
+		logger.log("update companion");
 		const cmd = child_process.spawn('/home/pi/companion/scripts/update.sh', {
 			detached: true,
 		});
@@ -215,18 +223,19 @@ io.on('connection', function(socket) {
 		});
 		
 		cmd.on('exit', function (code) {
-			console.log('companion update exited with code ' + code.toString());
+			logger.log('companion update exited with code ' + code.toString());
 		});
 		
 		cmd.on('error', (err) => {
-			console.log('Failed to start child process.');
-			console.log(err);
+			logger.log('Failed to start child process.');
+			logger.log(err);
 		});	
 	});
 	
 	
 	// system setup
 	socket.on('update pixhawk', function(data) {
+		logger.log("update pixhawk");
 		if (data.option == 'dev') {
 			// Use spawn instead of exec to get callbacks for each line of stderr, stdout
 			var cmd = child_process.spawn('/home/pi/companion/tools/flash_px4.py', ['--latest']);
@@ -240,35 +249,35 @@ io.on('connection', function(socket) {
 		
 		cmd.stdout.on('data', function (data) {
 			socket.emit('terminal output', data.toString());
-			console.log(data.toString());
+			logger.log(data.toString());
 		});
 		
 		cmd.stderr.on('data', function (data) {
 			socket.emit('terminal output', data.toString());
-			console.log(data.toString());
+			logger.log(data.toString());
 		});
 		
 		cmd.on('exit', function (code) {
-			console.log('pixhawk update exited with code ' + code.toString());
+			logger.log('pixhawk update exited with code ' + code.toString());
 		});
 		
 		cmd.on('error', (err) => {
-			console.log('Failed to start child process.');
-			console.log(err);
+			logger.log('Failed to start child process.');
+			logger.log(err);
 		});	
 	});
 	
 	socket.on('reboot', function(data) {
-		console.log('REBOOT');
+		logger.log('reboot');
 		child_process.exec('sudo reboot now', function (error, stdout, stderr) {
-			console.log(stdout + stderr);
+			logger.log(stdout + stderr);
 		});
 	});
 	
 	socket.on('shutdown', function(data) {
-		console.log('SHUTDOWN');
+		logger.log('shutdown');
 		child_process.exec('sudo shutdown -h now', function (error, stdout, stderr) {
-			console.log(stdout + stderr);
+			logger.log(stdout + stderr);
 		});
 	});
 	
@@ -283,21 +292,21 @@ io.on('connection', function(socket) {
         overwrite: true 							// overwrite file if exists, default is true. 
     });
     uploader.on('start', (fileInfo) => {
-        console.log('Start uploading');
-        console.log(fileInfo);
+        logger.log('Start uploading');
+        logger.log(fileInfo);
     });
     uploader.on('stream', (fileInfo) => {
-        console.log(`${fileInfo.wrote} / ${fileInfo.size} byte(s)`);
+        logger.log(`${fileInfo.wrote} / ${fileInfo.size} byte(s)`);
     });
     uploader.on('complete', (fileInfo) => {
-        console.log('Upload Complete.');
-        console.log(fileInfo);
+        logger.log('Upload Complete.');
+        logger.log(fileInfo);
         
     });
     uploader.on('error', (err) => {
-        console.log('Error!', err);
+        logger.log('Error!', err);
     });
     uploader.on('abort', (fileInfo) => {
-        console.log('Aborted: ', fileInfo);
+        logger.log('Aborted: ', fileInfo);
     });
 });
