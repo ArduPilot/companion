@@ -15,16 +15,16 @@ app.use('/style.css', express.static(__dirname + '/style.css')); // redirect CSS
 var fs = require("fs");
 var expressLiquid = require('express-liquid');
 var options = {
-  // read file handler, optional 
-  includeFile: function (filename, callback) {
-    fs.readFile(filename, 'utf8', callback);
-  },
-  // the base context, optional 
-  context: expressLiquid.newContext(),
-  // custom tags parser, optional 
-  customTags: {},
-  // if an error occurred while rendering, show detail or not, default to false 
-  traceError: false
+	// read file handler, optional 
+	includeFile: function (filename, callback) {
+		fs.readFile(filename, 'utf8', callback);
+	},
+	// the base context, optional 
+	context: expressLiquid.newContext(),
+	// custom tags parser, optional 
+	customTags: {},
+	// if an error occurred while rendering, show detail or not, default to false 
+	traceError: false
 };
 app.set('view engine', 'liquid');
 app.engine('liquid', expressLiquid(options));
@@ -281,32 +281,33 @@ io.on('connection', function(socket) {
 		});
 	});
 	
-    var uploader = new SocketIOFile(socket, {
-        // uploadDir: {			// multiple directories 
-        // 	music: 'data/music', 
-        // 	document: 'data/document' 
-        // }, 
-        uploadDir: '/tmp/data',							// simple directory 
-        chunkSize: 10240,							// default is 10240(1KB) 
-        transmissionDelay: 0,						// delay of each transmission, higher value saves more cpu resources, lower upload speed. default is 0(no delay) 
-        overwrite: true 							// overwrite file if exists, default is true. 
-    });
-    uploader.on('start', (fileInfo) => {
-        logger.log('Start uploading');
-        logger.log(fileInfo);
-    });
-    uploader.on('stream', (fileInfo) => {
-        logger.log(`${fileInfo.wrote} / ${fileInfo.size} byte(s)`);
-    });
-    uploader.on('complete', (fileInfo) => {
-        logger.log('Upload Complete.');
-        logger.log(fileInfo);
-        
-    });
-    uploader.on('error', (err) => {
-        logger.log('Error!', err);
-    });
-    uploader.on('abort', (fileInfo) => {
-        logger.log('Aborted: ', fileInfo);
-    });
+	var uploader = new SocketIOFile(socket, {
+		// uploadDir: {			// multiple directories 
+		// 	music: 'data/music', 
+		// 	document: 'data/document' 
+		// },
+		
+		uploadDir: '/tmp/data',	// simple directory 
+		chunkSize: 10240,		// default is 10240(1KB) 
+		transmissionDelay: 0,	// delay of each transmission, higher value saves more cpu resources, lower upload speed. default is 0(no delay) 
+		overwrite: true 		// overwrite file if exists, default is true. 
+	});
+	uploader.on('start', (fileInfo) => {
+		logger.log('Start uploading');
+		logger.log(fileInfo);
+	});
+	uploader.on('stream', (fileInfo) => {
+		logger.log(`${fileInfo.wrote} / ${fileInfo.size} byte(s)`);
+	});
+	uploader.on('complete', (fileInfo) => {
+		logger.log('Upload Complete.');
+		logger.log(fileInfo);
+		
+	});
+	uploader.on('error', (err) => {
+		logger.log('Error!', err);
+	});
+	uploader.on('abort', (fileInfo) => {
+		logger.log('Aborted: ', fileInfo);
+	});
 });
