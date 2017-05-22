@@ -20,6 +20,7 @@ socket.on('companion latest', function(data) {
 
 function updateCompanion() {
 	disableUpdates(true);
+	showCompanionSpinner(true);
 	socket.emit('update companion');
 }
 
@@ -37,6 +38,7 @@ function updatePixhawkStable() {
 
 function updatePixhawkFile(file) {
 	disableUpdates(true);
+	showPixhawkSpinner(true);
 	socket.emit('update pixhawk', {
 		'option': 'file',
 		'file': file
@@ -45,13 +47,20 @@ function updatePixhawkFile(file) {
 
 function updatePixhawk(option) {
 	disableUpdates(true);
+	showPixhawkSpinner(true);
 	socket.emit('update pixhawk', {
 		'option' : option
 	});
 }
 
-socket.on('update complete', function(data) {
+socket.on('pixhawk update complete', function(data) {
 	disableUpdates(false);
+	showPixhawkSpinner(false);
+});
+
+socket.on('companion update complete', function(data) {
+	disableUpdates(false);
+	showCompanionSpinner(false);
 });
 
 function disableUpdates(disabled) {
@@ -60,6 +69,14 @@ function disableUpdates(disabled) {
 	document.getElementById('betaButton').disabled = disabled;
 	document.getElementById('stableButton').disabled = disabled;
 	document.getElementById('fileButton').disabled = disabled;
+}
+
+function showCompanionSpinner(show) {
+	document.getElementById('companionSpinner').style.visibility = show ? "visible" : "hidden";
+}
+
+function showPixhawkSpinner(show) {
+	document.getElementById('pixhawkSpinner').style.visibility = show ? "visible" : "hidden";
 }
 
 socket.emit('get companion version');
@@ -104,7 +121,10 @@ function submit(ev) {
 	<div class="col-md-12">
 		<div class="panel panel-default">
 			<div class="panel-heading">
-				<h3 class="panel-title">ArduSub Companion Status</h3>
+				<h3 class="panel-title">
+					ArduSub Companion Status
+					<i id="companionSpinner" class="fa fa-refresh fa-spin fa-2x fa-fw" style="visibility:hidden;"></i>
+				</h3>
 			</div>
 			<div class="panel-body">
 				<h3>Version</h3>
@@ -122,7 +142,10 @@ function submit(ev) {
 	<div class="col-md-12">
 		<div class="panel panel-default">
 			<div class="panel-heading">
-				<h3 class="panel-title">Pixhawk Firmware Update</h3>
+				<h3 class="panel-title">
+					Pixhawk Firmware Update
+					<i id="pixhawkSpinner" class="fa fa-refresh fa-spin fa-2x fa-fw" style="visibility:hidden;"></i>
+				</h3>
 			</div>
 			<div class="panel-body">
 				<div>
@@ -137,7 +160,9 @@ function submit(ev) {
 					<input type="file" id="file" style="display:table-cell" enabled/>
 				</div>
 				<br />
+				<div>
 				<textarea rows="20" cols="120" id="terminal-output" style="font-family:monospace"></textarea>
+				</div>
 			</div>
 		</div>
 	</div>

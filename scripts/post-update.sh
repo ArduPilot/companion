@@ -5,6 +5,8 @@ cd /home/pi/companion/br-webui && npm install
 
 echo 'Update Complete, refresh your browser'
 
+sleep 1
+
 echo 'quit webui' >> /home/pi/.update_log
 screen -X -S webui quit
 

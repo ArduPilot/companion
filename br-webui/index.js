@@ -218,6 +218,9 @@ io.on('connection', function(socket) {
 		
 		cmd.stdout.on('data', function (data) {
 			socket.emit('terminal output', data.toString());
+			if (data.indexOf("Update Complete, refresh your browser") > -1) {
+				socket.emit('companion update complete');
+			}
 		});
 		
 		cmd.stderr.on('data', function (data) {
@@ -226,7 +229,6 @@ io.on('connection', function(socket) {
 		
 		cmd.on('exit', function (code) {
 			logger.log('companion update exited with code ' + code.toString());
-			socket.emit('update complete');
 		});
 		
 		cmd.on('error', (err) => {
@@ -262,7 +264,7 @@ io.on('connection', function(socket) {
 		
 		cmd.on('exit', function (code) {
 			logger.log('pixhawk update exited with code ' + code.toString());
-			socket.emit('update complete');
+			socket.emit('pixhawk update complete');
 		});
 		
 		cmd.on('error', (err) => {
