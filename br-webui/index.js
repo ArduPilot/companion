@@ -190,6 +190,7 @@ io.on('connection', function(socket) {
 	socket.on('get companion version', function(data) {
 		logger.log('get companion version');
 		var cmd = child_process.exec('git describe --tags', function(error, stdout, stderr) {
+			logger.log(error + stdout + stderr);
 			socket.emit('companion version', stdout + stderr);
 		});
 	});
@@ -199,6 +200,7 @@ io.on('connection', function(socket) {
 	socket.on('get companion latest', function(data) {
 		logger.log("get companion latest");
 		var cmd = child_process.exec('git tag -d stable >/dev/null; git fetch >/dev/null; git rev-list --left-right --count HEAD...refs/tags/stable | cut -f2', function(error, stdout, stderr) {
+			logger.log(error + stdout + stderr);
 			if (parseInt(stdout) > 0) {
 				socket.emit('companion latest');
 			}
@@ -209,9 +211,17 @@ io.on('connection', function(socket) {
 	// system setup
 	socket.on('update companion', function(data) {
 		logger.log("update companion");
-		const cmd = child_process.spawn('/home/pi/companion/scripts/update.sh', {
-			detached: true,
-		});
+		var cmd;
+		if (data) {
+			logger.log('from file', data);
+			cmd = child_process.spawn('/home/pi/companion/scripts/sideload.sh', ['/tmp/data/' + data], {
+				detached: true
+			});	
+		} else {
+			cmd = child_process.spawn('/home/pi/companion/scripts/update.sh', {
+				detached: true
+			});
+		}
 		
 		// Ignore parent exit, we will restart this application after updating
 		cmd.unref();
@@ -229,12 +239,13 @@ io.on('connection', function(socket) {
 		
 		cmd.on('exit', function (code) {
 			logger.log('companion update exited with code ' + code.toString());
+			socket.emit('companion update complete');
 		});
 		
 		cmd.on('error', (err) => {
 			logger.log('Failed to start child process.');
 			logger.log(err);
-		});	
+		});
 	});
 	
 	
@@ -247,7 +258,7 @@ io.on('connection', function(socket) {
 		} else if (data.option == 'beta') {
 			var cmd = child_process.spawn('/home/pi/companion/tools/flash_px4.py', ['--url', 'http://firmware.us.ardupilot.org/Sub/beta/PX4/ArduSub-v2.px4']);
 		} else if (data.option == 'file') {
-			var cmd = child_process.spawn('/home/pi/companion/tools/flash_px4.py', ['--file', '/tmp/data/firmware.px4']);
+			var cmd = child_process.spawn('/home/pi/companion/tools/flash_px4.py', ['--file', '/tmp/data/' + data.file]);
 		} else {
 			var cmd = child_process.spawn('/home/pi/companion/tools/flash_px4.py');
 		}
@@ -292,7 +303,6 @@ io.on('connection', function(socket) {
 		// 	music: 'data/music', 
 		// 	document: 'data/document' 
 		// },
-		rename: "firmware.px4",
 		uploadDir: '/tmp/data',	// simple directory 
 		chunkSize: 10240,		// default is 10240(1KB) 
 		transmissionDelay: 0,	// delay of each transmission, higher value saves more cpu resources, lower upload speed. default is 0(no delay) 
@@ -308,7 +318,6 @@ io.on('connection', function(socket) {
 	uploader.on('complete', (fileInfo) => {
 		logger.log('Upload Complete.');
 		logger.log(fileInfo);
-		
 	});
 	uploader.on('error', (err) => {
 		logger.log('Error!', err);

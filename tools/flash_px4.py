@@ -70,7 +70,7 @@ os.system("screen -X -S mavproxy quit")
 # Flash Pixhawk
 print "Flashing Pixhawk..."
 if options.file is not None:
-    if(os.system("python -u /home/pi/companion/tools/px_uploader.py --port /dev/ttyACM0 %s" % options.file) != 0):
+    if(os.system("python -u /home/pi/companion/tools/px_uploader.py --port /dev/ttyACM0 '%s'" % options.file) != 0):
                 print "Error flashing pixhawk!"
                 exit(1)
 else:
