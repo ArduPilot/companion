@@ -224,6 +224,7 @@ io.on('connection', function(socket) {
 		
 		cmd.on('exit', function (code) {
 			logger.log('companion update exited with code ' + code.toString());
+			socket.emit('update complete');
 		});
 		
 		cmd.on('error', (err) => {
@@ -259,6 +260,7 @@ io.on('connection', function(socket) {
 		
 		cmd.on('exit', function (code) {
 			logger.log('pixhawk update exited with code ' + code.toString());
+			socket.emit('update complete');
 		});
 		
 		cmd.on('error', (err) => {

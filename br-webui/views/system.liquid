@@ -19,6 +19,7 @@ socket.on('companion latest', function(data) {
 });
 
 function updateCompanion() {
+	disableUpdates(true);
 	socket.emit('update companion');
 }
 
@@ -35,6 +36,7 @@ function updatePixhawkStable() {
 }
 
 function updatePixhawkFile(file) {
+	disableUpdates(true);
 	socket.emit('update pixhawk', {
 		'option': 'file',
 		'file': file
@@ -42,31 +44,44 @@ function updatePixhawkFile(file) {
 }
 
 function updatePixhawk(option) {
+	disableUpdates(true);
 	socket.emit('update pixhawk', {
 		'option' : option
 	});
+}
+
+socket.on('update complete', function(data) {
+	disableUpdates(false);
+});
+
+function disableUpdates(disabled) {
+	document.getElementById('companionButton').disabled = disabled;
+	document.getElementById('devButton').disabled = disabled;
+	document.getElementById('betaButton').disabled = disabled;
+	document.getElementById('stableButton').disabled = disabled;
+	document.getElementById('fileButton').disabled = disabled;
 }
 
 socket.emit('get companion version');
 socket.emit('get companion latest');
 
 var uploader = new SocketIOFileClient(socket);
- 
+
 uploader.on('start', function(fileInfo) {
-    console.log('Start uploading', fileInfo);
+	console.log('Start uploading', fileInfo);
 });
 uploader.on('stream', function(fileInfo) {
-    console.log('Streaming... sent ' + fileInfo.sent + ' bytes.');
+	console.log('Streaming... sent ' + fileInfo.sent + ' bytes.');
 });
 uploader.on('complete', function(fileInfo) {
-    console.log('Upload Complete', fileInfo);
-    updatePixhawkFile(fileInfo.name);
+	console.log('Upload Complete', fileInfo);
+	updatePixhawkFile(fileInfo.name);
 });
 uploader.on('error', function(err) {
-    console.log('Error!', err);
+	console.log('Error!', err);
 });
 uploader.on('abort', function(fileInfo) {
-    console.log('Aborted: ', fileInfo);
+	console.log('Aborted: ', fileInfo);
 });
 
 var form = document.getElementById('form');
@@ -96,7 +111,7 @@ function submit(ev) {
 				<span id="companion version">Companion Version</span>
 				<div id="companion-update" style="display:none">
 					<h3>An Update is Available:</h3>
-					<button type="button" class="btn btn-primary" onclick="updateCompanion()">Update Companion</button>
+					<button id="companionButton" type="button" class="btn btn-primary" onclick="updateCompanion()">Update Companion</button>
 				</div>
 			</div>
 		</div>
@@ -112,13 +127,13 @@ function submit(ev) {
 			<div class="panel-body">
 				<div>
 					<strong>Download and Update (Requires Internet Connection):</strong>
-					<button type="button" class="btn btn-primary" onclick="updatePixhawkDev()">Development</button>
-					<button type="button" class="btn btn-primary" onclick="updatePixhawkBeta()">Beta</button>
-					<button type="button" class="btn btn-primary" onclick="updatePixhawkStable()">Stable</button>
+					<button id="devButton" type="button" class="btn btn-primary" onclick="updatePixhawkDev()">Development</button>
+					<button id="betaButton" type="button" class="btn btn-primary" onclick="updatePixhawkBeta()">Beta</button>
+					<button id="stableButton" type="button" class="btn btn-primary" onclick="updatePixhawkStable()">Stable</button>
 				</div>
 				<div>
 					<strong>From File:</strong>
-					<input type="submit" class="btn btn-primary" value="Upload" onClick="submit()" style="display:table-cell"/>
+					<input id="fileButton" type="submit" class="btn btn-primary" value="Upload" onClick="submit()" style="display:table-cell"/>
 					<input type="file" id="file" style="display:table-cell" enabled/>
 				</div>
 				<br />
