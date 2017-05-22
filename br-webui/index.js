@@ -79,10 +79,12 @@ networking.on('connection', function(socket) {
 				var cmd = child_process.exec('sudo ifdown wlan0 && sudo ifup wlan0', function (error, stdout, stderr) {
 					logger.log("restarting network");
 					logger.log(error + stdout + stderr);
+					socket.emit('join complete');
 				});
 			}); 
 		} catch (e) {
 			logger.error(e);
+			socket.emit('join complete');
 		}
 	});
 	

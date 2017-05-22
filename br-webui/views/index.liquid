@@ -50,7 +50,12 @@ networking.on('wifi status', function(data) {
 	statusIndicator.innerHTML = data;
 });
 
+networking.on('join complete', function(data) {
+	disableButton(false);
+});
+
 function joinNetwork() {
+	disableButton(true);
 	var select = document.getElementById("ssid");
 	var ssid = select.options[select.selectedIndex].text;
 	networking.emit('join network', {
@@ -58,6 +63,11 @@ function joinNetwork() {
 		"password" : document.getElementById('password').value
 	});
 };
+
+function disableButton(disabled) {
+	document.getElementById('joinButton').disabled = disabled;
+	document.getElementById('spinner').style.visibility = disabled ? "visible" : "hidden";
+}
 
 networking.emit('get internet status');
 networking.emit('get wifi status');
@@ -91,7 +101,8 @@ setInterval(function() {
 				<h3>Password:</h3>
 				<div class="form-group">
 					<input class="form-control" id="password" type="password" style="width: 200px;" />
-					<button type="button" class="btn btn-primary" onclick="joinNetwork()">Join Network</button>
+					<button id="joinButton" type="button" class="btn btn-primary" onclick="joinNetwork()">Join Network</button>
+					<i id="spinner" class="fa fa-refresh fa-spin fa-2x fa-fw" style="visibility:hidden"></i>
 				</div>
 			</div>
 		</div>
