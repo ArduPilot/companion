@@ -11,6 +11,7 @@
     "font-awesome": "latest",
     "fs": "latest",
     "jquery": "3.2.1",
+    "node-file-manager": "^0.4.6",
     "socket.io": "1.7.3",
     "socket.io-file": "latest",
     "socket.io-file-client": "latest",

@@ -5,6 +5,7 @@ if [ ! -f /home/pi/.updating ]; then
 	sudo -H -u pi screen -dm -S webterminal /home/pi/companion/scripts/start_webterminal.sh
 	sudo -H -u pi screen -dm -S commrouter /home/pi/companion/tools/comm_router.py
 	sudo -H -u pi screen -dm -S audio /home/pi/companion/scripts/start_audio.sh
+	sudo -H -u pi screen -dm -S file-manager node --harmony /home/pi/companion/br-webui/node_modules/node-file-manager/lib/index.js -p 7777 -d /
 else
 	echo 'UPDATE FAILED!' >> /home/pi/.update_log
 	rm -r /home/pi/.updating
