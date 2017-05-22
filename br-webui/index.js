@@ -242,7 +242,7 @@ io.on('connection', function(socket) {
 		} else if (data.option == 'beta') {
 			var cmd = child_process.spawn('/home/pi/companion/tools/flash_px4.py', ['--url', 'http://firmware.us.ardupilot.org/Sub/beta/PX4/ArduSub-v2.px4']);
 		} else if (data.option == 'file') {
-			var cmd = child_process.spawn('/home/pi/companion/tools/flash_px4.py', ['--file', '/tmp/data/' + data.file]);
+			var cmd = child_process.spawn('/home/pi/companion/tools/flash_px4.py', ['--file', '/tmp/data/firmware.px4']);
 		} else {
 			var cmd = child_process.spawn('/home/pi/companion/tools/flash_px4.py');
 		}
@@ -286,7 +286,7 @@ io.on('connection', function(socket) {
 		// 	music: 'data/music', 
 		// 	document: 'data/document' 
 		// },
-		
+		rename: "firmware.px4",
 		uploadDir: '/tmp/data',	// simple directory 
 		chunkSize: 10240,		// default is 10240(1KB) 
 		transmissionDelay: 0,	// delay of each transmission, higher value saves more cpu resources, lower upload speed. default is 0(no delay) 
