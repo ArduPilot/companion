@@ -140,6 +140,16 @@
 
 		var ip = document.getElementById('udpIP').value;
 
+		if (!ip) {
+			console.log("Invalid UDP ip!");
+			return false;
+		}
+		
+		if (!parseInt(port)) {
+			console.log("Invalid UDP port!");
+			return false;
+		}
+		
 		socket.emit('routing request', {
 			'request' : 'add endpoint',
 			'id' : ip + ":" + port,
@@ -156,6 +166,16 @@
 		var port = _port.options[_port.selectedIndex].text;
 
 		var baudrate = document.getElementById('baudrate').value;
+		
+		if (!port) {
+			console.log("Invalid port selection!");
+			return false;
+		}
+		
+		if (!parseInt(baudrate)) {
+			console.log("Invalid baudrate!");
+			return false;
+		}
 
 		socket.emit('routing request', {
 			'request' : 'add endpoint',
