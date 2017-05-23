@@ -110,6 +110,15 @@ uploader.on('abort', function(fileInfo) {
 var form = document.getElementById('form');
 
 function submit(callback, fileElement) {
+	var fileEl = document.getElementById(fileElement);
+	var uploadIds = uploader.upload(fileEl);
+	console.log(fileEl.value);
+	
+	if (!fileEl.value) {
+		console.log('No file selected!');
+		return false;
+	}
+	
 	disableUpdates(true);
 	if (fileElement == 'pixhawkFile') {
 		showPixhawkSpinner(true);
@@ -118,8 +127,7 @@ function submit(callback, fileElement) {
 	}
 	
 	uploader.on('complete', callback);
-	var fileEl = document.getElementById(fileElement);
-	var uploadIds = uploader.upload(fileEl);
+
 	
 	// setTimeout(function() { 
 		// uploader.abort(uploadIds[0]); 
