@@ -602,6 +602,10 @@ try:
                             print("if the board does not respond, unplug and re-plug the USB connector.")
                             up.send_reboot()
 
+                            if time.time() > start + 20:
+                                print("Timed out trying to catch bootloader!\nPlease try again.")
+                                sys.exit(0)
+
                             # wait for the reboot, without we might run into Serial I/O Error 5
                             time.sleep(0.1)
 
