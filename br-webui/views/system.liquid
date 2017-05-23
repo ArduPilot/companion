@@ -21,12 +21,19 @@ socket.on('companion latest', function(data) {
 
 function updateCompanion(fileInfo) {
 	if (fileInfo) {
+		document.getElementById('companionProgress').innerHTML = "";
+		uploader.off('stream', companionProgress);
+		uploader.off('complete', updateCompanion);
 		socket.emit('update companion', fileInfo.name);
 	} else {
 		disableUpdates(true);
 		showCompanionSpinner(true);
 		socket.emit('update companion');
 	}
+}
+
+function companionProgress(fileInfo) {
+	document.getElementById('companionProgress').innerHTML = `Uploading: ${fileInfo.sent} / ${fileInfo.size} byte(s)`;
 }
 
 function updatePixhawkDev() {
@@ -42,6 +49,9 @@ function updatePixhawkStable() {
 }
 
 function updatePixhawkFile(fileInfo) {
+	document.getElementById('pixhawkProgress').innerHTML = "";
+	uploader.off('stream', pixhawkProgress);
+	uploader.off('complete', updatePixhawkFile);
 	socket.emit('update pixhawk', {
 		'option': 'file',
 		'file': fileInfo.name
@@ -54,6 +64,10 @@ function updatePixhawk(option) {
 	socket.emit('update pixhawk', {
 		'option' : option
 	});
+}
+
+function pixhawkProgress(fileInfo) {
+	document.getElementById('pixhawkProgress').innerHTML = `Uploading: ${fileInfo.sent} / ${fileInfo.size} byte(s)`;
 }
 
 socket.on('pixhawk update complete', function(data) {
@@ -102,6 +116,12 @@ uploader.on('error', function(err) {
 	disableUpdates(false);
 	showPixhawkSpinner(false);
 	showCompanionSpinner(false);
+	
+	uploader.off('stream', pixhawkProgress);
+	uploader.off('complete', updatePixhawkFile);
+	
+	uploader.off('stream', companionProgress);
+	uploader.off('complete', updateCompanion);
 });
 uploader.on('abort', function(fileInfo) {
 	console.log('Aborted: ', fileInfo);
@@ -109,7 +129,7 @@ uploader.on('abort', function(fileInfo) {
 
 var form = document.getElementById('form');
 
-function submit(callback, fileElement) {
+function submit(onComplete, onStream, fileElement) {
 	var fileEl = document.getElementById(fileElement);
 	var uploadIds = uploader.upload(fileEl);
 	console.log(fileEl.value);
@@ -126,8 +146,8 @@ function submit(callback, fileElement) {
 		showCompanionSpinner(true);
 	}
 	
-	uploader.on('complete', callback);
-
+	uploader.on('complete', onComplete);
+	uploader.on('stream', onStream);
 	
 	// setTimeout(function() { 
 		// uploader.abort(uploadIds[0]); 
@@ -145,6 +165,7 @@ function submit(callback, fileElement) {
 				<h3 class="panel-title">
 					ArduSub Companion Status
 					<i id="companionSpinner" class="fa fa-refresh fa-spin fa-2x fa-fw" style="visibility:hidden;"></i>
+					<span id="companionProgress"></span>
 				</h3>
 			</div>
 			<div class="panel-body">
@@ -156,7 +177,7 @@ function submit(callback, fileElement) {
 				</div>
 				<div>
 					<h4>Upload Zipped Update:</h4>
-					<input id="companionFileButton" type="submit" class="btn btn-primary" value="Upload" onClick="submit(updateCompanion, 'companionFile')" style="display:table-cell"/>
+					<input id="companionFileButton" type="submit" class="btn btn-primary" value="Upload" onClick="submit(updateCompanion, companionProgress, 'companionFile')" style="display:table-cell"/>
 					<input type="file" id="companionFile" style="display:table-cell;" />
 				</div>
 			</div>
@@ -171,6 +192,7 @@ function submit(callback, fileElement) {
 				<h3 class="panel-title">
 					Pixhawk Firmware Update
 					<i id="pixhawkSpinner" class="fa fa-refresh fa-spin fa-2x fa-fw" style="visibility:hidden;"></i>
+					<span id="pixhawkProgress"></span>
 				</h3>
 			</div>
 			<div class="panel-body">
@@ -182,7 +204,7 @@ function submit(callback, fileElement) {
 				</div>
 				<div>
 					<h4>Upload Firmware File:</h4>
-					<input id="pixhawkFileButton" type="submit" class="btn btn-primary" value="Upload" onClick="submit(updatePixhawkFile, 'pixhawkFile')" style="display:table-cell"/>
+					<input id="pixhawkFileButton" type="submit" class="btn btn-primary" value="Upload" onClick="submit(updatePixhawkFile, pixhawkProgress, 'pixhawkFile')" style="display:table-cell"/>
 					<input type="file" id="pixhawkFile" style="display:table-cell" enabled/>
 				</div>
 				<br />
