@@ -227,6 +227,7 @@ io.on('connection', function(socket) {
 		cmd.unref();
 		
 		cmd.stdout.on('data', function (data) {
+			logger.log(data);
 			socket.emit('terminal output', data.toString());
 			if (data.indexOf("Update Complete, refresh your browser") > -1) {
 				socket.emit('companion update complete');
@@ -234,6 +235,7 @@ io.on('connection', function(socket) {
 		});
 		
 		cmd.stderr.on('data', function (data) {
+			logger.error(data);
 			socket.emit('terminal output', data.toString());
 		});
 		
@@ -243,8 +245,7 @@ io.on('connection', function(socket) {
 		});
 		
 		cmd.on('error', (err) => {
-			logger.log('Failed to start child process.');
-			logger.log(err);
+			logger.error('companion update errored: ', err);
 		});
 	});
 	
