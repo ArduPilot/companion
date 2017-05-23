@@ -15,7 +15,7 @@ socket.on('companion version', function(data) {
 
 socket.on('companion latest', function(data) {
 	console.log('got companion latest');
-	document.getElementById('companionButton').style.visibility = "visible";
+	document.getElementById('companionButton').style.display = "inline";
 	document.getElementById('companionAvailable').innerHTML = "Download Update: An Update is Available!";
 });
 
@@ -140,13 +140,14 @@ function submit(callback, fileElement) {
 				</h3>
 			</div>
 			<div class="panel-body">
-				<strong>Version: <span id="companion version">Companion Version</span></strong>
+				<h4>Version: </h4>
+				<span id="companion version">Companion Version</span>
 				<div>
-					<strong id="companionAvailable">Download Update: No Updates Available</strong>
-					<button id="companionButton" type="button" class="btn btn-primary" onclick="updateCompanion()" style="visibility:hidden">Update</button>
+					<h4 id="companionAvailable">Download Update: No Updates Available</h4>
+					<button id="companionButton" type="button" class="btn btn-primary" onclick="updateCompanion()" style="display:none">Update</button>
 				</div>
 				<div>
-					<strong>Upload Zipped Update:</strong>
+					<h4>Upload Zipped Update:</h4>
 					<input id="companionFileButton" type="submit" class="btn btn-primary" value="Upload" onClick="submit(updateCompanion, 'companionFile')" style="display:table-cell"/>
 					<input type="file" id="companionFile" style="display:table-cell;" />
 				</div>
@@ -166,13 +167,13 @@ function submit(callback, fileElement) {
 			</div>
 			<div class="panel-body">
 				<div>
-					<strong>Download and Update (Requires Internet Connection):</strong>
+					<h4>Download and Update (Requires Internet Connection):</h4>
 					<button id="devButton" type="button" class="btn btn-primary" onclick="updatePixhawkDev()">Development</button>
 					<button id="betaButton" type="button" class="btn btn-primary" onclick="updatePixhawkBeta()">Beta</button>
 					<button id="stableButton" type="button" class="btn btn-primary" onclick="updatePixhawkStable()">Stable</button>
 				</div>
 				<div>
-					<strong>From File:</strong>
+					<h4>Upload Firmware File:</h4>
 					<input id="pixhawkFileButton" type="submit" class="btn btn-primary" value="Upload" onClick="submit(updatePixhawkFile, 'pixhawkFile')" style="display:table-cell"/>
 					<input type="file" id="pixhawkFile" style="display:table-cell" enabled/>
 				</div>
