@@ -199,7 +199,7 @@ io.on('connection', function(socket) {
 	// system setup
 	socket.on('get companion latest', function(data) {
 		logger.log("get companion latest");
-		var cmd = child_process.exec('git tag -d stable >/dev/null; git fetch >/dev/null; git rev-list --left-right --count HEAD...refs/tags/stable | cut -f2', function(error, stdout, stderr) {
+		var cmd = child_process.exec('git tag -d stable >/dev/null; git fetch --tags >/dev/null; git rev-list --left-right --count HEAD...refs/tags/stable | cut -f2', function(error, stdout, stderr) {
 			logger.log(error + stdout + stderr);
 			if (parseInt(stdout) > 0) {
 				socket.emit('companion latest');
