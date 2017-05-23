@@ -9,8 +9,10 @@ if [ ! -f /home/pi/.updating ]; then
 else
 	echo 'UPDATE FAILED!' >> /home/pi/.update_log
 	rm -f /home/pi/.updating
-	rm -rf /home/pi/companion
-	cp /home/pi/.companion /home/pi/companion
+	if [ -d /home/pi/.companion ]; then
+		rm -rf /home/pi/companion
+		cp /home/pi/.companion /home/pi/companion
+	fi
 	echo 'Trying to run again...' >> /home/pi/.update_log
 	/home/pi/companion/.companion.rc
 fi
