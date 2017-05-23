@@ -8,11 +8,9 @@ if [ ! -f /home/pi/.updating ]; then
 	sudo -H -u pi screen -dm -S file-manager node --harmony /home/pi/companion/br-webui/node_modules/node-file-manager/lib/index.js -p 7777 -d /
 else
 	echo 'UPDATE FAILED!' >> /home/pi/.update_log
-	rm -r /home/pi/.updating
-	cd /home/pi/companion
-	echo 'Reverting to' $(git rev-parse revert-point) >> /home/pi/.update_log
-	git reset --hard revert-point
-	echo 'HEAD is now at' $(git rev-parse HEAD) >> /home/pi/.update_log
+	rm -f /home/pi/.updating
+	rm -rf /home/pi/companion
+	cp /home/pi/.companion /home/pi/companion
 	echo 'Trying to run again...' >> /home/pi/.update_log
 	/home/pi/companion/.companion.rc
 fi

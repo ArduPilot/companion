@@ -9,7 +9,7 @@ else
     exit 1
 fi
 
-echo 'adding lock' >> /home/pi/.update_log
+echo 'adding lock'
 touch /home/pi/.updating
 
 echo 'removing old stash'
@@ -18,7 +18,6 @@ rm -rf /home/pi/.companion
 echo 'stashing repository'
 mv /home/pi/companion /home/pi/.companion
 
-echo 'extracting archive' >> /home/pi/.update_log
 echo 'extracting archive: ' $1
 unzip -q $1 -d /home/pi
 

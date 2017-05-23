@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo 'run npm install' >> /home/pi/.update_log
+echo 'run npm install'
 cd /home/pi/companion/br-webui && npm install
 
 echo 'Update Complete, refresh your browser'
