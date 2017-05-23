@@ -61,7 +61,7 @@ var networking = io.of('/networking');
 networking.on('connection', function(socket) {
 	
 	// Network setup
-	socket.on('join network', function (data) {
+	socket.on('join network', function(data) {
 		logger.log('join network');
 		
 		try {
@@ -95,15 +95,36 @@ networking.on('connection', function(socket) {
 		try {
 			var cmd = child_process.execSync('sudo wpa_cli scan');
 			logger.log("sudo wpa_cli scan : ", cmd.toString());
-			// For some reason this fails once in a while
+		} catch (e) {
+			logger.error("wpa_cli scan failed!", e.stderr.toString(), e);
+			
+			logger.log("WiFi scan failed, attempting to repair configuration....");
+			logger.log("Fetching current contents....");
+			cmd = child_process.execSync("sudo cat /etc/wpa_supplicant/wpa_supplicant.conf");
+			logger.log(cmd.toString());
+			
+			logger.log("Bringing down wlan0....");
+			cmd = child_process.execSync("sudo ifdown wlan0");
+			logger.log(cmd.toString());
+			
+			logger.log("Writing over config....");
+			cmd = child_process.execSync("sudo sh -c 'echo > /etc/wpa_supplicant/wpa_supplicant.conf'");
+			logger.log(cmd.toString());
+			
+			logger.log("Bringing wlan0 up....");
+			cmd = child_process.execSync("sudo ifup wlan0");
+			logger.log(cmd.toString());
+			
+			return;
+		}
+		
+		try {
 			cmd = child_process.execSync('sudo wpa_cli scan_results | grep PSK | cut -f5 | grep .');
 			logger.log("wpa_cli scan_results: ", cmd.toString());
 			socket.emit('wifi aps', cmd.toString().trim().split("\n"));
 		} catch (e) {
-			logger.error(e);
-			return "";
+			logger.error("wpa_cli scan_results failed!", e.stderr.toString(), e);
 		}
-		
 	});
 	
 	
