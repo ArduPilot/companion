@@ -62,8 +62,8 @@ socket.on('pixhawk update complete', function(data) {
 });
 
 socket.on('companion update complete', function(data) {
-	disableUpdates(false);
 	showCompanionSpinner(false);
+	setInterval(location.reload(true), 1500);
 });
 
 function disableUpdates(disabled) {
