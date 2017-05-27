@@ -34,15 +34,19 @@ app.use(expressLiquid.middleware);
 
 // root
 app.get('/', function(req, res) {
-	res.render('index',{})
+	res.render('index', {});
 });
 
 app.get('/routing', function(req, res) {
-	res.render('routing',{})
+	res.render('routing', {});
 });
 
 app.get('/system', function(req, res) {
-	res.render('system',{})
+	res.render('system', {});
+});
+
+app.get('/camera', function(req, res) {
+	res.render('camera', {});
 });
 
 app.get('/socket.io-file-client.js', (req, res, next) => {
@@ -298,6 +302,33 @@ io.on('connection', function(socket) {
 		cmd.on('exit', function (code) {
 			logger.log('pixhawk update exited with code ' + code.toString());
 			socket.emit('pixhawk update complete');
+		});
+		
+		cmd.on('error', (err) => {
+			logger.log('Failed to start child process.');
+			logger.log(err.toString());
+		});	
+	});
+	
+	socket.on('restart video', function(data) {
+		logger.log('/home/pi/companion/scripts/restart-raspivid.sh "' + data.rpiOptions + '" "' + data.gstOptions + '"');
+		var cmd = child_process.spawn('/home/pi/companion/scripts/restart-raspivid.sh', [data.rpiOptions , data.gstOptions], {
+			detached: true
+		});
+		
+		cmd.unref();
+		
+		cmd.stdout.on('data', function (data) {
+			logger.log(data.toString());
+		});
+		
+		cmd.stderr.on('data', function (data) {
+			logger.log(data.toString());
+		});
+		
+		cmd.on('exit', function (code) {
+			logger.log('pixhawk update exited with code ' + code.toString());
+			socket.emit('video up');
 		});
 		
 		cmd.on('error', (err) => {

@@ -1,0 +1,59 @@
+{% include ../_includes/header.liquid %}
+
+<script>
+	var socket = io();
+	
+	function restartCamera() {
+		var rpiOptions = document.getElementById('rpiOptions').value.replace(/\n/g, ' ');
+		var gstOptions = document.getElementById('gstOptions').value.replace(/\n/g, ' ');
+		console.log('rpiOptions', rpiOptions);
+		console.log('gstOptions', gstOptions);
+		socket.emit('restart video', {
+			'rpiOptions':rpiOptions,
+			'gstOptions':gstOptions
+			
+		});
+	}
+</script>
+
+<h1>Camera Setup</h1>
+
+<div class="row">
+	<div class="col-md-12">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Edit Streaming Options</h3>
+			</div>
+			<div class="panel-body">
+				<div class="col-md-6">
+					<h4>raspivid options:</h4>
+					<textarea rows="20" id="rpiOptions" style="font-family:monospace; width:100%;">
+--nopreview
+--mode 5
+--bitrate 15000000
+--intra 1
+--awb auto
+--brightness 55
+--saturation 10
+--sharpness 50
+--contrast 15
+-roi 0.02,0.0,0.81,0.85
+-fl
+--timeout 0</textarea>
+				</div>
+				<div class="col-md-6">
+					<h4>gstreamer options:</h4>
+					<textarea rows="20" id="gstOptions" style="font-family:monospace; width:100%;">
+! h264parse
+! rtph264pay config-interval=10 pt=96
+! udpsink host=192.168.2.1 port=5600</textarea>
+				</div>
+				<div class="col-md-12">
+					<button class="btn btn-primary" onclick="restartCamera()">Restart Camera</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% include ../_includes/footer.liquid %}
