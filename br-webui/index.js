@@ -69,7 +69,7 @@ networking.on('connection', function(socket) {
 		logger.log('join network');
 		
 		try {
-			var passphrase = child_process.execSync("wpa_passphrase " + data.ssid + " " + data.password);
+			var passphrase = child_process.execSync("wpa_passphrase '" + data.ssid + "' '" + data.password + "'");
 			
 			var networkString = passphrase.toString();
 			networkString = networkString.replace(/\t#.*\n/g, ''); // strip unencrypted password out
