@@ -1,7 +1,7 @@
 #!/usr/bin/python -u
 
 import os
-import urllib
+from urllib2 import urlopen
 import time
 import sys
 import signal
@@ -47,15 +47,18 @@ else:
                                 firmwareURL = options.url
                                 print "Downloading ArduSub firmware from %s" % firmwareURL
                 elif options.latest:
-                                firmwareURL = "http://firmware.us.ardupilot.org/Sub/latest/PX4/ArduSub-v2.px4"
+                                firmwareURL = "http://firmware.ardupilot.org/Sub/latest/PX4/ArduSub-v2.px4"
                                 print "Downloading latest ArduSub firmware from %s" % firmwareURL
                 else:
-                                firmwareURL = "http://firmware.us.ardupilot.org/Sub/stable/PX4/ArduSub-v2.px4"
+                                firmwareURL = "http://firmware.ardupilot.org/Sub/stable/PX4/ArduSub-v2.px4"
                                 print "Downloading stable ArduSub firmware from %s" % firmwareURL
                 
                 try:
-                                firmwarefile = urllib.URLopener()
-                                firmwarefile.retrieve(firmwareURL, "/tmp/ArduSub-v2.px4")
+                                firmwarefile = urlopen(firmwareURL)
+                                with open("/tmp/ArduSub-v2.px4", "wb") as local_file:
+                                    local_file.write(firmwarefile.read())
+                                    
+                                local_file.close()
                 
                 except Exception as e:
                                 print(e)

@@ -290,7 +290,7 @@ io.on('connection', function(socket) {
 			// Use spawn instead of exec to get callbacks for each line of stderr, stdout
 			var cmd = child_process.spawn('/home/pi/companion/tools/flash_px4.py', ['--latest']);
 		} else if (data.option == 'beta') {
-			var cmd = child_process.spawn('/home/pi/companion/tools/flash_px4.py', ['--url', 'http://firmware.us.ardupilot.org/Sub/beta/PX4/ArduSub-v2.px4']);
+			var cmd = child_process.spawn('/home/pi/companion/tools/flash_px4.py', ['--url', 'http://firmware.ardupilot.org/Sub/beta/PX4/ArduSub-v2.px4']);
 		} else if (data.option == 'file') {
 			var cmd = child_process.spawn('/home/pi/companion/tools/flash_px4.py', ['--file', '/tmp/data/' + data.file]);
 		} else {
