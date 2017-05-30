@@ -57,6 +57,14 @@ var server = app.listen(2770, function() {
 	var host = server.address().address;
 	var port = server.address().port;
 	logger.log("App running at http://%s:%s", host, port);
+	
+	var cmd = child_process.exec('git describe --tags', function(error, stdout, stderr) {
+		logger.log('Companion version: ', stdout);
+	});
+	
+	var cmd = child_process.exec('git rev-parse HEAD', function(error, stdout, stderr) {
+		logger.log('Git revision: ', stdout);
+	});
 });
 
 var io = require('socket.io')(server);
