@@ -1,0 +1,3 @@
+[submodule "submodules/MAVProxy"]
+	path = submodules/MAVProxy
+	url = https://github.com/bluerobotics/MAVProxy.git

@@ -9,8 +9,30 @@ if ! npm list nodegit | grep -q nodegit@0.18.3; then
     unzip -q /tmp/nodegit_required_modules.zip -d ~/companion/br-webui/node_modules/
 fi
 
+# TODO prune unused npm modules here
+
 echo 'run npm install'
 npm install
+
+cd /home/pi/companion
+
+echo 'Updating submodules...'
+git submodule init
+git submodule sync
+
+# https://git-scm.com/docs/git-submodule#git-submodule-status--cached--recursive--ltpathgt82308203
+
+echo 'Checking MAVProxy status...'
+MAVPROXY_STATUS=$(git submodule status | grep MAVProxy | head -c 1)
+if [[ ! -z $MAVPROXY_STATUS && ($MAVPROXY_STATUS == '+' || $MAVPROXY_STATUS == '-') ]]; then
+    echo 'MAVProxy needs update.'
+    git submodule update --recursive -f submodules/MAVProxy
+    echo 'Installing MAVProxy...'
+    cd /home/pi/companion/submodules/MAVProxy
+    sudo python setup.py build install || { echo 'MAVProxy installation failed!'; }
+else
+    echo 'MAVProxy is up to date.'
+fi
 
 echo 'checking for github in known_hosts'
 
@@ -26,6 +48,14 @@ if ! ssh-keygen -H -F github.com; then
         # Add to known_hosts
         cat /tmp/githost >> ~/.ssh/known_hosts
     fi
+fi
+
+# install pynmea2 if neccessary
+if pip list | grep pynmea2; then
+    echo 'pynmea2 already installed'
+else
+    echo 'installing pynmea2...'
+    sudo pip install pynmea2
 fi
 
 echo 'Update Complete, refresh your browser'
