@@ -1,5 +1,10 @@
 /*
-  support for embedded files
+  support for embedded files.
+
+  files are embedded as C arrays in the web server to support running
+  on systems which don't have a local filesystem
+
+  See files/embed.py for the creation of the embedded arrays
  */
 
 #include "includes.h"

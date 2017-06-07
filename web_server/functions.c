@@ -1,5 +1,5 @@
 /*
-  server side functions
+  server side functions for web server.
  */
 
 #include "includes.h"
