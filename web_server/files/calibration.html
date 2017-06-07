@@ -1,0 +1,348 @@
+<!DOCTYPE HTML>
+<html manifest="manifest.appcache">
+  <head>
+    <title>ArduPilot</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/styles.css">
+    <script type="text/javascript" src="js/config.js"></script>
+    <script type="text/javascript" src="js/cors.js"></script>
+    <script type="text/javascript" src="js/smoothie.min.js"></script>
+    <script type="text/javascript" src="js/mavlink.js"></script>
+    <script type="text/javascript" src="js/tabs.js"></script>
+    <script type="text/javascript" src="js/charts.js"></script>
+    <script type="text/javascript" src="js/pouchdb.js"></script>
+    <script type="text/javascript" src="js/database.js"></script>
+  </head>
+<body>
+
+<p><a href="index.html"><img src="images/main_logo.png" alt="ArduPilot"></a></p>
+  
+<div class="tab">
+  <button class="tablinks" onclick="openTab(event, 'Accelerometer')" id="defaultTab">Accelerometer</button>
+  <button class="tablinks" onclick="openTab(event, 'Magnetometer')" id="defaultTab">Magnetometer</button>
+</div>
+
+<div id="Accelerometer" class="tabcontent">
+
+<h1>Accelerometer calibration</h1>
+
+There are two types of accelerometer calibration available. Please
+choose which type of calibration you would like.
+
+<hr>
+<h2>Simple Accelerometer Calibration</h2>
+
+A simple accelerometer calibration involves you placing your vehicle
+on a level surface and pressing the button below. The calibration will
+take just a few seconds. This type of calibration is good for most
+users.
+
+<p><div id="simple_accel_message"></div>
+
+<p><input type="submit" name="action" value="Start Simple Accelerometer Calibration" onclick="simple_accel_cal();"><br>
+  
+<hr>
+<h2>Six-Axis Accelerometer Calibration</h2>
+
+A six axis accelerometer calibration involves you placing your vehicle
+in each of 6 orientations in turn, as you are guided by the prompts
+below. This type of calibration is good if you will be doing 3D
+flying, or if you find that you get poor results with a simple
+accelerometer calibration.
+
+<p>After a six-axis calibration you will need to power cycle your vehicle
+
+<p><div id="six_axis_accel_message"></div>
+
+<div id="continue_div">
+    <p><input type="submit" value="Continue" onclick="six_axis_accel_cal_continue();"><br>
+</div>
+<p><input type="submit" name="action" value="Start Six-Axis Accelerometer Calibration" onclick="six_axis_accel_cal();"><br>
+
+<hr>
+
+<h2>Sensor State</h2>
+
+<table>
+  <tr><td>
+    
+      <table class="values">
+        <tr><th>Variable</th><th>Value</th></tr>
+        <tr><td>Roll</td><td><div name="MAVLINK:ATTITUDE:roll"></div></td></tr>
+        <tr><td>Pitch</td><td><div name="MAVLINK:ATTITUDE:pitch"></div></td></tr>
+      </table>
+
+      <table class="values">
+        <tr><th>Name</th><th>X</th><th>Y</th><th>Z</th></tr>
+        <tr><td>Sensor</td>
+          <td><div name="MAVLINK:RAW_IMU:xacc"></div></td>
+          <td><div name="MAVLINK:RAW_IMU:yacc"></div></td>
+          <td><div name="MAVLINK:RAW_IMU:zacc"></div></td>
+        </tr>
+        <tr><td>Offsets</td>
+          <td><div name="MAVLINK:SENSOR_OFFSETS:accel_cal_x"></div></td>
+          <td><div name="MAVLINK:SENSOR_OFFSETS:accel_cal_y"></div></td>
+          <td><div name="MAVLINK:SENSOR_OFFSETS:accel_cal_z"></div></td>
+        </tr>
+        <tr><td>Scaling</td>
+          <td><div id="INS_ACCSCAL_X"></div></td>
+          <td><div id="INS_ACCSCAL_Y"></div></td>
+          <td><div id="INS_ACCSCAL_Z"></div></td>
+        </tr>
+      </table>
+
+    </td>
+    <td>
+    Accelerometers&nbsp;(<b style="color:red">X</b>, <b style="color:green">Y</b>, <b style="color:blue">Z</b>)<br>
+      <canvas id="accel_canvas" width="400" height="100"></canvas><p>
+    </td>
+  </tr>
+  </table>
+</div>
+
+<div id="Magnetometer" class="tabcontent">
+
+<h1>Magnetometer calibration</h1>
+
+To calibrate the magnetometer you will need to move to a location well
+away from all metal. Then press the button below to start
+calibration. Once started you will need to rotate the vehicle about
+all axes.
+
+<p>A progress bar will display to show how far you are through the calibration.
+
+<p>After a magnetometer calibration you will need to power cycle your vehicle
+
+<p><div id="mag_message"></div>
+
+<div id="mag_div">
+<div id="progress">
+<p>Calibration progress:<br>
+<div id="ProgressBlock">
+  <div id="ProgressBar"></div>
+</div>
+</div>
+</div>
+  
+<p><input type="submit" name="action" value="Start Magnetometer Calibration" onclick="magnetometer_cal();"><br>
+
+<hr>
+
+<h2>Sensor State</h2>
+<table>
+  <tr><td>
+    
+      <table class="values">
+        <tr><th>Variable</th><th>Value</th></tr>
+        <tr><td>Roll</td><td><div name="MAVLINK:ATTITUDE:roll"></div></td></tr>
+        <tr><td>Pitch</td><td><div name="MAVLINK:ATTITUDE:pitch"></div></td></tr>
+        <tr><td>Yaw</td><td><div name="MAVLINK:ATTITUDE:yaw"></div></td></tr>
+      </table>
+
+      <table class="values">
+        <tr><th>Sensor</th><th>X</th><th>Y</th><th>Z</th></tr>
+        <tr><td>Magnetometer</td>
+          <td><div name="MAVLINK:RAW_IMU:xmag"></div></td>
+          <td><div name="MAVLINK:RAW_IMU:ymag"></div></td>
+          <td><div name="MAVLINK:RAW_IMU:zmag"></div></td>
+        </tr>
+      </table>
+
+    </td>
+    <td>
+      Magnetometer&nbsp;(<b style="color:red">X</b>, <b style="color:green">Y</b>, <b style="color:blue">Z</b>)<br>
+      <canvas id="mag_canvas" width="400" height="100"></canvas><p>
+    </td>
+  </tr>
+  </table>
+</div>
+
+
+<hr>
+<p><a href="index.html">home</a>
+
+<script type="text/javascript">
+
+var params = {}
+var six_axis_stage = 0;
+var mag_completion_pct = -1;
+var mag_cal_report_seq = -1;
+var mag_cal_progress_seq = -1;
+var MAG_CAL_SUCCESS = 4;
+
+create_chart("accel_canvas", ["MAVLINK:RAW_IMU:xacc", "MAVLINK:RAW_IMU:yacc", "MAVLINK:RAW_IMU:zacc"]);
+create_chart("mag_canvas",   ["MAVLINK:RAW_IMU:xmag", "MAVLINK:RAW_IMU:ymag", "MAVLINK:RAW_IMU:zmag"]);
+
+// setup default Tab
+document.getElementById("defaultTab").click();
+
+document.getElementById("continue_div").style.display = "none";
+document.getElementById("mag_div").style.display = "none";
+
+// called on tab change
+function tab_clicked(tab) {
+}
+
+// refresh at 4Hz
+function refresh_ms() {
+    return 250;
+}
+
+function simple_accel_cal_callback(result) {
+    if (result == 0) {
+        result = "calibration successful";
+        color = "green";
+    } else {
+        result = "calibration failed: " + result;
+        color = "red";
+    }
+    set_message_color("simple_accel_message", color, result);
+}
+
+// perform a simple accel calibration
+function simple_accel_cal() {
+    set_message_color("simple_accel_message", "blue", "starting calibration");
+    mavlink_command_long_callback([MAV_CMD_PREFLIGHT_CALIBRATION, 0, 0, 0, 0, 0, 4],
+                                  simple_accel_cal_callback, 5000);
+}
+
+// send a COMMAND_ACK to move to next stage
+function six_axis_accel_cal_continue() {
+    six_axis_stage++;
+    console.log("waiting stage " + six_axis_stage);
+    command_send("mavlink_message_send(COMMAND_ACK," + six_axis_stage + ",1)");
+}
+
+function six_axis_accel_cal_callback(result) {
+    six_axis_running = false;
+    if (result == 0) {
+        // wait for level
+        six_axis_stage = 1;
+        console.log("waiting stage 1");
+        result = "calibration starting";
+        color = "blue";
+    } else {
+        result = "calibration failed: " + result;
+        color = "red";
+        document.getElementById("continue_div").style.display = "none";
+    }
+    set_message_color("six_axis_accel_message", color, result);
+}
+
+// perform a simple accel calibration
+function six_axis_accel_cal() {
+    six_axis_stage = 0;
+    set_message_color("six_axis_accel_message", "blue", "starting calibration");
+    mavlink_command_long_callback([MAV_CMD_PREFLIGHT_CALIBRATION, 0, 0, 0, 0, 0, 1],
+                                  six_axis_accel_cal_callback, 60000);
+}
+
+function mag_cal_callback(result) {
+    if (result == 0) {
+        // wait for level
+        six_axis_stage = 1;
+        console.log("waiting stage 1");
+        result = "calibration starting";
+        color = "blue";
+        mag_completion_pct = -1;
+    } else {
+        result = "calibration failed: " + result;
+        color = "red";
+        document.getElementById("mag_div").style.display = "none";
+    }
+    set_message_color("mag_message", color, result);    
+}
+
+function magnetometer_cal() {
+    mavlink_command_long_callback([MAV_CMD_DO_START_MAG_CAL, 0, 0, 0, 1, 0, 0],
+                                  mag_cal_callback, 5000);
+}
+
+// fill in calibration parameters
+function fill_parameters(plist) {
+    var n = plist.length;
+    for (var i=0; i<n; i++) {
+        var name = plist[i].name;
+        var value = plist[i].value;
+        var element = document.getElementById(name);
+        if (element != null) {
+            element.innerHTML = value;
+            params[name] = value;
+        }
+    }
+}
+
+// check for incoming messages
+function mavlink_callback(mavlink) {
+    if ('COMMAND_LONG' in mavlink) {
+        command_long = mavlink.COMMAND_LONG;
+        if (command_long.command == MAV_CMD_ACCELCAL_VEHICLE_POS && six_axis_stage > 0) {
+            if (command_long.param1 == six_axis_stage) {
+                var pos_map = [ "level", "on its left side", "on its right side", "nose down", "nose up", "on its back" ];
+                var pos = pos_map[command_long.param1-1];
+                document.getElementById("continue_div").style.display = "";
+                set_message_color("six_axis_accel_message", "blue", "Please place vehicle " + pos + " and press CONTINUE");
+            }
+        }
+    }
+    if ('STATUSTEXT' in mavlink) {
+        var text = mavlink.STATUSTEXT.text;
+        if (six_axis_stage > 0 && text.startsWith("Calibration")) {
+            console.log("cal done");
+            six_axis_stage = 0;
+            var color = "red";
+            if (text == "Calibration successful") {
+                color = "green";
+            }
+            set_message_color("six_axis_accel_message", color, text);
+            document.getElementById("continue_div").style.display = "none";
+        }
+    }
+    if ('MAG_CAL_PROGRESS' in mavlink && mavlink.MAG_CAL_PROGRESS._age < 2000) {
+        var progress = mavlink.MAG_CAL_PROGRESS;
+        if (progress._seq != mag_cal_progress_seq &&
+            progress.completion_pct != mag_completion_pct) {
+            mag_cal_progress_seq = progress._seq;
+            mag_completion_pct = progress.completion_pct;
+            document.getElementById("mag_div").style.display = "";
+            document.getElementById("progress").style.display = 'block';
+            document.getElementById("ProgressBar").style.width = mag_completion_pct + '%';
+        }
+    }
+    if ('MAG_CAL_REPORT' in mavlink && mavlink.MAG_CAL_REPORT._age < 2000) {
+        var cal_report = mavlink.MAG_CAL_REPORT;
+        if (cal_report._seq != mag_cal_report_seq) {
+            mag_cal_report_seq = cal_report._seq;
+            var cal_status = cal_report.cal_status;
+            var fitness = cal_report.fitness;
+            document.getElementById("mag_div").style.display = "";
+            document.getElementById("progress").style.display = 'block';
+            document.getElementById("ProgressBar").style.width = mag_completion_pct + '%';
+            var color = "red";
+            var text = "Calibration failed: fitness " + fitness;
+            if (cal_status == MAG_CAL_SUCCESS) {
+                color = "green";
+                var text = "Calibration successful: fitness " + fitness;
+            }
+            set_message_color("mag_message", color, text);
+            document.getElementById("mag_div").style.display = "none";
+        }
+    }
+}
+
+// fill in parameters at 2Hz
+ajax_json_poll(drone_url + "/ajax/command.json?command1=get_param_list(INS_,COMPASS_)", fill_parameters, 500);
+
+// setup to fill in MAVLink data and call sensor_callback
+fill_mavlink_ids({ 'chart_lines' : chart_lines,
+                   'callback_fn' : mavlink_callback,
+                   'extra_msgs' : ['COMMAND_LONG',
+                                   'STATUSTEXT',
+                                   'MAG_CAL_PROGRESS',
+                                   'MAG_CAL_REPORT']});
+
+</script>
+
+</body>
+</html>
+

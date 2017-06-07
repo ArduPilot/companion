@@ -1,0 +1,130 @@
+<!DOCTYPE HTML>
+<html manifest="manifest.appcache">
+  <head>
+    <title>ArduPilot</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/styles.css">
+    <script type="text/javascript" src="js/config.js"></script>
+    <script type="text/javascript" src="js/cors.js"></script>
+    <script type="text/javascript" src="js/mavlink.js"></script>
+  </head>
+<body>
+
+<p><a href="index.html"><img src="images/main_logo.png" alt="ArduPilot"></a></p>
+
+<h1>System Control</h1>
+
+Control system setup of your vehicle
+<p>
+<div id="command_result"></div>
+<p>
+    
+<hr/>
+<h2>Video Control</h2>
+
+Toggle video recording. Videos will be saved in the <a href="filesystem.html">filesystem</a>.<p>
+
+<input type="submit" name="action" value="Toggle Recording" onclick="command_send('toggle_video()');">
+<input type="submit" name="action" value="Take Photo" onclick="command_send('take_picture()');">
+
+<hr/>
+<h2>WiFi Setup</h2>
+
+Configure your WiFi SSID, password, authentication type and
+channel.
+
+<p>If using WEP you need to use a 5 character password. For WPA2 your
+password needs to be at least 8 characters long. Using WPA2 is
+recommended.<p>
+
+<fieldset>
+  <legend>WiFi Configuration</legend>
+  WiFi SSID:<br>
+<input type="text" id="ssid" value=""><br>
+WiFi Password:<br>
+<input type="password" id="password" id="password" value="">
+<input type="checkbox" onchange="document.getElementById('password').type = this.checked ? 'text' : 'password'">Show password<br>
+Auth Type: 
+<select name="authmode" id="authmode">
+  <option value="0">None</option>
+  <option value="1">WEP</option>
+  <option value="2">WPA</option>
+  <option value="3">WPA2</option>
+</select>
+WiFi Channel: 
+<select name="channel" id="channel">
+  <option value="1">1</option>
+  <option value="2">2</option>
+  <option value="3">3</option>
+  <option value="4">4</option>
+  <option value="5">5</option>
+  <option value="6">6</option>
+  <option value="7">7</option>
+  <option value="8">8</option>
+  <option value="9">9</option>
+  <option value="10">10</option>
+  <option value="11">11</option>
+  <option value="12">12</option>
+  <option value="13">13</option>
+  <option value="14">14</option>
+</select>
+<br><input type="submit" name="action" value="Set SSID and Password" onclick="set_ssid();" />
+</fieldset>
+
+<script>
+    function set_ssid(action) {
+        var args = [
+            document.getElementById("ssid").value,
+            document.getElementById("password").value,
+            document.getElementById("authmode").value,
+            document.getElementById("channel").value];
+        var cmd = "set_ssid(" + args.join() + ")";
+        command_send(cmd, {fillid:"command_result"});
+    }
+
+    // get the wifi information
+    command_send('get_ssid()', {filljson : true});
+</script>
+
+<hr/>
+<h2>Reboot</h2>
+
+Reboot your video board or flight controller board<p>
+
+<input type="submit" name="action" value="Reboot Video" onclick="command_send('reboot_companion()');"/>
+<input type="submit" name="action" value="Reboot Flight Board" onclick="mavlink_command_long_send(MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN, 0, 1);"/>
+
+<hr/>
+<h2>Bind Transmitter</h2>
+
+To bind your transmitter, first press the button below, then power on
+your transmitter with the left button pressed.
+<p>The flight controller will wait for a bind packet from the transmitter.
+<p>The transmitter will send bind packets for 5 seconds if powered on with left button pressed.<p>
+
+<input type="submit" name="action" value="Start Bind" onclick="mavlink_command_long_send(MAV_CMD_START_RX_PAIR, 0, 1);"/>
+
+<hr/>
+<h2>Factory Reset</h2>
+
+This allows you to reset your video board and flight board to factory
+defaults. The WiFi password after reset will be '12345678'. To secure
+your ArduPilot you should change your WiFi password immediately after
+rebooting.<p>
+
+<input type="submit" name="action" value="Factory Reset" onclick="command_send('factory_reset()');"/>
+
+<hr/>
+<h2>Format</h2>
+
+Format the microSD card in your video board as FAT32. The microSD
+card must be at least 4G in size, and not more than 32G.<p>
+
+<input type="submit" name="action" value="Format SD card" onclick="command_send('format_storage()');"/>
+
+<hr>
+<p><a href="index.html">home</a>
+
+</body>
+</html>
+

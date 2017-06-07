@@ -1,0 +1,4 @@
+{
+  "upload_progress": {{ @upload_progress() }},
+  "upload_message": "{{ @upload_message() }}"
+}

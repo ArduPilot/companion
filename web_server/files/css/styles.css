@@ -1,0 +1,70 @@
+/* border on values tables */
+.values table, .values td, .values th {
+    border: 1px solid gray
+}
+
+/* tab style */
+div.tab {
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+}
+
+/* buttons in tabs */
+div.tab button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+}
+
+/* highlight on hover */
+div.tab button:hover {
+    background-color: #ddd;
+}
+  
+/* active tab */
+div.tab button.active {
+    background-color: #ccc;
+}
+
+/* tab content */
+.tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-top: none;
+}
+
+#ProgressBlock {
+  width: 100%;
+  background-color: #eee;
+}
+
+#ProgressBar {
+  width: 1%;
+  height: 30px;
+  background-color: #4CAF50;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* map telemetry */
+.telemetry table {
+    bgcolor: #FFFFFF;
+}
+
+/* parameter table */
+.parameters table, .parameters td, .parameters th {
+    border: 1px solid gray
+}
+
+.paramvalue {
+    text-align: right;
+}

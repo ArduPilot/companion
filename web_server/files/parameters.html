@@ -1,0 +1,241 @@
+<!DOCTYPE HTML>
+<html manifest="manifest.appcache">
+  <head>
+    <title>ArduPilot</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/styles.css">
+    <script type="text/javascript" src="js/config.js"></script>
+    <script type="text/javascript" src="js/cors.js"></script>
+    <script type="text/javascript" src="js/mavlink.js"></script>
+  </head>
+<body>
+
+<p><a href="index.html"><img src="images/main_logo.png" alt="ArduPilot"></a></p>
+
+Parameter Category:&nbsp
+<select name="param_category" id="param_category" onchange="refresh();">
+</select>
+
+<p><input type="submit" name="action" value="Refresh" onclick="refresh();">&nbsp;
+<input type="text" id="search", onkeyup="search_change()" placeholder="Search parameters ...">
+
+<p><div id="message"></div>
+
+<table id="param_table" class="parameters">
+  <tr><th>Name</th><th class="alnright">Value</th><th>Options</th><th>Full Name</th><th>Description</th></tr>
+</table>
+
+<hr>
+<p><a href="index.html">home</a>
+
+</body>
+<script>
+    // list of categories to choose from
+    var categories = [
+        'Actions:TMODE_',
+        'Tuning:PILOT_,ATC_,MOT_,ANGLE_,RC_',
+        'PosControl:VEL_,POS_,WPNAV_,RTL_',
+        'Radio:BRD_RADIO_',
+        'Compass:COMPASS_',
+        'IMU:INS_',
+        'Failsafe:FS_',
+        'EKF2:EK2_,AHRS_EKF_',
+        'EKF3:EK3_,AHRS_EKF_',
+        'Fence:FENCE_',
+        'Logging:LOG_',
+        'GPS:GPS_',
+        'All:',
+    ];
+    var prefix_hash = {};
+
+    var category_select = document.getElementById("param_category");
+    var ncategories = categories.length;
+    for (var i=0; i<ncategories; i++) {
+        var c = categories[i].split(":");
+        var category = c[0];
+        var prefixes = c[1];
+        prefix_hash[category] = prefixes;
+        var option = document.createElement("option");
+        option.value = category;
+        option.innerHTML = category;
+        category_select.appendChild(option);
+    }
+    category_select.value = "Actions";
+
+    var param_docs = {};
+    var plist;
+    var byname = {};
+
+    function fill_parameters(json) {
+        var table = document.getElementById("param_table");
+        var search = document.getElementById("search").value.toUpperCase();
+
+        // delete any existing rows
+        var nrows = table.rows.length;
+        for (var i=nrows-1; i>0; i--) {
+            table.deleteRow(i);
+        }
+        
+        try {
+            plist = JSON.parse(json);
+            plist.sort(function(a,b) {
+                if (a.name < b.name) {
+                    return -1;
+                }
+                if (a.name > b.name) {
+                    return 1;
+                }
+                return 0;
+            });
+        } catch(e) {
+            console.log(e);
+            return;
+        }
+
+        var n = plist.length;
+
+        for (var i=0; i<n; i++) {
+            var rownum = table.rows.length;
+            var row = table.insertRow(table.rows.length);
+            var rowdata = plist[i];
+            row.insertCell(0).innerHTML = rowdata.name;
+            var c1 = row.insertCell(1);
+            c1.innerHTML = '<input type="text" class="paramvalue" id="input:' + rowdata.name + '" value="' + rowdata.value + '" onchange="change_param(\'' + rowdata.name + '\',this.value);">';
+
+            var c2 = row.insertCell(2);
+            var c3 = row.insertCell(3);
+            var c4 = row.insertCell(4);
+            show_hide(row, search);
+            byname[rowdata.name] = rowdata.value;
+        }
+        fill_param_docs();
+    }
+
+    function refresh() {
+        var category = document.getElementById("param_category").value;
+        command_send("get_param_list(" + prefix_hash[category] + ")", { "onload" : fill_parameters });
+    }
+
+    function change_param(name, value) {
+        document.getElementById("message").innerHTML = '<b style="color:blue">Changing ' + name + " to " + value + '</b>';
+    
+        console.log("Set name: " + name + " value: " + value);
+        command_send("mavlink_message_send(PARAM_SET,0,0," + name + "," + value + ")");
+        var select = document.getElementById("select:" + name);
+        if (select != null) {
+            select.value = value;
+        }
+    }
+
+    function change_selection(name, value) {
+        if (document.getElementById("input:" + name).value != value) {
+            document.getElementById("input:" + name).value = value;
+            change_param(name, value);
+        }
+    }
+
+    function show_hide(tr, search) {
+        var name = tr.cells[0].innerHTML;
+        var humanName = tr.cells[3].innerHTML.toUpperCase();
+        var documentation = tr.cells[4].innerHTML.toUpperCase();
+        if (name.indexOf(search) > -1 ||
+            humanName.indexOf(search) > -1 ||
+            documentation.indexOf(search) > -1) {
+            tr.style.display = "";
+        } else {
+            tr.style.display = "none";
+        }
+    }
+
+    function search_change() {
+        var search = document.getElementById("search").value.toUpperCase();
+        var table = document.getElementById("param_table");
+        var nrows = table.rows.length;
+        for (var i=1; i<nrows; i++) {
+            var tr = table.rows[i];
+            show_hide(tr, search);
+        }
+    }
+
+    // create a select list for a parameter
+    function fill_select_list(name, row, values) {
+        var cell = row.cells[2];
+        var value = byname[name];
+        var sel = '<select id="select:' + name + '" onchange="change_selection(\'' + name + '\',this.value);">\r\n';
+        var nvalues = values.length;
+        var found_selection = false;
+        for (var i=0; i<nvalues; i++) {
+            var selected = "";
+            if (value == values[i].code) {
+                selected = " selected";
+                found_selection = true;
+            }
+            sel += '<option value="' + values[i].code + '"' + selected + '>' + values[i].code + ': ' + values[i].value + '</option>\r\n';
+        }
+        sel += '</select>\r\n'
+        cell.innerHTML = sel;
+    }
+
+    function fill_param_docs() {
+        var table = document.getElementById("param_table");
+        var nrows = table.rows.length;
+        for (var i=1; i<nrows; i++) {
+            var tr = table.rows[i];            
+            var name = tr.cells[0].innerHTML;
+            var pdoc = param_docs[name];
+            if (pdoc) {
+                tr.cells[3].innerHTML = pdoc.humanName;
+                tr.cells[4].innerHTML = pdoc.documentation;
+                if (pdoc.values != null) {
+                    fill_select_list(name, tr, pdoc.values);
+                }
+            }
+        }
+    }
+
+    function pdef_callback(xml) {
+        var xmldoc = new DOMParser().parseFromString(xml, 'text/xml');
+        var params = xmldoc.getElementsByTagName("param");
+        var nparam = params.length;
+        for (var i=0; i<nparam; i++) {
+            var p = params[i];
+            var name = p.attributes.name.nodeValue;
+            if (name.indexOf(":") > -1) {
+                name = name.split(":")[1];
+            }
+            var humanName = p.attributes.humanName.nodeValue;
+            var documentation = '';
+            if ('documentation' in p.attributes) {
+                documentation = p.attributes.documentation.nodeValue;
+            }
+            var user = 'standard';
+            if ('user' in p.attributes) {
+                user = p.attributes.user.nodeValue;
+            }
+            param_docs[name] = { humanName : humanName, documentation : documentation,
+                                 user : user, values : null };
+            var nchildren = 0;
+            if (p.children) {
+                nchildren = p.children.length;
+            }
+            for (var j=0; j<nchildren; j++) {
+                if (p.children[j].nodeName == "values") {
+                    param_docs[name].values = []
+                    var c = p.children[j];
+                    var nvalues = c.children.length;
+                    for (var k=0; k<nvalues; k++) {
+                        var code = c.children[k].attributes.code.value;
+                        var text = c.children[k].innerHTML;
+                        param_docs[name].values.push({'code' : code, 'value' : text});
+                    }
+                }
+            }
+        }
+        fill_param_docs();
+    }
+
+    refresh();
+    ajax_get_callback("data/apm.pdef.xml", pdef_callback);
+</script>
+
+</html>

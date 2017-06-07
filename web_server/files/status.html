@@ -1,0 +1,408 @@
+<!DOCTYPE HTML>
+<html manifest="manifest.appcache">
+  <head>
+    <title>ArduPilot</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/styles.css">
+    <script type="text/javascript" src="js/config.js"></script>
+    <script type="text/javascript" src="js/cors.js"></script>
+    <script type="text/javascript" src="js/smoothie.min.js"></script>
+    <script type="text/javascript" src="js/mavlink.js"></script>
+    <script type="text/javascript" src="js/tabs.js"></script>
+    <script type="text/javascript" src="js/charts.js"></script>
+    <script type="text/javascript" src="js/pouchdb.js"></script>
+    <script type="text/javascript" src="js/database.js"></script>
+    <script type="text/javascript" src="js/ublox.js"></script>
+  </head>
+<body>
+
+<p><a href="index.html"><img src="images/main_logo.png" alt="ArduPilot"></a></p>
+  
+<div class="tab">
+  <button class="tablinks" onclick="openTab(event, 'System')" id="defaultTab">System</button>
+  <button class="tablinks" onclick="openTab(event, 'IMU')">IMU</button>
+  <button class="tablinks" onclick="openTab(event, 'Baro')">Baro</button>
+  <button class="tablinks" onclick="openTab(event, 'GPS')">GPS</button>
+  <button class="tablinks" onclick="openTab(event, 'EKF')">EKF</button>
+  <button class="tablinks" onclick="openTab(event, 'Transmitter')">Transmitter</button>
+  <button class="tablinks" onclick="openTab(event, 'Camera')">Camera</button>
+  <button class="tablinks" onclick="openTab(event, 'Motors')">Motors</button>
+</div>
+
+<div id="System" class="tabcontent">
+
+Core system information<p>
+  
+<h3>System Information</h3>
+
+<table class="values">
+  <tr><th>Variable</th><th>Value</th></tr>
+  <tr><td>Uptime</td><td><div id="uptime"></div></td></tr>
+  <tr><td>Free Memory (KERNEL)</td><td><div id="free_mem_kernel"></div></td></tr>
+  <tr><td>Free Memory (DMA)</td><td><div id="free_mem_dma"></div></td></tr>
+  <tr><td>FC MAVLink count</td><td><div id="fc_mavlink_count"></div></td></tr>
+  <tr><td>FC MAVLink baudrate</td><td><div id="fc_mavlink_baudrate"></div></td></tr>
+</table>
+
+<h3>Flight Board Status</h3>
+
+<table class="values">
+  <tr><td>Mode</td><td><div name="MAVLINK:HEARTBEAT:custom_mode"></div></td></tr>
+  <tr><td>Uptime</td><td><div name="MAVLINK:ATTITUDE:time_boot_ms"></div></td></tr>
+  <tr><td>Voltage</td><td><div name="MAVLINK:SYS_STATUS:voltage_battery"></div></td></tr>
+</table>
+</div>
+
+<div id="IMU" class="tabcontent">
+<h2>Attitude</h2>
+
+<table>
+  <tr><td>
+    
+      <table class="values">
+        <tr><th>Variable</th><th>Value</th></tr>
+        <tr><td>Roll</td><td><div name="MAVLINK:ATTITUDE:roll"></div></td></tr>
+        <tr><td>Pitch</td><td><div name="MAVLINK:ATTITUDE:pitch"></div></td></tr>
+        <tr><td>Yaw</td><td><div name="MAVLINK:ATTITUDE:yaw"></div></td></tr>
+      </table>
+
+      <h2>IMU Status</h2>
+
+      <table class="values">
+        <tr><th>Sensor</th><th>X</th><th>Y</th><th>Z</th></tr>
+        <tr><td>Accelerometer</td>
+          <td><div name="MAVLINK:RAW_IMU:xacc"></div></td>
+          <td><div name="MAVLINK:RAW_IMU:yacc"></div></td>
+          <td><div name="MAVLINK:RAW_IMU:zacc"></div></td>
+        </tr>
+        <tr><td>Gyroscope</td>
+          <td><div name="MAVLINK:RAW_IMU:xgyro"></div></td>
+          <td><div name="MAVLINK:RAW_IMU:ygyro"></div></td>
+          <td><div name="MAVLINK:RAW_IMU:zgyro"></div></td>
+        </tr>
+        <tr><td>Magnetometer</td>
+          <td><div name="MAVLINK:RAW_IMU:xmag"></div></td>
+          <td><div name="MAVLINK:RAW_IMU:ymag"></div></td>
+          <td><div name="MAVLINK:RAW_IMU:zmag"></div></td>
+        </tr>
+      </table>
+
+    </td>
+    <td>
+    Accelerometers&nbsp;(<b style="color:red">X</b>, <b style="color:green">Y</b>, <b style="color:blue">Z</b>)<br>
+      <canvas id="accel_canvas" width="400" height="100"></canvas><p>
+      Gyro&nbsp;(<b style="color:red">roll</b>, <b style="color:green">pitch</b>, <b style="color:blue">yaw</b>)<br>
+      <canvas id="gyro_canvas" width="400" height="100"></canvas><p>
+      Magnetometer&nbsp;(<b style="color:red">X</b>, <b style="color:green">Y</b>, <b style="color:blue">Z</b>)<br>
+      <canvas id="mag_canvas" width="400" height="100"></canvas><p>
+    </td>
+  </tr>
+  </table>
+</div>
+
+
+<div id="Baro" class="tabcontent">
+
+<table>
+  <tr><td>
+      <table class="values">
+        <tr><th>Variable</th><th>Value</th></tr>
+        <tr><td>Pressure Absolute</td><td><div name="MAVLINK:SCALED_PRESSURE:press_abs"></div></td></tr>
+        <tr><td>Pressure Relative</td><td><div name="MAVLINK:SCALED_PRESSURE:press_diff"></div></td></tr>
+        <tr><td>Temperature</td><td><div name="MAVLINK:SCALED_PRESSURE:temperature"></div></td></tr>
+      </table>
+
+    </td>
+    <td>
+      Pressure<br>
+      <canvas id="pressure_canvas" width="400" height="100"></canvas><p>
+      Temperature<br>
+      <canvas id="temperature_canvas" width="400" height="100"></canvas><p>
+    </td>
+  </tr>
+  </table>
+
+</div>
+
+<div id="GPS" class="tabcontent">
+
+<table>
+  <tr><td>
+      <table class="values">
+        <tr><th>Variable</th><th>Value</th></tr>
+        <tr><td>FixType</td><td><div name="MAVLINK:GPS_RAW_INT:fix_type"></div></td></tr>
+        <tr><td>Numsats</td><td><div name="MAVLINK:GPS_RAW_INT:satellites_visible"></div></td></tr>
+        <tr><td>Latitude (GPS)</td><td><div name="MAVLINK:GPS_RAW_INT:lat"></div></td></tr>
+        <tr><td>Longitude (GPS)</td><td><div name="MAVLINK:GPS_RAW_INT:lon"></div></td></tr>
+        <tr><td>Altitude (AMSL)</td><td><div name="MAVLINK:GPS_RAW_INT:alt"></div></td></tr>
+        <tr><td>Speed Accuracy</td><td><div name="MAVLINK:GPS2_RAW:vel"></div></td></tr>
+        <tr><td>Position Accuracy</td><td><div name="MAVLINK:GPS2_RAW:eph"></div></td></tr>
+        <tr><td>Height Accuracy</td><td><div name="MAVLINK:GPS2_RAW:epv"></div></td></tr>
+        <tr><td>MGA Cache Size</td><td><div id="offline_cache_size"></div></td></tr>
+        <tr><td>MGA Upload UTC</td><td><div id="upload_utc"></div></td></tr>
+        <tr><td>MGA Highest UTC</td><td><div id="highest_utc"></div></td></tr>
+        <tr><td>Fix start</td><td><div id="fix_wait_start"></div></td></tr>
+        <tr><td>Fix time</td><td><div id="fix_time"></div></td></tr>
+        <tr><td>Pos source</td><td><div id="pos_source"></div></td></tr>
+        <tr><td>Time source</td><td><div id="time_source"></div></td></tr>
+      </table>
+    </td>
+    <td>
+      GPS Accuracy
+      (<b style="color:red">speed</b>, <b style="color:green">horizontal</b>, <b style="color:blue">vertical</b>)<br>
+      <canvas id="gps_canvas" width="400" height="150"></canvas><p>
+    </td>
+  </tr>
+  </table>
+</div>
+
+<div id="EKF" class="tabcontent">
+
+<table class="values">
+  <tr><th>Variable</th><th>Value</th></tr>
+  <tr><td>Flags</td><td><div name="MAVLINK:EKF_STATUS_REPORT:flags"></div></td></tr>
+  <tr><td>Latitude</td><td><div name="MAVLINK:GLOBAL_POSITION_INT:lat"></div></td></tr>
+  <tr><td>Longitude</td><td><div name="MAVLINK:GLOBAL_POSITION_INT:lon"></div></td></tr>
+  <tr><td>Altitude</td><td><div name="MAVLINK:GLOBAL_POSITION_INT:relative_alt"></div></td></tr>
+  <tr><td>Velocity Variance</td><td><div name="MAVLINK:EKF_STATUS_REPORT:velocity_variance"></div></td></tr>
+  <tr><td>Position Variance (H)</td><td><div name="MAVLINK:EKF_STATUS_REPORT:pos_horiz_variance"></div></td></tr>
+  <tr><td>Position Variance (V)</td><td><div name="MAVLINK:EKF_STATUS_REPORT:pos_vert_variance"></div></td></tr>
+  <tr><td>Compass Variance</td><td><div name="MAVLINK:EKF_STATUS_REPORT:compass_variance"></div></td></tr>
+</table>
+</div>
+
+<div id="Transmitter" class="tabcontent">
+
+<table>
+  <tr><td>  
+      <table class="values">
+        <tr><th>Variable</th><th>Value</th></tr>
+        <tr><td>Channels</td><td><div name="MAVLINK:RC_CHANNELS:chancount"></div></td></tr>
+        <tr><td>Chan1</td><td><div name="MAVLINK:RC_CHANNELS:chan1_raw"></div></td></tr>
+        <tr><td>Chan2</td><td><div name="MAVLINK:RC_CHANNELS:chan2_raw"></div></td></tr>
+        <tr><td>Chan3</td><td><div name="MAVLINK:RC_CHANNELS:chan3_raw"></div></td></tr>
+        <tr><td>Chan4</td><td><div name="MAVLINK:RC_CHANNELS:chan4_raw"></div></td></tr>
+        <tr><td>Chan5</td><td><div name="MAVLINK:RC_CHANNELS:chan5_raw"></div></td></tr>
+        <tr><td>Chan6</td><td><div name="MAVLINK:RC_CHANNELS:chan6_raw"></div></td></tr>
+        <tr><td>Chan7</td><td><div name="MAVLINK:RC_CHANNELS:chan7_raw"></div></td></tr>
+        <tr><td>RX PPS</td><td><div name="MAVLINK:RC_CHANNELS:chan8_raw"></div></td></tr>
+        <tr><td>RX RSSI</td><td><div name="MAVLINK:RC_CHANNELS:chan9_raw"></div></td></tr>
+      </table>
+    </td>
+    <td>
+      Stick input (<b style="color:red">chan1</b>, <b style="color:green">chan2</b>, <b style="color:blue">chan3</b>, <b style="color:orange">chan4</b>)<br>
+      <canvas id="tx_canvas" width="400" height="200"></canvas><p>
+    </td>
+  </tr>
+  </table>
+
+  <table class="values">
+    <tr><th>Button</th><th>Status</th></tr>
+    <tr><td>Left Button</td><td><div id="left_button"></div></td></tr>
+    <tr><td>Right Button</td><td><div id="right_button"></div></td></tr>
+    <tr><td>Power Button</td><td><div id="power_button"></div></td></tr>
+    <tr><td>Left Shoulder Button</td><td><div id="left_shoulder_button"></div></td></tr>
+    <tr><td>Right Shoulder Button</td><td><div id="right_shoulder_button"></div></td></tr>
+  </table>
+<h2>Bind Transmitter</h2>
+
+To bind your transmitter, first press the button below, then power on
+your transmitter with the left button pressed.
+<p>The flight controller will wait for a bind packet from the transmitter.
+<p>The transmitter will send bind packets for 5 seconds if powered on with left button pressed.<p>
+
+<input type="submit" name="action" value="Start Bind" onclick="mavlink_command_long_send(MAV_CMD_START_RX_PAIR, 0, 1);"/>
+
+</div>
+
+<div id="Camera" class="tabcontent">
+    <img src="" alt="snapshot" id="snapshot">
+    <p>
+      <form id="videoForm">
+      <input type="radio" name="video_type" value="JPG">JPG Frames</input>
+      <input type="radio" name="video_type" value="MJPG">MJPG Stream</input><br>
+      </form>
+      <input type="submit" name="action" value="Toggle Recording" onclick="command_send('toggle_video()');">
+      <input type="submit" name="action" value="Take Photo" onclick="command_send('take_picture()');">
+
+<script>
+
+// get refresh time in milliseconds
+function refresh_ms() {
+    return 1000/document.getElementById("refresh_rate").value;
+}
+
+function disable_camera() {
+    var img = document.getElementById("snapshot");
+    img.src = "";
+    console.log("disable_camera");
+}
+
+var last_refresh_ms = new Date().getTime();
+function refresh_camera() {
+    var img = document.getElementById("snapshot");
+    var form = document.getElementById("videoForm");
+    var new_src = "";
+    var new_type = img.type;
+    var video_type = form.elements["video_type"].value;
+    console.log("video_type: " + video_type);
+    if (activeTab != "Camera") {
+        new_src = "";
+        new_type = "img";
+    } else if (video_type == "MJPG") {
+        new_src = drone_url + "/ajax/video.mjpg";
+        new_type = "video";
+    } else {
+        new_src = drone_url + "/ajax/snapshot.jpg?" + Math.random();
+        new_type = "img";
+    }
+    console.log(new_src);
+    if (img.src != new_src || img.type != new_type) {
+        img.src = new_src;
+        img.type = new_type;
+    }
+    last_refresh_ms = new Date().getTime();
+}
+
+var img = document.getElementById("snapshot");
+img.onload = function() {
+    if (activeTab == "Camera") {
+        var dt = refresh_ms();
+        var now = new Date().getTime();
+        dt -= (now - last_refresh_ms);
+        setTimeout(refresh_camera,Math.max(dt, 0));
+    }
+}
+refresh_camera();
+
+    </script>
+</div>
+
+<div id="Motors" class="tabcontent">
+
+  <h2>Motor Testing</h2>
+  <script>
+    function motor_test(motornum) {
+        var motorpower = document.getElementById("motor_power").value;
+        var testtime = document.getElementById("test_time").value;
+        mavlink_command_long_send(MAV_CMD_DO_MOTOR_TEST, 0, motornum, 0, motorpower, testtime);
+    }
+  </script>
+
+Select motor to test, along with test power level (as a percentage) and test time in seconds.
+
+    <p>
+    <input type="submit" name="action" value="Front Right" onclick="motor_test(1);">
+    <input type="submit" name="action" value="Rear Right " onclick="motor_test(2);">
+    <input type="submit" name="action" value="Rear Left"   onclick="motor_test(3);">
+    <input type="submit" name="action" value="Front Left"  onclick="motor_test(4);">
+
+    <p>
+  Test Power
+  <select name="motor_power" id="motor_power">
+    <option value="10">10</option>
+    <option value="20">20</option>
+    <option value="30">30</option>
+    <option value="40">40</option>
+    <option value="50" selected>50</option>
+    <option value="60">60</option>
+    <option value="70">70</option>
+    <option value="80">80</option>
+    <option value="90">90</option>
+    <option value="100">100</option>
+  </select>
+
+  <br>Test Time (s)
+  <select name="test_time" id="test_time">
+    <option value="1">1</option>
+    <option value="2" selected>2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+    <option value="5">5</option>
+    <option value="6">6</option>
+    <option value="7">7</option>
+    <option value="8">8</option>
+    <option value="9">9</option>
+    <option value="10">10</option>
+  </select>
+
+</div>
+
+  Refresh rate:&nbsp;
+  <select name="refresh_rate" id="refresh_rate">
+    <option value="1" selected>1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+    <option value="5">5</option>
+    <option value="6">6</option>
+    <option value="7">7</option>
+    <option value="8">8</option>
+    <option value="9">9</option>
+    <option value="10">10</option>
+  </select>
+
+<hr>
+<p><a href="index.html">home</a>
+
+<script type="text/javascript">
+create_chart("accel_canvas", ["MAVLINK:RAW_IMU:xacc", "MAVLINK:RAW_IMU:yacc", "MAVLINK:RAW_IMU:zacc"]);
+create_chart("gyro_canvas",  ["MAVLINK:RAW_IMU:xgyro", "MAVLINK:RAW_IMU:ygyro", "MAVLINK:RAW_IMU:zgyro"]);
+create_chart("mag_canvas",   ["MAVLINK:RAW_IMU:xmag", "MAVLINK:RAW_IMU:ymag", "MAVLINK:RAW_IMU:zmag"]);
+
+create_chart("pressure_canvas",   ["MAVLINK:SCALED_PRESSURE:press_abs"]);
+create_chart("temperature_canvas",["MAVLINK:SCALED_PRESSURE:temperature"]);
+create_chart("gps_canvas",        ["MAVLINK:GPS2_RAW:vel","MAVLINK:GPS2_RAW:eph","MAVLINK:GPS2_RAW:epv"]);
+create_chart("tx_canvas",         ["MAVLINK:RC_CHANNELS:chan1_raw","MAVLINK:RC_CHANNELS:chan2_raw","MAVLINK:RC_CHANNELS:chan3_raw","MAVLINK:RC_CHANNELS:chan4_raw"]);
+
+/* called after a tab is clicked */
+function tab_clicked(tabName) {
+    if (tabName == "Camera") {
+        refresh_camera();
+    } else {
+        disable_camera();
+    }
+}
+
+// setup default Tab
+document.getElementById("defaultTab").click();
+
+// callback for filling in buttons
+function button_callback(mavlink) {
+    // decode buttons from channel values
+    if (mavlink.RC_CHANNELS == null) {
+        return;
+    }
+    var chan5 = mavlink.RC_CHANNELS.chan5_raw;
+    var chan6 = mavlink.RC_CHANNELS.chan6_raw;
+    var chan7 = mavlink.RC_CHANNELS.chan7_raw;
+    var left_button, right_button, left_shoulder_button, right_shoulder_button, power_button;
+    right_button = (chan6 > 1800);
+    left_button = (chan5 > 2050) || (chan5 > 1050 && chan5 < 1150);
+
+    var bits = Math.round((chan7 - 1000) / 100);
+    left_shoulder_button = ((bits & 1) != 0);
+    right_shoulder_button = ((bits & 2) != 0);
+    power_button = ((bits & 4) != 0);
+    var pressed_str = { false: "off", true: '<b style="color:green">on</b>' }
+    
+    document.getElementById("left_button").innerHTML = pressed_str[left_button];
+    document.getElementById("right_button").innerHTML = pressed_str[right_button];
+    document.getElementById("left_shoulder_button").innerHTML = pressed_str[left_shoulder_button];
+    document.getElementById("right_shoulder_button").innerHTML = pressed_str[right_shoulder_button];
+    document.getElementById("power_button").innerHTML = pressed_str[power_button];
+}
+
+fill_mavlink_ids({ 'chart_lines' : chart_lines, 'callback_fn' : button_callback });
+
+// poll system information at 1Hz
+ajax_json_poll_fill(drone_url + "/ajax/sysinfo.json", 1000);
+
+// check GPS upload info
+poll_ublox_status();
+
+</script>
+
+</body>
+</html>
+

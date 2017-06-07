@@ -1,0 +1,201 @@
+<!DOCTYPE HTML>
+<html manifest="manifest.appcache">
+  <head>
+    <title>ArduPilot</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/styles.css">
+    <script type="text/javascript" src="js/config.js"></script>
+    <script type="text/javascript" src="js/cors.js"></script>
+    <script type="text/javascript" src="js/mavlink.js"></script>
+  </head>
+<body>
+
+<p><a href="index.html"><img src="images/main_logo.png" alt="ArduPilot"></a></p>
+
+<br><div id="uploadMessage"></div>
+
+<div id="progress">
+<p>Upload progress:<br>
+<div id="ProgressBlock">
+  <div id="ProgressBar"></div>
+</div>
+</div>
+
+<h1>Firmware update</h1>
+
+Upgrade the firmware on your vehicle.
+
+<p>You can get the latest firmware releases from <a href="http://firmware.ardupilot.org/">http://firmware.ardupilot.org/</a>
+
+<hr/>
+<h2>Upgrade Sonix Firmware</h2>
+
+After uploading the new Sonix firmware (which should have a file
+extension of ".bin"), the Sonix board will automatically reboot and
+start the new firmware. You will need to reconnect to the WiFi access
+point on the ArduPilot after the reboot.<p>
+
+Choose a file to upload: <input id="sonix:file" type="file" accept=".bin"/><br />
+<input type="submit" value="Upload File" onclick="upload_file('sonix');"/>
+
+<p>
+Current version: <b id="sonix_build_date">unknown</b>&nbsp;<b id="sonix_git_revision">unknown</b>
+
+<hr/>
+<h2>Upgrade ArduPilot Firmware</h2>
+
+After uploading the new ArduPilot firmware (which should have a file
+extension of ".abin") the flight controller will automatically
+reboot. The reboot will take about 15 seconds.<p>
+
+Choose a file to upload: <input id="ArduPilot:file" type="file" accept=".abin"/><br />
+<input type="submit" value="Upload File" onclick="upload_file('ArduPilot');"/>
+
+<p>
+Current version: <b id="flight_build_date">unknown</b>&nbsp;<b id="flight_custom_version">unknown</b>
+
+<hr/>
+<h2>Upgrade Transmitter Firmware</h2>
+
+After uploading the new transmitter firmware (which should have a file
+extension of ".img"), you will need to power cycle your
+transmitter. The transmitter will then flash its LEDs alternately at a
+one second interval for 14 seconds while it performs the firmware
+update. It will then boot as normal.<p>
+
+Choose a file to upload: <input id="TX:file" type="file" accept=".img"/><br />
+<input type="submit" value="Upload File" onclick="upload_file('TX');"/>
+
+<p>
+Current version: <b id="tx_fw_version">unknown</b>
+
+<hr/>
+<h2>File Upload</h2>
+
+You can upload a file to any location on the microSD card.<p>
+
+<input type="text" id="FILENAME" value=""><br>
+Choose a file to upload: <input id="fs:file" type="file" /><br />
+<input type="submit" value="Upload File" onclick="upload_file('fs');"/>
+
+<hr>
+<p><a href="index.html">home</a>
+
+<script>
+    function progress_callback(json) {
+        document.getElementById("progress").style.display = 'block';
+        document.getElementById("ProgressBar").style.width = json.upload_progress + '%';
+        document.getElementById("uploadMessage").innerHTML = json.upload_message;
+        console.log("progress: " + json.upload_progress + " msg: " + json.upload_message);
+        if (json.upload_progress == 100) {
+            return false;
+        }
+        return true;
+    }
+        
+    function upload_file(uploadtype) {
+        var filevar = uploadtype + ":file";
+        var files = document.getElementById(filevar);
+        if (files == null || files.files.length <= 0) {
+            console.log("bad file upload request");
+            return;
+        }
+        var file = files.files[0];
+        var formData = new FormData();
+
+        formData.append("command1", "file_upload()");
+        formData.append("uploadtype", uploadtype);
+        formData.append("file", file);
+        if (uploadtype == "fs") {
+            var element = document.getElementById("FILENAME");
+            if (element != null) {
+                formData.append("FILENAME", element.value);                
+            }
+        }
+        
+        var xhr = createCORSRequest("POST", drone_url + "/ajax/command.json");
+        xhr.onload = function() {
+            console.log("file uploaded");
+        }
+        xhr.onerror = function() {
+            console.log("file upload error");
+        }
+        xhr.ontimeout = function() {
+            console.log("file upload timeout");
+        }
+        xhr.timeout = 7000;
+
+        /* display progress block */
+        document.getElementById("progress").style.display = 'block';
+        document.getElementById("ProgressBar").style.width = '0%';
+        document.getElementById("uploadMessage").innerHTML = '';
+        xhr.send(formData);
+
+        ajax_json_poll(drone_url + "/ajax/upgrade.json", progress_callback, 200);
+    }
+    /* hide progress div initially */
+    document.getElementById("progress").style.display = 'none';
+
+    ajax_json_poll_fill(drone_url + "/ajax/version.json", 5000);
+
+    /* get autopilot version */
+    mavlink_command_long_send(MAV_CMD_REQUEST_AUTOPILOT_CAPABILITIES, 0, 1);
+
+    function set_ardupilot_version(json) {
+        try {
+            var mavlink = JSON.parse(json);
+        } catch(e) {
+            console.log(e);
+            return;
+        }
+        var flight_sw_version = mavlink.AUTOPILOT_VERSION.flight_sw_version;
+        var major_version = flight_sw_version >> 24;
+        var min_version = (flight_sw_version >> 16) & 0xFF;
+        var patch_version = (flight_sw_version >> 8) & 0xFF;
+        var version_type = flight_sw_version & 0xFF;
+        if (version_type >= 255) {
+            version_type = '';
+        } else if (version_type >= 192) {
+            version_type = 'RC' + (version_type-191);
+        } else if (version_type >= 128) {
+            version_type = 'beta' + (version_type-127);
+        } else if (version_type >= 64) {
+            version_type = 'alpha' + (version_type-63);
+        } else {
+            version_type = 'dev';
+        }
+        
+        var ver_string = major_version + "." + min_version + "." + patch_version + "-" + version_type;
+        var git_version = String.fromCharCode.apply(null,mavlink.AUTOPILOT_VERSION.flight_custom_version);
+        document.getElementById("flight_custom_version").innerHTML = "(" + ver_string + '&nbsp;' + git_version + ")";
+
+        // pad dates with leading zeros
+        function two_pad(v) {
+            if (v >= 10) {
+                return v;
+            }
+            return "0" + v;
+        }
+
+        if (mavlink.AUTOPILOT_VERSION.vendor_id != 0) {
+            var v = mavlink.AUTOPILOT_VERSION.vendor_id;
+            var tx_version_year = (v >> 12) + 2017;
+            var tx_version_month = two_pad((v >> 8) & 0xF);
+            var tx_version_day = two_pad(v & 0xFF);
+            document.getElementById("tx_fw_version").innerHTML = tx_version_year + "-" + tx_version_month + "-" + tx_version_day;
+        }
+
+        if (mavlink.AUTOPILOT_VERSION.os_sw_version != 0) {
+            var v = mavlink.AUTOPILOT_VERSION.os_sw_version;
+            var ap_version_year = Math.round(v/(100*100));
+            var ap_version_month = two_pad(Math.round((v/100) % 100));
+            var ap_version_day = two_pad(Math.round(v % 100));
+            document.getElementById("flight_build_date").innerHTML = ap_version_year + "-" + ap_version_month + "-" + ap_version_day;
+        }
+    }
+
+    setInterval(function() { command_send("mavlink_message(AUTOPILOT_VERSION)", { onload: set_ardupilot_version }) }, 1000);
+</script>
+  
+</body>
+</html>

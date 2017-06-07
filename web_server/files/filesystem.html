@@ -1,0 +1,142 @@
+<!DOCTYPE HTML>
+<html manifest="manifest.appcache">
+  <head>
+    <title>ArduPilot</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/styles.css">
+    <script type="text/javascript" src="js/config.js"></script>
+    <script type="text/javascript" src="js/cors.js"></script>
+    <script type="text/javascript" src="js/mavlink.js"></script>
+  </head>
+<body>
+
+<p><a href="index.html"><img src="images/main_logo.png" alt="ArduPilot"></a></p>
+
+<h2>ArduPilot Filesystem</h2>
+
+<h1>Index of <b id="directory_name">/</b></h1>
+
+<table id="directory_table">
+  <tr><th>Type</th><th>Name</th><th>Date</th><th>Size</th></tr>
+
+</table>
+
+<p>Directory size: <b id="total_size"></b> MByte<br>
+Card Size: <b id="disk_total_gb"></b>&nbsp;GByte<br>
+Card Free: <b id="disk_free_gb"></b>&nbsp;GByte<br>
+Card Label: <b id="disk_label"></b><br>
+
+<p><input type="submit" name="action" value="Refresh" onclick="refresh();"><br>
+
+<hr>
+<p><a href="index.html">home</a>
+
+</body>
+<script>
+    var current_directory = "/";
+
+    function fill_directory(json) {
+        var table = document.getElementById("directory_table");
+
+        // delete any existing rows
+        var nrows = table.rows.length;
+        for (var i=nrows-1; i>0; i--) {
+            table.deleteRow(i);
+        }
+        
+        try {
+            var dlist = JSON.parse(json);
+        } catch(e) {
+            console.log(e);
+            return;
+        }
+
+        var attribs = ["type", "name", "date", "size" ];
+        var nattribs = attribs.length;
+        var n = dlist.length;
+
+        var dir_base;
+        if (current_directory == "/") {
+            dir_base = "/";
+        } else {
+            dir_base = current_directory + "/";
+        }
+
+        function dirname(path) {
+          return path.replace(/\\/g, '/').replace(/\/[^/]*\/?$/, '');
+        }
+
+        var total_size = 0;
+        for (var i=0; i<n; i++) {
+            var row = table.insertRow(table.rows.length);
+            var rowdata = dlist[i];
+            if (current_directory == "/" && rowdata.name == "..") {
+                continue;
+            }
+            if (rowdata.type == 0) {
+                total_size += rowdata.size;
+            }
+            for (var j=0; j<nattribs; j++) {
+                var a = attribs[j];
+                var v = rowdata[a];
+                var c = row.insertCell(j);
+                if (a == "name") {
+                    var link_name;
+                    if (v == "..") {
+                        link_name = dirname(current_directory);
+                    } else {
+                        link_name = dir_base + v;
+                    }
+                    if (rowdata.type == 1) {
+                        v = '<a href="#" onclick="list_directory(\'' + link_name + '\');return false;">' + v + '</a>';
+                        console.log(v);
+                    } else {
+                        v = '<a href="' + drone_url + '/fs' + link_name + '">' + v + '</a>';
+                    }
+                } else if (a == "type") {
+                    if (v == 0) {
+                        v = '-';
+                    } else if (v == 1) {
+                        v = 'd';
+                    }
+                }
+                c.innerHTML = v;
+            }
+        }
+
+        document.getElementById("total_size").innerHTML = (total_size / (1<<20)).toFixed(2);
+    }
+
+    function fill_disk_info(json) {
+        try {
+            var info = JSON.parse(json);
+        } catch(e) {
+            console.log(e);
+            return;
+        }
+        document.getElementById("disk_label").innerHTML = info.label;
+        var gb_scale = info.cluster_size / (1<<30);
+        var gb_total = (info.total_clusters * gb_scale).toFixed(2);
+        var gb_free = (info.free_clusters * gb_scale).toFixed(2);
+        document.getElementById("disk_total_gb").innerHTML = gb_total;
+        document.getElementById("disk_free_gb").innerHTML = gb_free;
+    }
+
+    function list_directory(directory) {
+        if (directory == '') {
+            directory = '/';
+        }
+        current_directory = directory;
+        document.getElementById("directory_name").innerHTML = directory;
+        command_send("file_listdir(" + directory + ")", { "onload" : fill_directory });        
+        command_send("disk_info()", { "onload" : fill_disk_info });
+    }
+
+    function refresh() {
+        list_directory(current_directory);
+    }
+
+    list_directory(current_directory);
+</script>
+
+</html>

@@ -1,0 +1,6 @@
+This is a really simple web server designed for used in embedded
+environments. It features server side scripting using bash, server
+side includes, variable substitution, form processing and callbacks to
+C functions from html.
+
+The big thing it doesn't feature is documentation!

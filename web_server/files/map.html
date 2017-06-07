@@ -1,0 +1,204 @@
+<!DOCTYPE HTML>
+<html manifest="manifest.appcache">
+  <head>
+    <title>ArduPilot</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/styles.css">
+
+    <link rel="stylesheet" href="css/leaflet.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <script type="text/javascript" src="js/config.js"></script>
+    <script type="text/javascript" src="js/cors.js"></script>
+    <script type="text/javascript" src="js/leaflet.js"></script>
+    <script type="text/javascript" src="js/leaflet.rotatedMarker.js"></script>
+    <script type="text/javascript" src="js/pouchdb.js"></script>
+    <script type="text/javascript" src="js/L.TileLayer.PouchDBCached.js"></script>
+    <script type="text/javascript" src="js/tabs.js"></script>
+    <script type="text/javascript" src="js/mavlink.js"></script>
+    <script type="text/javascript" src="js/database.js"></script>
+</head>
+<body>
+
+<p><a href="index.html"><img src="images/main_logo.png" alt="ArduPilot"></a></p>
+
+<div id="mapid" style="width: 800px; height: 600px;"></div>
+
+<p>Position:<div id="latlon"></div><p>
+
+<script>
+var chart_lines = [];
+var HERE_app_id = 'Us1dLAdkDGKdspU5dqcR';
+var HERE_app_code = '_wd6_cV1dyn9gltgua6fAQ';
+var map = L.map('mapid').setView([0, 0], 0);
+var have_position = false;
+var have_position_3d = false;
+var requested_position = false;
+
+function add_marker(iconfile) {
+    var icon = L.icon({
+        iconUrl: iconfile,
+        iconAnchor: [30,30]
+    });
+    return new L.marker([0, 0], {icon: icon}).addTo(map);
+}
+
+function rotate_marker(marker, angle) {
+    marker.setRotationAngle(angle);
+    marker.update();
+}
+
+var green_marker = add_marker("images/greencopter.png");
+var red_marker = add_marker("images/redcopter.png");
+var home_marker = add_marker("images/home.svg");
+
+var telem_info = L.control();
+
+telem_info.onAdd = function (map) {
+    this._div = L.DomUtil.create('div', 'telem_info');
+    this._div.innerHTML = `
+        <table bgcolor="lightgrey">
+        <tr><td>Mode</td><td><div id="flight_mode"></div></td></tr>
+        <tr><td>Battery</td><td><div name="MAVLINK:SYS_STATUS:voltage_battery"></div></td></tr>
+        <tr><td>Height</td><td><div name="MAVLINK:GLOBAL_POSITION_INT:relative_alt"></div></td></tr>
+        </table>
+        `;
+    return this._div;
+};
+telem_info.addTo(map);
+telem_info.setPosition('topleft');
+
+var mode_map = {
+    0: "STABILIZE",
+    1: "ACRO",
+    2: "ALT_HOLD",
+    3: "AUTO",
+    4: "GUIDED",
+    5: "LOITER",
+    6: "RTL",
+    7: "CIRCLE",
+    9: "LAND",
+    11: "DRIFT",
+    13: "SPORT",
+    14: "FLIP",
+    15: "AUTOTUNE",
+    16: "POSHOLD",
+    17: "BRAKE",
+    18: "THROW",
+    19: "AVOID_ADSB",
+    20: "GUIDED_NOGPS"
+};
+
+/* use HERE hybrid maps */
+var layer = L.tileLayer('http://{s}.{base}.maps.cit.api.here.com/maptile/2.1/{type}/{mapID}/hybrid.day/{z}/{x}/{y}/{size}/{format}?app_id={app_id}&app_code={app_code}&lg={language}', {
+	attribution: 'Map &copy; 1987-2014 <a href="http://developer.here.com">HERE</a>',
+	subdomains: '1234',
+	mapID: 'newest',
+	app_id: HERE_app_id,
+        app_code: HERE_app_code,
+	base: 'aerial',
+	maxZoom: 20,
+	type: 'maptile',
+	language: 'eng',
+	format: 'png8',
+        size: '256',
+        useCache: true
+});
+
+// Listen to cache hits and misses and spam the console
+// The cache hits and misses are only from this layer, not from the WMS layer.
+layer.on('tilecachehit',function(ev){
+    console.log('Cache hit: ', ev.url);
+});
+layer.on('tilecachemiss',function(ev){
+    console.log('Cache miss: ', ev.url);
+});
+layer.on('tilecacheerror',function(ev){
+    console.log('Cache error: ', ev.tile, ev.error);
+});
+layer.addTo(map);
+
+// change map view position
+function set_map_position(pos) {
+    var pos2d = [pos[0], pos[1]]
+    map.setView(pos2d);
+    if (!have_position) {
+        map.setZoom(13);
+        have_position = true;
+        console.log("Initial position: " + pos);
+    }
+}
+
+// check for 0,0 positions
+function is_zero_pos(pos) {
+    return pos[0] == 0 && pos[1] == 0;
+}
+
+// query mavlink data and fill in elements of map
+function fill_map(mavlink) {
+    var ekf_pos = [ mavlink.GLOBAL_POSITION_INT.lat * 1.0e-7,
+                    mavlink.GLOBAL_POSITION_INT.lon * 1.0e-7];
+    var gps_pos = [ mavlink.GPS_RAW_INT.lat * 1.0e-7,
+                    mavlink.GPS_RAW_INT.lon * 1.0e-7,
+                    mavlink.GPS_RAW_INT.alt / 10 ];
+    var gps_heading = mavlink.GPS_RAW_INT.cog * 0.01;
+    var ekf_heading = mavlink.GLOBAL_POSITION_INT.hdg * 0.01;
+    var home_pos = [0,0];
+    if ("HOME_POSITION" in mavlink) {
+        home_pos = [ mavlink.HOME_POSITION.latitude * 1.0e-7,
+                     mavlink.HOME_POSITION.longitude * 1.0e-7 ];
+    }
+    var good_fix = mavlink.GPS_RAW_INT.fix_type >= 3;
+
+    if (good_fix && !have_position_3d) {
+        have_position_3d = true;
+        console.log("Storing last_position: " + gps_pos);
+        db_store('last_position', gps_pos);
+    }
+    
+    if (!is_zero_pos(gps_pos)) {
+        set_map_position(gps_pos);
+        red_marker.setLatLng(gps_pos);
+        rotate_marker(red_marker, gps_heading);
+    }
+    if (!is_zero_pos(ekf_pos)) {
+        green_marker.setLatLng(ekf_pos);
+        rotate_marker(green_marker, ekf_heading);
+    }
+    if (!is_zero_pos(home_pos)) {
+        home_marker.setLatLng(home_pos);
+    }
+    document.getElementById("latlon").innerHTML = ekf_pos[0].toFixed(6) + ", " + ekf_pos[1].toFixed(6);
+    document.getElementById("flight_mode").innerHTML = mode_map[mavlink.HEARTBEAT.custom_mode];
+    
+    if (!have_position && !requested_position) {
+        /* if we don't have GPS lock then ask the browser for an initial position */
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(function(pos) {
+                if (pos.coords.latitude != 0 || pos.coords.longitude != 0) {
+                    set_map_position([pos.coords.latitude, pos.coords.longitude]);
+                }
+            });
+        }
+        requested_position = true;
+    }
+    return true;
+}
+
+function refresh_ms() {
+    return 250;
+}
+
+fill_mavlink_ids({'callback_fn' : fill_map, 'extra_msgs' :
+                  ["GPS_RAW_INT", "HOME_POSITION", "HEARTBEAT"]});
+
+db_fetch('last_position', set_map_position);
+
+</script>
+
+<hr>
+<p><a href="index.html">home</a>
+
+
+</body>
+</html>
+
