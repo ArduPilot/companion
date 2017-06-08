@@ -1,0 +1,7 @@
+{
+    "uptime":          {{ @uptime() }},
+    "free_mem_dma":    {{ @mem_free(1) }},
+    "free_mem_kernel": {{ @mem_free(2) }},
+    "fc_mavlink_count": {{ @fc_mavlink_count() }},
+    "fc_mavlink_baudrate": {{ @fc_mavlink_baudrate() }}
+}

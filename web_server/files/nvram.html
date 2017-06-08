@@ -1,0 +1,129 @@
+<!DOCTYPE HTML>
+<html manifest="manifest.appcache">
+  <head>
+    <title>ArduPilot</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/styles.css">
+    <script type="text/javascript" src="js/config.js"></script>
+    <script type="text/javascript" src="js/cors.js"></script>
+    <script type="text/javascript" src="js/mavlink.js"></script>
+  </head>
+<body>
+
+<p><a href="index.html"><img src="images/main_logo.png" alt="ArduPilot"></a></p>
+
+<h2>Video Parameters</h2>
+
+It is not recommended that you change any video NVRAM parameters
+unless you are instructed to do so. This parameter interface is
+intended for engineering development.<p>
+
+NVRAM Pack: 
+<select name="nvram_pack" id="nvram_pack" onchange="change_pack();">
+    <option value="App_ISP">App_ISP</option>
+</select>
+
+<p><input type="submit" name="action" value="Refresh" onclick="refresh();">
+
+<p><div id="message"></div>
+
+<table id="nvram_table" class="parameters">
+  <tr><th>Name</th><th>Type</th><th>Size</th><th class="alnright">Value</th></tr>
+</table>
+
+<hr>
+<p><a href="index.html">home</a>
+
+</body>
+<script>
+
+var nlist;
+
+function fill_nvram_pack_values(json) {
+    var table = document.getElementById("nvram_table");
+
+    // delete any existing rows
+    var nrows = table.rows.length;
+    for (var i=nrows-1; i>0; i--) {
+        table.deleteRow(i);
+    }
+        
+    try {
+        nlist = JSON.parse(json);
+        nlist.sort(function(a,b) {
+            if (a.name < b.name) {
+                return -1;
+            }
+            if (a.name > b.name) {
+                return 1;
+            }
+            return 0;
+        });
+    } catch(e) {
+        console.log(e);
+        return;
+    }
+
+    var n = nlist.length;
+
+    for (var i=0; i<n; i++) {
+        var rownum = table.rows.length;
+        var row = table.insertRow(table.rows.length);
+        var rowdata = nlist[i];
+        row.insertCell(0).innerHTML = rowdata.name;
+        row.insertCell(1).innerHTML = rowdata.type;
+        row.insertCell(2).innerHTML = rowdata.size;
+        var c3 = row.insertCell(3);
+        c3.innerHTML = '<input type="text" class="paramvalue" value="' + rowdata.value + '" onchange="change_nvram_value(\'' + rowdata.name + '\',this.value);">';
+    }
+}
+
+function change_pack() {
+    var pack_name = document.getElementById("nvram_pack").value;
+    command_send("nvram_pack_values(" + pack_name + ")", { "onload" : fill_nvram_pack_values });
+}
+
+function fill_nvram_pack_list(json) {
+    try {
+        pack_list = JSON.parse(json);
+    } catch(e) {
+        console.log(e);
+        return;
+    }
+    pack_list.sort();
+    var pack_select = document.getElementById("nvram_pack");
+    var current_selected = pack_select.value;
+    
+    /* remove old values */
+    var select_len = pack_select.childNodes.length;
+    for (var i=select_len-1; i>=0; i--) {
+        pack_select.removeChild(pack_select.childNodes[i]);
+    }
+
+    var n = pack_list.length;
+    for (var i=0; i<n; i++) {
+        var option = document.createElement("option");
+        option.value = pack_list[i];
+        option.innerHTML = pack_list[i];
+        pack_select.appendChild(option);
+    }
+    pack_select.value = current_selected;
+}
+
+function refresh() {
+    command_send("nvram_pack_list()", { "onload" : fill_nvram_pack_list });
+}
+
+function change_nvram_value(name, value) {
+    var pack_name = document.getElementById("nvram_pack").value;
+    document.getElementById("message").innerHTML = "Changing " + pack_name + "/" + name + " to " + value;
+    
+    console.log("Set name: " + pack_name + "/" + name + " value: " + value);
+    command_send("nvram_set_value(" + pack_name + "," + name + "," + value + ")");
+}
+
+command_send("nvram_pack_values(App_ISP)", { "onload" : fill_nvram_pack_values });
+refresh();
+</script>
+
+</html>
