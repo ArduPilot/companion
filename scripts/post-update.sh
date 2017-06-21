@@ -75,6 +75,18 @@ else
     sudo pip install pynmea2
 fi
 
+# install grequests if neccessary
+if pip list | grep grequests; then
+    echo 'grequests already installed'
+else
+    echo 'Fetching grequests packages for raspberry pi...'
+    wget https://s3.amazonaws.com/downloads.bluerobotics.com/Pi/dependencies/grequests/grequests.zip -O /tmp/grequests.zip
+    echo 'Extracting prebuilt packages...'
+    sudo unzip -q -o /tmp/grequests.zip -d /
+    echo 'installing grequests...'
+    sudo pip install grequests
+fi
+
 echo 'Update Complete, refresh your browser'
 
 sleep 1
