@@ -12,7 +12,11 @@ ssh apsync@10.0.1.128
 # Check "screen -list" includes cmavnode, DataFlashLogger:
 screen -list
 
+# ensure mavproxy starts on the apsync image:
+mavproxy.py --master :14550
+
 # make sure dflogger is creating dataflash logs:
+# arm the vehcile, then:
 watch ls dflogger/dataflash -l
 
 # Can you connect using a GCS using the broadcast packets on port 14550?
@@ -27,7 +31,7 @@ mavproxy.py --mav10 --master :14550
  Test UDP port 5600 streaming works to:
   QGC on Linux
   QGC on Android
-  Tower on Android
+  Tower on Android (need to change setting!)
   Mission Planner on Windows
 
 
@@ -37,3 +41,6 @@ mavproxy.py --mav10 --master :14550
  Ensure autostart/stop works
 
 
+# web interface testing
+ Ensure you get a response when connecting to http://apsync/
+ 

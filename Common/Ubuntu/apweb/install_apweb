@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# install APWeb to provide a web interface for configuring drone (etc)
+
+if [ $(id -u) -ne 0 ]; then
+   echo >&2 "Must be run as root"
+   exit 1
+fi
+
+# if [ -z "$TELEM_SERIAL_PORT" ]; then
+#     echo 'TELEM_SERIAL_PORT must be set (e.g. "/dev/ttyS1" or "/dev/ttyMFD1")'
+#     exit 1
+# fi
+
+set -e
+set -x
+
+apt-get install -y libtalloc-dev
+
+sudo -u $NORMAL_USER -H bash <<EOF
+set -e
+set -x
+
+# auto start apweb
+APWEB_HOME=~/start_apweb
+rm -rf \$APWEB_HOME
+if [ ! -d \$APWEB_HOME ]; then
+    mkdir \$APWEB_HOME
+fi
+cp start_apweb.sh \$APWEB_HOME/
+cp autostart_apweb.sh \$APWEB_HOME/
+
+pushd ~/GitHub
+ rm -rf APWeb
+ git clone --recurse-submodules https://github.com/peterbarker/APWeb
+ pushd APWeb
+  git checkout apsync
+  git submodule update --init
+  time (make | cat)
+  cp web_server \$APWEB_HOME
+ popd
+popd
+
+EOF
+
+
+# add line below to bottom of /etc/rc.local to call start script
+LINE="/bin/bash -c '~$NORMAL_USER/start_apweb/autostart_apweb.sh'"
+perl -pe "s%^exit 0%$LINE\\n\\nexit 0%" -i /etc/rc.local
