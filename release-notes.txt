@@ -9,3 +9,14 @@ Release 201703
   - apsync-rpi-20170314110804.img.xz
   - apsync-tx1-201703141027.img.xz
   - apsync-edison-20170316114410.tar.xz
+
+
+Release 201709
+ - Runs on Pi0W, however the shortage of memory makes it a poor development platform
+ - APWeb (https://github.com/ardupilot/APWeb/) runs on port 80
+ - RPI image created from 2017-07-05-raspbian-jessie-lite.zip
+ - still no BeagleBoneBlue release due to performance questions 
+ - WiFi password is now ardupilot
+ - Edison
+  - added modules for USB ethernet dongles
+  - patched kernel against usb-otg bug, however this seems ineffective
