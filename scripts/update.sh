@@ -7,7 +7,7 @@ echo 'removing old stash'
 rm -rf /home/pi/.companion
 
 echo 'stashing current repo'
-cp /home/pi/companion /home/pi/.companion
+cp -r /home/pi/companion /home/pi/.companion
 
 cd /home/pi/companion
 echo 'removing tags'
