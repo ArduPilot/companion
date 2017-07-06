@@ -123,8 +123,13 @@ app.post('/test', function(req, res) {
 		res.send("bye.");
 	}
 });
+
 app.get('/home/pi/server.php', function(req, res) {
 	return res.sendFile('/home/pi/server.php');
+});
+
+app.get('/git', function(req, res) {
+	res.render('git', {});
 });
 
 app.get('/socket.io-file-client.js', (req, res, next) => {
@@ -151,6 +156,318 @@ var server = app.listen(2770, function() {
 
 var io = require('socket.io')(server);
 var networking = io.of('/networking');
+var gitsetup = io.of('/gitsetup');
+
+
+///////////////////////////////////////////////////////////////
+////////////////   Git setup functions   //////////////////////
+///////////////////////////////////////////////////////////////
+
+var Git = require('nodegit');
+
+var _current_HEAD = '';
+
+//hack/workaround for remoteCallback spinlock
+var _authenticated = false;
+
+// We store all of the remote references in this format:
+//var _refs = {
+//	'remotes' :  {
+//		
+//		'upstream' : {
+//			'branches' : [],
+//			'tags'     : []
+//		},
+//		
+//		'origin' : {
+//			'branches' : [],
+//			'tags'     : []
+//		}
+//	}
+//}
+
+// TODO open/init git repository in callback here
+checkGithubAuthentication();
+
+var _refs = { 'remotes' : {} };
+
+var companionRepository = null;
+Git.Repository.open(_companion_directory)
+	.then(function(repository) {
+		companionRepository = repository;
+		updateCurrentHead(companionRepository);
+		emitRemotes();
+	})
+	.catch(function(err) { logger.log(err); });
+
+function updateCurrentHEAD(repository) {
+	repository.head()
+		.then(function(reference) {
+			_current_HEAD = reference.target().tostrS().substring(0,8);
+			io.emit('current HEAD', _current_HEAD);
+			console.log('Current HEAD:', reference.target().tostrS().substring(0,8));
+		});
+}
+
+//Set up fetch options and credential callback
+var fetchOptions = new Git.FetchOptions();
+var remoteCallbacks = new Git.RemoteCallbacks();
+
+remoteCallbacks.credentials = function(url, userName) {
+	logger.log('credentials required', url, userName);
+
+	if (!_authenticated) {
+		return null;
+	}
+	
+	var creds = Git.Cred.sshKeyFromAgent(userName);
+	return creds;
+}
+fetchOptions.callbacks = remoteCallbacks;
+fetchOptions.downloadTags = 1;
+
+// Fetch and parse remote references, add them to our list
+// Emit our list after each remote's references are parsed
+function formatRemote(remoteName) {
+	// Add new remote to our list
+	var newRemote = {
+			'branches' : [],
+			'tags' : []
+		}
+	_refs.remotes[remoteName] = newRemote;
+	
+	companionRepository.getRemote(remoteName)
+		.then(function(remote) {
+			logger.log('connecting to remote', remote.name());
+			remote.connect(Git.Enums.DIRECTION.FETCH, remoteCallbacks)
+			.then(function(errorCode) {
+				// Get a list of refs
+				remote.referenceList()
+				.then(function(promiseArrayRemoteHead) {
+					// Get the name of each ref, determine if it is a branch or tag
+					// and add it to our list
+					promiseArrayRemoteHead.forEach(function(ref) {
+						var branch
+						var tag
+						var oid = ref.oid().tostrS().substring(0,8);
+						if (branch = ref.name().split('refs/heads/')[1]) {
+							var newRef = [branch, oid]
+							_refs.remotes[remoteName].branches.push(newRef);
+						} else if (tag = ref.name().split('refs/tags/')[1]) {
+							var newRef = [tag, oid]
+							_refs.remotes[remoteName].tags.push(newRef);
+						}
+					});
+					
+					// Update frontend with most recent list
+					io.emit('refs', _refs);
+				})
+				.catch(function(err) { logger.log(err); });
+			})
+			.catch(function(err) { logger.log(err); });
+		})
+		.catch(function(err) { logger.log(err); });
+}
+
+
+// Fetch, format, emit the refs on each remote
+function formatRemotes(remoteNames) {
+	logger.log('formatRemotes', remoteNames);
+	remoteNames.forEach(formatRemote);
+}
+
+
+// Get all remote references, compile a formatted list, and update frontend
+function emitRemotes() {
+	if (companionRepository == null) {
+		return;
+	}
+	
+	updateCurrentHEAD(companionRepository);
+	
+	companionRepository.getRemotes()
+		.then(formatRemotes)
+		.catch(function(err) { logger.log(err); });
+}
+
+
+//Check to see if we have ssh authentication with github
+function checkGithubAuthentication(callback) {
+	var cmd = 'ssh -T git@github.com';
+	child_process.exec(cmd, function(err, stdout, stderr) {
+		logger.log(cmd + ' returned ' + err ? err.code : '0');
+		logger.log('stdout:\n' + stdout);
+		logger.log('stderr:\n' + stderr);
+		
+		// github greeting comes through stderr
+		_authenticated = err ? err.code == 1 && stderr.indexOf('successfully authenticated') > -1 : false;
+		
+		logger.log(err.code == 1);
+		logger.log(stderr.indexOf('successfully authenticated'));
+		logger.log(_authenticated);
+		
+		if (callback) {
+			callback(_authenticated);
+		}
+	});
+}
+
+
+// Let frontend know if we are authenticated or not
+function emitAuthenticationStatus(status) {
+	io.emit('authenticated', status);
+}
+
+
+// Not used
+// fetch a remote by name
+function fetchRemote(remote) {
+	logger.log('fetching', remote);
+	companionRepository.fetch(remote, fetchOptions)
+		.then(function(status) {
+			logger.log('fetch success', status);
+		})
+		.catch(function(status) {
+			logger.log('fetch fail', status);
+		});
+}
+
+
+// Checkout a reference object
+function checkout(reference) {
+	logger.log('reference', reference.name());
+	companionRepository.checkoutRef(reference)
+		.catch(function(err) { logger.log(err); });
+}
+
+///////////////////////////////////////////////////////////////
+////////////////  ^Git setup functions^  //////////////////////
+///////////////////////////////////////////////////////////////
+
+
+gitsetup.on('connection', function(socket) {
+	// Populate frontend reference list
+	emitRemotes(companionRepository);
+	
+	// Request to checkout remote reference
+	socket.on('checkout with ref', function(data) {
+		var referenceName = '';
+		
+		if (data.branch) {
+			referenceName = data.remote + "/" + data.branch;
+		} else if (data.tag) {
+			// TODO delete tag and fetch first
+			referenceName = data.tag;
+		}
+		
+		// Get reference object then checkout
+		companionRepository.getReference(referenceName)
+		.then(checkout)
+		.catch(function(err) {
+			logger.log(err);
+			socket.emit('git error', err);
+		});
+	});
+	
+	// Request to run companion update scripts to update
+	// to target reference
+	socket.on('update with ref', function(data) {
+		
+		var arg1 = data.remote;
+		var arg2 = '';
+		var arg3 = '';
+		var arg4 = '';
+		
+		if (data.copyOption) {
+			arg4 = data.copyOption;
+			console.log('ARG 4', arg4);
+		}
+		
+		if (data.branch) {
+			arg2 = data.branch;
+		} else if (data.tag) {
+			// TODO delete tag and fetch first
+			arg3 = data.tag;
+		}
+		
+		var args = [arg1, arg2, arg3, arg4];
+		
+		// system setup
+		logger.log("update companion with ref", args);
+		var cmd = child_process.spawn(_companion_directory + '/scripts/update.sh', args, {
+			detached: true
+		});
+
+		// Ignore parent exit, we will restart this application after updating
+		cmd.unref();
+		
+		cmd.stdout.on('data', function (data) {
+			logger.log(data.toString());
+			
+			socket.emit('terminal output', data.toString());
+			if (data.indexOf("Update Complete, refresh your browser") > -1) {
+				socket.emit('companion update complete');
+			}
+		});
+		
+		cmd.stderr.on('data', function (data) {
+			logger.error(data.toString());
+			socket.emit('terminal output', data.toString());
+		});
+		
+		cmd.on('exit', function (code) {
+			logger.log('companion update exited with code ' + code.toString());
+			socket.emit('companion update complete');
+		});
+		
+		cmd.on('error', (err) => {
+			logger.error('companion update errored: ', err.toString());
+		});
+	});
+	
+	// Fetch all remotes and update
+	socket.on('fetch', function(data) {
+		logger.log('fetching remotes');
+		companionRepository.fetchAll(fetchOptions)
+			.then(emitRemotes)
+			.catch(function(err) {
+				logger.log(err);
+				socket.emit('git error', err);
+			});
+	});
+	
+	// Frontend requesting authentication status
+	socket.on('authenticated?', function(data) {
+		checkGithubAuthentication(emitAuthenticationStatus)
+	});
+	
+	// Get credentials from frontend, authenticate and update
+	socket.on('credentials', function(data) {
+		var cmd = _companion_directory + '/scripts/authenticate-github.sh ' + data.username + ' ' + data.password;
+		child_process.exec(cmd, function(err, stdout, stderr) {
+			logger.log('Authentication returned ' + err);
+			logger.log('stdout:\n' + stdout);
+			logger.log('stderr:\n' + stderr);
+			checkGithubAuthentication(function(status) {
+				emitAuthenticationStatus(status);
+				emitRemotes();
+			});
+		});
+	});
+	
+	// Add a remote to the local repository
+	socket.on('add remote', function(data) {
+		logger.log('add remote', data);
+		Git.Remote.create(companionRepository, data.name, data.url)
+			.then(function(remote) {
+				emitRemotes();
+			})
+			.catch(function(err) {
+				logger.log(err);
+				socket.emit('git error', err);
+			});
+	});
+});
 
 networking.on('connection', function(socket) {
 	
@@ -332,7 +649,8 @@ io.on('connection', function(socket) {
 				detached: true
 			});	
 		} else {
-			cmd = child_process.spawn(_companion_directory + '/scripts/update.sh', {
+			var args = ['origin', '', 'stable'];
+			cmd = child_process.spawn(_companion_directory + '/scripts/update.sh', args, {
 				detached: true
 			});
 		}
