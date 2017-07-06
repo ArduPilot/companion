@@ -2,6 +2,15 @@
 
 # Borrowed and modified from Raspbian usr/lib/raspi-config/init_resize.sh
 
+# Abort if we are not on a Raspberry Pi
+if grep -q 'Hardware : BCM2' /proc/cpuinfo; then
+    echo "RPI BUILD!"
+    RPI="1"
+else
+    echo "This script should only be run on a Raspberry Pi!"
+    exit(1)
+fi
+
 get_variables () {
   ROOT_PART_DEV=$(findmnt / -o source -n)
   #/dev/mmcblk0p2
