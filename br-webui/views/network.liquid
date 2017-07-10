@@ -1,0 +1,119 @@
+{% include ../_includes/header.liquid %}
+
+<script src="network.min.js"></script>
+<script>
+
+var settings = {
+	endpoint: '/test', // Where to GET/POST
+	delay: 5000,
+	
+	data: {
+		// The amount of data to initially use. 
+		size: 100 * 1024 * 1024, // 100 MB 
+		// If the measure period can't reach the delay defined in the settings, 
+		// the data amount is multiplied by the following value. 
+		multiplier: 2
+	},
+	
+	latency: {
+		measures: 50
+	}
+};
+
+var net = new Network(settings);
+
+// Listen for the "end" event which provides the calculated latencies. 
+net.latency.on('end', function(averageLatency, allLatencies) {
+	console.log('end', averageLatency, allLatencies);
+	document.getElementById("latency results").innerHTML = averageLatency.toFixed(3) + ' ms';
+});
+
+net.upload
+	.on('start', function(dataSize) {
+		console.log('start', dataSize);
+	})
+	.on('progress', function(averageSpeed, instantSpeed) {
+		// Every bandwidth measurement is in BYTES per second! 
+		document.getElementById("upload results").innerHTML = formatMbps(averageSpeed);
+	})
+	.on('restart', function(dataSize) {
+		// The restart event is triggered when the module didn't have time 
+		// (according to the `delay` option) to take all the measures. A new 
+		// request will start with data size increased by the multiplier value. 
+		console.log('restart', dataSize);
+	})
+	.on('end', function(averageSpeed, allInstantSpeeds) {
+		console.log('end', averageSpeed, allInstantSpeeds);
+		document.getElementById("upload results").innerHTML = formatMbps(averageSpeed);
+	});
+
+net.download
+	.on('start', function(dataSize) {
+		console.log('start', dataSize);
+	})
+	.on('progress', function(averageSpeed, instantSpeed) {
+		document.getElementById("download results").innerHTML = formatMbps(averageSpeed);
+	})
+	.on('restart', function(dataSize) {
+		console.log('restart', dataSize);
+	})
+	.on('end', function(averageSpeed, allInstantSpeeds) {
+		console.log('end', averageSpeed, allInstantSpeeds);
+		document.getElementById("download results").innerHTML = formatMbps(averageSpeed);
+	});
+
+// Convert Bytes per second to Megabits per second
+function formatMbps(Bps) {
+	var Mbps = Bps * 8 * 0.000001;
+	var formatted = Mbps.toFixed(3) + ' Mbps';
+	return formatted;
+}
+	
+function testLatency() {
+	// Once all the configuration is done, start the requests for this module. 
+	net.latency.start();
+}
+
+function testUpload() {
+	net.upload.start();
+}
+
+function testDownload() {
+	net.download.start();
+}
+</script>
+
+<div id="content">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 class="panel-title">
+						Bandwidth and Latency Testing
+					</h3>
+				</div>
+				
+				<div class="panel-body">
+					<h1>Test Network</h1>
+					<input type="submit" class="btn btn-primary" value="latency" onClick="testLatency()"/>
+					<input type="submit" class="btn btn-primary" value="upload" onClick="testUpload()"/>
+					<input type="submit" class="btn btn-primary" value="download" onClick="testDownload()"/>
+					<div>
+						<h2>Latency Results:</h2>
+						<h3 id="latency results"></h6>
+					</div>
+					<div>
+						<h2>Upload Results:</h2>
+						<h3 id="upload results"></h6>
+					</div>
+					<div>
+						<h2>Download Results:</h2>
+						<h3 id="download results"></h6>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% include ../_includes/footer.liquid %}
