@@ -2,7 +2,20 @@
 
 <script src="socket.io-file-client.js"></script> 
 <script>
+var _updating = false;
 var socket = io();
+
+// Listen to internet connectivity status updates from the backend
+// Disable features that require backend internet connectivity when
+// there is no connection
+socket.on('internet status', function(data) {
+	console.log('got internet status', data);
+	if(_updating) {
+		return; // Don't enable buttons until update is complete
+	}
+	enableInternetUpdates(data);
+});
+
 socket.on('terminal output', function(data) {
 	var currentHTML = document.getElementById("terminal-output").innerHTML;
 	document.getElementById("terminal-output").innerHTML = currentHTML + data;
@@ -26,10 +39,11 @@ function updateCompanion(fileInfo) {
 		uploader.off('complete', updateCompanion);
 		socket.emit('update companion', fileInfo.name);
 	} else {
-		disableUpdates(true);
-		showCompanionSpinner(true);
 		socket.emit('update companion');
 	}
+	_updating = true;
+	enableUpdates(false);
+	showCompanionSpinner(true);
 }
 
 function companionProgress(fileInfo) {
@@ -59,7 +73,8 @@ function updatePixhawkFile(fileInfo) {
 }
 
 function updatePixhawk(option) {
-	disableUpdates(true);
+	_updating = true;
+	enableUpdates(false);
 	showPixhawkSpinner(true);
 	socket.emit('update pixhawk', {
 		'option' : option
@@ -71,22 +86,28 @@ function pixhawkProgress(fileInfo) {
 }
 
 socket.on('pixhawk update complete', function(data) {
-	disableUpdates(false);
+	_updating = false;
+	enableUpdates(true);
 	showPixhawkSpinner(false);
 });
 
 socket.on('companion update complete', function(data) {
+	_updating = false;
+	enableUpdates(true);
 	showCompanionSpinner(false);
-	setInterval(location.reload(true), 3000);
 });
 
-function disableUpdates(disabled) {
-	document.getElementById('companionButton').disabled = disabled;
-	document.getElementById('devButton').disabled = disabled;
-	document.getElementById('betaButton').disabled = disabled;
-	document.getElementById('stableButton').disabled = disabled;
-	document.getElementById('pixhawkFileButton').disabled = disabled;
-	document.getElementById('companionFileButton').disabled = disabled;
+function enableInternetUpdates(enabled) {
+	document.getElementById('companionButton').disabled = !enabled;
+	document.getElementById('devButton').disabled = !enabled;
+	document.getElementById('betaButton').disabled = !enabled;
+	document.getElementById('stableButton').disabled = !enabled;
+}
+
+function enableUpdates(enabled) {
+	enableInternetUpdates(enabled);
+	document.getElementById('pixhawkFileButton').disabled = !enabled;
+	document.getElementById('companionFileButton').disabled = !enabled;
 }
 
 function showCompanionSpinner(show) {
@@ -127,8 +148,6 @@ uploader.on('abort', function(fileInfo) {
 	console.log('Aborted: ', fileInfo);
 });
 
-var form = document.getElementById('form');
-
 function submit(onComplete, onStream, fileElement) {
 	var fileEl = document.getElementById(fileElement);
 	var uploadIds = uploader.upload(fileEl);
@@ -148,11 +167,6 @@ function submit(onComplete, onStream, fileElement) {
 	
 	uploader.on('complete', onComplete);
 	uploader.on('stream', onStream);
-	
-	// setTimeout(function() { 
-		// uploader.abort(uploadIds[0]); 
-		// console.log(uploader.getUploadInfo()); 
-	// }, 1000); 
 };
 </script>
 
@@ -173,7 +187,7 @@ function submit(onComplete, onStream, fileElement) {
 				<span id="companion version">Companion Version</span>
 				<div>
 					<h4 id="companionAvailable">Download Update: No Updates Available</h4>
-					<button id="companionButton" type="button" class="btn btn-primary" onclick="updateCompanion()" style="display:none">Update</button>
+					<button id="companionButton" type="button" class="btn btn-primary" onclick="updateCompanion()" style="display:none" disabled=true>Update</button>
 				</div>
 				<div>
 					<h4>Upload Zipped Update:</h4>
@@ -198,9 +212,9 @@ function submit(onComplete, onStream, fileElement) {
 			<div class="panel-body">
 				<div>
 					<h4>Download and Update (Requires Internet Connection):</h4>
-					<button id="devButton" type="button" class="btn btn-primary" onclick="updatePixhawkDev()">Development</button>
-					<button id="betaButton" type="button" class="btn btn-primary" onclick="updatePixhawkBeta()">Beta</button>
-					<button id="stableButton" type="button" class="btn btn-primary" onclick="updatePixhawkStable()">Stable</button>
+					<button id="devButton" type="button" class="btn btn-primary" onclick="updatePixhawkDev()" disabled=true>Development</button>
+					<button id="betaButton" type="button" class="btn btn-primary" onclick="updatePixhawkBeta()" disabled=true>Beta</button>
+					<button id="stableButton" type="button" class="btn btn-primary" onclick="updatePixhawkStable()" disabled=true>Stable</button>
 				</div>
 				<div>
 					<h4>Upload Firmware File:</h4>
