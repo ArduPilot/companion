@@ -50,18 +50,6 @@ function companionProgress(fileInfo) {
 	document.getElementById('companionProgress').innerHTML = `Uploading: ${fileInfo.sent} / ${fileInfo.size} byte(s)`;
 }
 
-function updatePixhawkDev() {
-	updatePixhawk('dev');
-}
-
-function updatePixhawkBeta() {
-	updatePixhawk('beta');
-}
-
-function updatePixhawkStable() {
-	updatePixhawk('stable');
-}
-
 function updatePixhawkFile(fileInfo) {
 	document.getElementById('pixhawkProgress').innerHTML = "";
 	uploader.off('stream', pixhawkProgress);
@@ -212,9 +200,9 @@ function submit(onComplete, onStream, fileElement) {
 			<div class="panel-body">
 				<div>
 					<h4>Download and Update (Requires Internet Connection):</h4>
-					<button id="devButton" type="button" class="btn btn-primary" onclick="updatePixhawkDev()" disabled=true>Development</button>
-					<button id="betaButton" type="button" class="btn btn-primary" onclick="updatePixhawkBeta()" disabled=true>Beta</button>
-					<button id="stableButton" type="button" class="btn btn-primary" onclick="updatePixhawkStable()" disabled=true>Stable</button>
+					<button id="devButton" type="button" class="btn btn-primary" onclick="updatePixhawk('dev')" disabled=true>Development</button>
+					<button id="betaButton" type="button" class="btn btn-primary" onclick="updatePixhawk('beta')" disabled=true>Beta</button>
+					<button id="stableButton" type="button" class="btn btn-primary" onclick="updatePixhawk('stable')" disabled=true>Stable</button>
 				</div>
 				<div>
 					<h4>Upload Firmware File:</h4>
