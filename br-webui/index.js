@@ -217,20 +217,6 @@ networking.on('connection', function(socket) {
 	});
 	
 	
-	// Query internet connectivity
-	socket.on('get internet status', function() {
-		logger.log("get internet status")
-		var cmd = child_process.exec('ping -c1 google.com', function (error, stdout, stderr) {
-			logger.log("ping -c1 google.com : ", error + stdout + stderr);
-			if (error) {
-				socket.emit('internet status', '<h4 style="color:red;">Not Connected</h1>');
-			} else {
-				socket.emit('internet status', '<h4 style="color:green;">Connected</h1>');
-			}
-		})
-	});
-	
-	
 	socket.on('get wifi status', function() {
 		logger.log("get wifi status");
 		var cmd = child_process.exec('sudo wpa_cli status', function (error, stdout, stderr) {
@@ -264,6 +250,19 @@ networking.on('connection', function(socket) {
 	});
 });
 
+function updateInternetStatus() {
+	var cmd = child_process.exec('ping -c1 google.com', function (error, stdout, stderr) {
+		logger.log("ping -c1 google.com : ", error + stdout + stderr);
+		if (error) {
+			_internet_connected = false;
+		} else {
+			_internet_connected = true;
+		}
+		io.emit('internet status', _internet_connected);
+	});
+}
+
+setInterval(updateInternetStatus, 2500);
 
 io.on('connection', function(socket) {
 

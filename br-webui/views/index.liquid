@@ -36,11 +36,15 @@ networking.on('wifi aps', function(data) {
 	select.selectedIndex = newIndex;
 });
 
-networking.on('internet status', function(data) {
+socket.on('internet status', function(data) {
 	console.log('got internet status')
 	console.log(data);
 	var statusIndicator = document.getElementById("internet-status");
-	statusIndicator.innerHTML = data;
+	if (data == true) {
+		statusIndicator.innerHTML = '<h4 style="color:green;">Connected</h1>';
+	} else {
+		statusIndicator.innerHTML = '<h4 style="color:red;">Not Connected</h1>';
+	}
 });
 
 networking.on('wifi status', function(data) {
@@ -69,13 +73,8 @@ function disableButton(disabled) {
 	document.getElementById('spinner').style.visibility = disabled ? "visible" : "hidden";
 }
 
-networking.emit('get internet status');
 networking.emit('get wifi status');
 networking.emit('get wifi aps');
-
-setInterval(function() {
-	networking.emit('get internet status');
-}, 3000);
 
 setInterval(function() {
 	networking.emit('get wifi status');
