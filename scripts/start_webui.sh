@@ -1,6 +1,7 @@
 #!/bin/bash
+export COMPANION_DIR=/home/pi/companion
 
-cd $HOME/companion/br-webui/
+cd $COMPANION_DIR/br-webui/
 
 # limit logfile size
 tail -n 10000 /home/pi/.webui.log > /tmp/.webui.log

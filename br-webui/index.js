@@ -4,7 +4,9 @@ const child_process = require('child_process');
 const dgram = require('dgram');
 const SocketIOFile = require('socket.io-file');
 var logger = require('tracer').console();
-
+var env = process.env
+logger.log('ENVIRONMENT', process.env)
+logger.log('COMPANION_DIR', process.env.COMPANION_DIR)
 app.use(express.static('public'));
 app.use('/js', express.static(__dirname + '/node_modules/bootstrap/dist/js')); // redirect bootstrap JS
 app.use('/js', express.static(__dirname + '/node_modules/jquery/dist')); // redirect JS jQuery
@@ -29,6 +31,9 @@ var options = {
 app.set('view engine', 'liquid');
 app.engine('liquid', expressLiquid(options));
 app.use(expressLiquid.middleware);
+
+// Companion repository root directory
+var _companion_directory = process.env.COMPANION_DIR;
 
 ////////////////// Routes
 
@@ -69,7 +74,7 @@ app.get('/test', function(req, res) {
 	
 
 	if (module && module == 'download') {
-		res.sendFile('/home/pi/companion/tools/100MB.file');
+		res.sendFile(_companion_directory + '/tools/100MB.file');
 
 //		// Default to 20mb file download, unless a size is specified.
 //		var contentSize = req.param('size', 20 * 1024 * 1024);
@@ -323,11 +328,11 @@ io.on('connection', function(socket) {
 		var cmd;
 		if (data) {
 			logger.log('from file', data);
-			cmd = child_process.spawn('/home/pi/companion/scripts/sideload.sh', ['/tmp/data/' + data], {
+			cmd = child_process.spawn(_companion_directory + '/scripts/sideload.sh', ['/tmp/data/' + data], {
 				detached: true
 			});	
 		} else {
-			cmd = child_process.spawn('/home/pi/companion/scripts/update.sh', {
+			cmd = child_process.spawn(_companion_directory + '/scripts/update.sh', {
 				detached: true
 			});
 		}
@@ -364,13 +369,13 @@ io.on('connection', function(socket) {
 		logger.log("update pixhawk");
 		if (data.option == 'dev') {
 			// Use spawn instead of exec to get callbacks for each line of stderr, stdout
-			var cmd = child_process.spawn('/home/pi/companion/tools/flash_px4.py', ['--latest']);
+			var cmd = child_process.spawn(_companion_directory + '/tools/flash_px4.py', ['--latest']);
 		} else if (data.option == 'beta') {
-			var cmd = child_process.spawn('/home/pi/companion/tools/flash_px4.py', ['--url', 'http://firmware.ardupilot.org/Sub/beta/PX4/ArduSub-v2.px4']);
+			var cmd = child_process.spawn(_companion_directory + '/tools/flash_px4.py', ['--url', 'http://firmware.ardupilot.org/Sub/beta/PX4/ArduSub-v2.px4']);
 		} else if (data.option == 'file') {
-			var cmd = child_process.spawn('/home/pi/companion/tools/flash_px4.py', ['--file', '/tmp/data/' + data.file]);
+			var cmd = child_process.spawn(_companion_directory + '/tools/flash_px4.py', ['--file', '/tmp/data/' + data.file]);
 		} else {
-			var cmd = child_process.spawn('/home/pi/companion/tools/flash_px4.py');
+			var cmd = child_process.spawn(_companion_directory + '/tools/flash_px4.py');
 		}
 		
 		cmd.stdout.on('data', function (data) {
@@ -394,9 +399,10 @@ io.on('connection', function(socket) {
 		});	
 	});
 	
+	
 	socket.on('restart video', function(data) {
-		logger.log('/home/pi/companion/scripts/restart-raspivid.sh "' + data.rpiOptions + '" "' + data.gstOptions + '"');
-		var cmd = child_process.spawn('/home/pi/companion/scripts/restart-raspivid.sh', [data.rpiOptions , data.gstOptions], {
+		logger.log(_companion_directory + '/scripts/restart-raspivid.sh "' + data.rpiOptions + '" "' + data.gstOptions + '"');
+		var cmd = child_process.spawn(_companion_directory + '/scripts/restart-raspivid.sh', [data.rpiOptions , data.gstOptions], {
 			detached: true
 		});
 		
