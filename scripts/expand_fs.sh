@@ -8,7 +8,7 @@ if grep -q 'Hardware : BCM2' /proc/cpuinfo; then
     RPI="1"
 else
     echo "This script should only be run on a Raspberry Pi!"
-    exit(1)
+    exit 1
 fi
 
 get_variables () {
