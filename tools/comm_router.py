@@ -11,7 +11,7 @@ debug = False
 
 # load configuration from file
 try:
-	endpoint.load('/home/pi/.companion/routing.conf')
+    endpoint.load('/home/pi/.routing.conf')
 except:
 	pass
 
