@@ -4,6 +4,7 @@ const child_process = require('child_process');
 const dgram = require('dgram');
 const SocketIOFile = require('socket.io-file');
 var logger = require('tracer').console();
+var os = require("os");
 var env = process.env
 logger.log('ENVIRONMENT', process.env)
 logger.log('COMPANION_DIR', process.env.COMPANION_DIR)
@@ -585,6 +586,25 @@ function updateInternetStatus() {
 }
 
 setInterval(updateInternetStatus, 2500);
+
+// get cpu & ram usage
+function updateCPUStats () {
+	var cpu_stats = {};
+
+	// report cpu usage stats (divide load by # of cpus to get load)
+	cpu_stats.cpu_load	= os.loadavg()[0]/os.cpus().length*100;	 // %
+
+	// report ram stats (raspbian uses 1024 B = 1 KB)
+	cpu_stats.ram_free	= os.freemem()/(1024*1024);	 // MB
+	cpu_stats.ram_total = os.totalmem()/(1024*1024); // MB
+	cpu_stats.ram_used	= cpu_stats.ram_total - cpu_stats.ram_free; // MB
+
+	// stream collected data
+	io.emit('cpu stats', cpu_stats);
+}
+
+// Make updateCPUStats() run once every 5 seconds (=os.loadavg() update rate)
+setInterval(updateCPUStats, 5000);
 
 io.on('connection', function(socket) {
 

@@ -16,6 +16,11 @@ socket.on('internet status', function(data) {
 	enableInternetUpdates(data);
 });
 
+// Listen to RAM and CPU usage stats
+socket.on('cpu stats', function(data) {
+	console.log('got cpu status', data);
+});
+
 socket.on('terminal output', function(data) {
 	var currentHTML = document.getElementById("terminal-output").innerHTML;
 	document.getElementById("terminal-output").innerHTML = currentHTML + data;

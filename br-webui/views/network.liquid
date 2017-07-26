@@ -62,6 +62,26 @@ net.download
 		document.getElementById("download results").innerHTML = formatMbps(averageSpeed);
 	});
 
+// Set up socket
+var socket = io();
+
+// Listen to RAM and CPU usage stats
+socket.on('cpu stats', function(data) {
+	// make cpu load display with one decimal point if less than 10.
+	var _cpu_load;
+	if (Math.abs(data.cpu_load) < 10) {
+		_cpu_load = data.cpu_load.toFixed(1);
+	} else {
+		_cpu_load = data.cpu_load.toFixed(0);
+	}
+
+	// display data
+	document.getElementById('cpuLoad').innerHTML = _cpu_load + '%';
+	document.getElementById('ramFree').innerHTML = data.ram_free.toFixed(3) + ' MB';
+	document.getElementById('ramUsed').innerHTML = data.ram_used.toFixed(3) + ' MB';
+	document.getElementById('ramTotal').innerHTML = data.ram_total.toFixed(3) + ' MB';
+});
+
 // Convert Bytes per second to Megabits per second
 function formatMbps(Bps) {
 	var Mbps = Bps * 8 * 0.000001;
@@ -82,6 +102,31 @@ function testDownload() {
 	net.download.start();
 }
 </script>
+
+<!-- Companion Computer Status -->
+<div class="row">
+	<div class="col-md-12">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">
+					Companion Computer Status
+				</h3>
+			</div>
+			<div class="panel-body">
+				<dl class="dl-horizontal">
+					<dt>CPU Load: </dt>
+						<dd id="cpuLoad"></dd>
+					<dt>Free RAM: </dt>
+						<dd id="ramFree"></dd>
+					<dt>Used RAM: </dt>
+						<dd id="ramUsed"></dd>
+					<dt>Total RAM: </dt>
+						<dd id="ramTotal"></dd>
+				</dl>
+			</div>
+		</div>
+	</div>
+</div>
 
 <div id="content">
 	<div class="row">
