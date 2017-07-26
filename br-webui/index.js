@@ -765,6 +765,25 @@ io.on('connection', function(socket) {
 		});	
 	});
 	
+	socket.on('start WL driver', function(data) {
+		var args = '';
+		if (data.ip) {
+			args += ' --ip=' + data.ip;
+		}
+		if (data.port) {
+			args += ' --port=' + data.port;
+		}
+		var cmd = child_process.exec('screen -dm -S wldriver ' + _companion_directory + '/tools/underwater-gps.py' + args, function(error, stdout, stderr) {
+			logger.log(error, stdout, stderr);
+		});
+	});
+	
+	socket.on('stop WL driver', function(data) {
+		var cmd = child_process.exec('screen -X -S wldriver quit', function(error, stdout, stderr) {
+			logger.log(error, stdout, stderr);
+		});
+	});
+	
 	socket.on('reboot', function(data) {
 		logger.log('reboot');
 		child_process.exec('sudo reboot now', function (error, stdout, stderr) {
