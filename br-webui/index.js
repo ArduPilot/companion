@@ -730,10 +730,72 @@ io.on('connection', function(socket) {
 			logger.log('pixhawk update exited with code ' + code.toString());
 			socket.emit('pixhawk update complete');
 		});
-		
+
+		cmd.on('error', (err) => {
+			logger.log('Failed to start child process.');
+			logger.log(err.toString() + '\n');
+		});
+	});
+
+	// Restore pixhawk factory firmware
+	socket.on('restore px fw', function(data) {
+		logger.log("restore px fw");
+		var cmd = child_process.spawn('/usr/bin/python', ['-u',
+			_companion_directory + '/tools/flash_px4.py',
+			'--file', _companion_directory + '/fw/ArduSub-v2.px4']);
+
+		cmd.stdout.on('data', function (data) {
+			socket.emit('terminal output', data.toString());
+			logger.log(data.toString());
+		});
+
+		cmd.stderr.on('data', function (data) {
+			socket.emit('terminal output', data.toString());
+			logger.log(data.toString());
+		});
+
+		cmd.on('exit', function (code) {
+			logger.log('pixhawk firmware restore exited with code '
+				+ code.toString());
+			socket.emit('restore px fw complete');
+		});
+
 		cmd.on('error', (err) => {
 			logger.log('Failed to start child process.');
 			logger.log(err.toString());
+			socket.emit('terminal output', err.toString() + '\n');
+			socket.emit('restore px fw complete');
+		});
+	});
+
+	// Restore pixhawk factory parameters
+	socket.on('restore px params', function(data) {
+		logger.log("restore px params");
+		var cmd = child_process.spawn('/usr/bin/python', ['-u',
+			_companion_directory + '/tools/flashPXParameters.py',
+			'--file', _companion_directory + '/fw/standard.params']);
+
+		cmd.stdout.on('data', function (data) {
+			socket.emit('terminal output', data.toString());
+			logger.log(data.toString());
+		});
+
+		cmd.stderr.on('data', function (data) {
+			socket.emit('terminal output', data.toString());
+			logger.log(data.toString());
+		});
+
+		cmd.on('exit', function (code) {
+			logger.log('pixhawk parameters restore exited with code '
+				+ code.toString());
+			socket.emit('restore px params complete');
+		});
+
+		cmd.on('error', (err) => {
+			logger.log('Failed to start child process.');
+			logger.log(err.toString());
+			socket.emit('terminal output', err.toString());
+			socket.emit('restore px params complete');
 		});
 	});
 

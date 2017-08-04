@@ -198,6 +198,30 @@ window.addEventListener('resize', resizeDynamicWidthElement);
 window.addEventListener("DOMContentLoaded", function() {
 	resizeDynamicWidthElement();
 });
+
+function restoreFw() {
+	if (confirm("Are you sure you want to reset ArduSub firmware to "
+		+ "factory default?")) {
+		document.getElementById('restore fw').disabled = true;
+		socket.emit('restore px fw');
+	}
+}
+
+function restoreParams() {
+	if (confirm("Are you sure you want to reset ArduSub parameters to "
+		+ "factory default?")) {
+		document.getElementById('restore params').disabled = true;
+		socket.emit('restore px params');
+	}
+}
+
+socket.on('restore px fw complete', function(data){
+	document.getElementById('restore fw').disabled = false;
+});
+
+socket.on('restore px params complete', function(data){
+	document.getElementById('restore params').disabled = false;
+});
 </script>
 
 <h1>Software Status and Update</h1>
@@ -250,6 +274,14 @@ window.addEventListener("DOMContentLoaded", function() {
 					<h4>Upload Firmware File:</h4>
 					<input id="pixhawkFileButton" type="submit" class="btn btn-primary" value="Upload" onClick="submit(updatePixhawkFile, pixhawkProgress, 'pixhawkFile')" style="display:table-cell"/>
 					<input type="file" id="pixhawkFile" style="display:table-cell" enabled/>
+
+					<h4>Restore Factory Defaults</h4>
+					<button type="button" class="btn btn-primary"
+						id="restore fw" onclick="restoreFw()">
+						Restore Default Firmware</button>
+					<button type="button" class="btn btn-primary"
+						id="restore params" onclick="restoreParams()">
+						Restore Default Parameters</button>
 				</div>
 				<br />
 				<div>
