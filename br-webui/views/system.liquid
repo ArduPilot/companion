@@ -24,9 +24,12 @@ socket.on('cpu stats', function(data) {
 socket.on('terminal output', function(data) {
 	var terminalEl = document.getElementById("terminal-output");
 	var html = terminalEl.innerHTML + data;
-
+	var autoscroll = terminalEl.scrollHeight - terminalEl.scrollTop
+		=== terminalEl.clientHeight;
 	terminalEl.innerHTML = html.replace(/\n.*?\r/g, "\n");
-	terminalEl.scrollTop = terminalEl.scrollHeight;
+	if (autoscroll) {
+		terminalEl.scrollTop = terminalEl.scrollHeight;
+	}
 });
 
 socket.on('companion version', function(data) {
