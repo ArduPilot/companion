@@ -183,6 +183,21 @@ function startWLDriver() {
 function stopWLDriver() {
 	socket.emit('stop WL driver');
 }
+
+// Set width of all "dynamic-parent-width" elements to parent width
+function resizeDynamicWidthElement() {
+    var elements = document.getElementsByClassName("dynamic-parent-width");
+    for (i=0; i<elements.length; i++) {
+        elements[i].style.width = elements[i].parentElement.clientWidth + "px";
+    }
+}
+
+// Create event listener to dynamically resize elements when page is resized
+window.addEventListener('resize', resizeDynamicWidthElement);
+
+window.addEventListener("DOMContentLoaded", function() {
+	resizeDynamicWidthElement();
+});
 </script>
 
 <h1>Software Status and Update</h1>
@@ -238,7 +253,9 @@ function stopWLDriver() {
 				</div>
 				<br />
 				<div>
-				<textarea rows="20" cols="120" id="terminal-output" style="font-family:monospace"></textarea>
+				<textarea rows="20" cols="120" id="terminal-output"
+					style="font-family:monospace; resize: vertical"
+					class="dynamic-parent-width" readonly></textarea>
 				</div>
 			</div>
 		</div>
