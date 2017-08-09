@@ -22,9 +22,11 @@ socket.on('cpu stats', function(data) {
 });
 
 socket.on('terminal output', function(data) {
-	var currentHTML = document.getElementById("terminal-output").innerHTML;
-	document.getElementById("terminal-output").innerHTML = currentHTML + data;
-	document.getElementById("terminal-output").scrollTop = document.getElementById("terminal-output").scrollHeight
+	var terminalEl = document.getElementById("terminal-output");
+	var html = terminalEl.innerHTML + data;
+
+	terminalEl.innerHTML = html.replace(/\n.*?\r/g, "\n");
+	terminalEl.scrollTop = terminalEl.scrollHeight;
 });
 
 socket.on('companion version', function(data) {
