@@ -1,9 +1,7 @@
 #!/usr/bin/python
 
-import serial
 import socket
 import time
-import argparse
 import json
 import endpoint
 
