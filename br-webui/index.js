@@ -734,10 +734,34 @@ io.on('connection', function(socket) {
 		cmd.on('error', (err) => {
 			logger.log('Failed to start child process.');
 			logger.log(err.toString());
-		});	
+		});
 	});
-	
-	
+
+	socket.on('save params', function(data) {
+		var file_path = "/home/pi/" + data.file
+		fs.writeFile(file_path, data.params, function(err) {
+			if(err) {
+				return console.log(err);
+			}
+			console.log("The file was saved!");
+		});
+	});
+
+	socket.on('load params', function(data) {
+		var file_path = "/home/pi/" + data.file;
+		fs.readFile(file_path, function(err, param_data) {
+			if(err) {
+				return console.log(err);
+			}
+
+			socket.emit('load params response', {
+				'params':param_data.toString(),
+				'file':data.file
+			});
+			console.log("The file was loaded!");
+		});
+	});
+
 	socket.on('restart video', function(data) {
 		logger.log(_companion_directory + '/scripts/restart-raspivid.sh "' + data.rpiOptions + '" "' + data.gstOptions + '"');
 		var cmd = child_process.spawn(_companion_directory + '/scripts/restart-raspivid.sh', [data.rpiOptions , data.gstOptions], {

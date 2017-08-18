@@ -87,6 +87,18 @@ else
     sudo pip install grequests
 fi
 
+# copy default parameters if neccessary
+cd /home/pi/companion/params
+
+for default_param_file in *; do
+    if [[ $default_param_file == *".param.default" ]]; then
+        param_file="/home/pi/"$(echo $default_param_file | sed "s/.default//")
+        if [ ! -e "$param_file" ]; then
+            cp $default_param_file $param_file
+        fi
+    fi
+done
+
 echo 'Update Complete, refresh your browser'
 
 sleep 1

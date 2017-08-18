@@ -2,8 +2,55 @@
 
 <script>
 	var socket = io();
-	
+
+	const GST_PARAM_FILE = 'gstreamer.param';
+	const CAM_PARAM_FILE = 'rpicamera.param';
+
+	var gst_params_loaded = false;
+	var cam_params_loaded = false;
+
+	function saveOptions() {
+		var rpiOptions = document.getElementById('rpiOptions').value;
+		var gstOptions = document.getElementById('gstOptions').value;
+		socket.emit('save params', {
+			'file':CAM_PARAM_FILE,
+			'params':rpiOptions
+		});
+		socket.emit('save params', {
+			'file':GST_PARAM_FILE,
+			'params':gstOptions
+		});
+	}
+
+	function loadOptions() {
+		socket.emit('load params', {'file':CAM_PARAM_FILE});
+		socket.emit('load params', {'file':GST_PARAM_FILE});
+	}
+
+	socket.on('load params response', function(data) {
+		switch(data.file) {
+		case CAM_PARAM_FILE:
+			document.getElementById('rpiOptions').value = data.params;
+			cam_params_loaded = true;
+			break;
+		case GST_PARAM_FILE:
+			document.getElementById('gstOptions').value = data.params;
+			gst_params_loaded = true;
+			break;
+		}
+
+		// If both are loaded, enable inputs
+		if (cam_params_loaded && gst_params_loaded) {
+			document.getElementById('rpiOptions').disabled = false;
+			document.getElementById('gstOptions').disabled = false;
+			document.getElementById('camRestartBtn').disabled = false;
+			document.getElementById('saveOptionsBtn').disabled = false;
+		}
+	});
+
 	function restartCamera() {
+		saveOptions();
+
 		var rpiOptions = document.getElementById('rpiOptions').value.replace(/\n/g, ' ');
 		var gstOptions = document.getElementById('gstOptions').value.replace(/\n/g, ' ');
 		console.log('rpiOptions', rpiOptions);
@@ -11,9 +58,10 @@
 		socket.emit('restart video', {
 			'rpiOptions':rpiOptions,
 			'gstOptions':gstOptions
-			
 		});
 	}
+
+	loadOptions();
 </script>
 
 <h1>Camera Setup</h1>
@@ -27,28 +75,21 @@
 			<div class="panel-body">
 				<div class="col-md-6">
 					<h4>raspivid options:</h4>
-					<textarea rows="20" id="rpiOptions" style="font-family:monospace; width:100%;">
---nopreview
---mode 5
---bitrate 15000000
---intra 1
---awb auto
---brightness 55
---saturation 10
---sharpness 50
---contrast 15
--fl
---timeout 0</textarea>
+					<textarea rows="20" id="rpiOptions" disabled
+						style="font-family:monospace; width:100%;">Loading...
+					</textarea>
 				</div>
 				<div class="col-md-6">
 					<h4>gstreamer options:</h4>
-					<textarea rows="20" id="gstOptions" style="font-family:monospace; width:100%;">
-! h264parse
-! rtph264pay config-interval=10 pt=96
-! udpsink host=192.168.2.1 port=5600</textarea>
+					<textarea rows="20" id="gstOptions" disabled
+						style="font-family:monospace; width:100%;">Loading...
+					</textarea>
 				</div>
 				<div class="col-md-12">
-					<button class="btn btn-primary" onclick="restartCamera()">Restart Camera</button>
+					<button class="btn btn-primary" id="camRestartBtn" disabled
+						onclick="restartCamera()">Restart Camera</button>
+					<button class="btn btn-primary" id="saveOptionsBtn" disabled
+						onclick="saveOptions()">Save Options</button>
 				</div>
 			</div>
 		</div>
