@@ -22,6 +22,23 @@ git submodule sync
 
 # https://git-scm.com/docs/git-submodule#git-submodule-status--cached--recursive--ltpathgt82308203
 
+echo 'Checking mavlink status...'
+MAVLINK_STATUS=$(git submodule status | grep mavlink | head -c 1)
+if [[ ! -z $MAVLINK_STATUS && ($MAVLINK_STATUS == '+' || $MAVLINK_STATUS == '-') ]]; then
+    # Remove old mavlink directory if it exists
+    [ -d ~/mavlink ] && sudo rm -rf ~/mavlink
+    
+    echo 'mavlink needs update.'
+    git submodule update --recursive -f submodules/mavlink
+    echo 'Installing mavlink...'
+    cd /home/pi/companion/submodules/mavlink/pymavlink
+    sudo python setup.py build install || { echo 'mavlink installation failed!'; }
+else
+    echo 'mavlink is up to date.'
+fi
+
+cd /home/pi/companion
+
 echo 'Checking MAVProxy status...'
 MAVPROXY_STATUS=$(git submodule status | grep MAVProxy | head -c 1)
 if [[ ! -z $MAVPROXY_STATUS && ($MAVPROXY_STATUS == '+' || $MAVPROXY_STATUS == '-') ]]; then
