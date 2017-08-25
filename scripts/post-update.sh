@@ -99,6 +99,13 @@ for default_param_file in *; do
     fi
 done
 
+# change the pi user password to 'bluerobotics' instead of the default 'raspberry'
+PRE_0_0_8=$(( git rev-list --count --left-right 0.0.8...revert-point || echo 0 ) | cut -f1)
+if (( $PRE_0_0_8 > 0 )); then
+    echo "changing default password to 'companion'..."
+    echo "pi:companion" | sudo chpasswd
+fi
+
 echo 'Update Complete, refresh your browser'
 
 sleep 1
