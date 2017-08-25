@@ -44,6 +44,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   
    config.vm.provision :"shell", inline: <<-SHELL
         echo "[Jetson-TX1]: Starting install"
+        sudo apt-get update
 	sudo apt-get install -y libgtk2.0 xterm
 	mkdir JetPack
  	pushd JetPack
