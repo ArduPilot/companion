@@ -573,9 +573,11 @@ networking.on('connection', function(socket) {
 	});
 });
 
-function updateInternetStatus() {
+function updateInternetStatus(should_log) {
 	var cmd = child_process.exec('ping -c1 google.com', function (error, stdout, stderr) {
-		logger.log("ping -c1 google.com : ", error + stdout + stderr);
+		if (should_log) {
+			logger.log("ping -c1 google.com : ", error + stdout + stderr);
+		}
 		if (error) {
 			_internet_connected = false;
 		} else {
@@ -585,7 +587,8 @@ function updateInternetStatus() {
 	});
 }
 
-setInterval(updateInternetStatus, 2500);
+updateInternetStatus(true);
+setInterval(updateInternetStatus, 2500, false);
 
 // get cpu & ram usage
 function updateCPUStats () {
