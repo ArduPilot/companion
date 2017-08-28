@@ -59,6 +59,10 @@ app.get('/network', function(req, res) {
 	res.render('network', {});
 });
 
+app.get('/waterlinked', function(req, res) {
+	res.render('waterlinked', {});
+});
+
 
 // Thank you > https://github.com/nesk/network.js/issues/8
 app.get('/test', function(req, res) {
