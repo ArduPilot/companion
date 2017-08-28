@@ -1,0 +1,27 @@
+0.0.7:
+
+Initial release
+
+- Setup/configuration on port 2770
+- WiFi Setup
+- Flash Pixhawk
+- Companion updates
+- Communications routing
+- Raspberry Pi Camera configuration
+- Filesystem access on port 7777
+- Terminal access on port 8088
+
+0.0.8:
+
+- Various bugfixes
+- Don't include -roi option in camera configuration ui
+- Network diagnostics: bandwidth, latency
+- CPU and ram usage monitoring
+- Lockout functions requiring internet when not available
+- Git remote configuration
+- Support for NMEA sentence input on port 27000
+- Support for json-formatted gps input on port 25100
+- Support for Water Linked Underwater GPS system
+- Allow adjusting/saving camera configuration used at boot
+- Factory firmware and parameter reset
+- Change the default password from 'raspberry' to 'companion'
