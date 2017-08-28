@@ -132,7 +132,7 @@ uploader.on('complete', function(fileInfo) {
 });
 uploader.on('error', function(err) {
 	console.log('Error!', err);
-	disableUpdates(false);
+	enableUpdates(true);
 	showPixhawkSpinner(false);
 	showCompanionSpinner(false);
 	
@@ -156,7 +156,7 @@ function submit(onComplete, onStream, fileElement) {
 		return false;
 	}
 	
-	disableUpdates(true);
+	enableUpdates(false);
 	if (fileElement == 'pixhawkFile') {
 		showPixhawkSpinner(true);
 	} else {
