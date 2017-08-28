@@ -58,22 +58,26 @@ with open(filename,'r') as f:
 		line = line.split(',')
 		name = line[0]
 		value = float(line[1])
-	
-		print "Sending " + name + " = " + str(value) + "\t\t\t", 
-	
-		master.param_set_send(name,value)
-		start = time.time()
 		
 		verified = False
+		attempts = 0
 		
-		while time.time() < start + timeout:
-			msg = master.recv_match()
-			if msg is not None:
-				if msg.get_type() == "PARAM_VALUE" and msg.param_id == name and msg.param_value == value:
-					print " OK"
-					verified = True
-					break
-			time.sleep(0.01)
+		while not verified and attempts < 3:
+			print "Sending " + name + " = " + str(value) + "\t\t\t", 
+		
+			master.param_set_send(name,value)
+			start = time.time()
+						
+			while time.time() < start + timeout:
+				msg = master.recv_match()
+				if msg is not None:
+					if msg.get_type() == "PARAM_VALUE" and msg.param_id == name and msg.param_value == value:
+						print " OK"
+						verified = True
+						break
+				time.sleep(0.01)
+				
+			attempts = attempts + 1
 			
 		if not verified:
 			print " FAIL!"
