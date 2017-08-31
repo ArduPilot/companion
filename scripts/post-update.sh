@@ -29,7 +29,7 @@ if [[ ! -z $MAVLINK_STATUS && ($MAVLINK_STATUS == '+' || $MAVLINK_STATUS == '-')
     [ -d ~/mavlink ] && sudo rm -rf ~/mavlink
     
     echo 'mavlink needs update.'
-    git submodule update --recursive -f submodules/mavlink
+    git submodule update --recursive --init -f submodules/mavlink
     echo 'Installing mavlink...'
     cd /home/pi/companion/submodules/mavlink/pymavlink
     sudo python setup.py build install || { echo 'mavlink installation failed!'; }
