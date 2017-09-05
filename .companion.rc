@@ -13,7 +13,7 @@ else
 	rm -f /home/pi/.updating
 	if [ -d /home/pi/.companion ]; then
 		rm -rf $COMPANION_DIR
-		sudo -H -u pi cp -r ~/.companion $COMPANION_DIR
+		sudo -H -u pi cp -r /home/pi/.companion $COMPANION_DIR
 	fi
 	sudo -H -u pi echo 'Trying to run again...' >> /home/pi/.update_log
 	$COMPANION_DIR/.companion.rc
