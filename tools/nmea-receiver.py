@@ -4,6 +4,7 @@ import time
 import pynmea2
 import json
 import socket
+from os import system
 
 ip="127.0.0.1"
 portnum = 25100
@@ -36,11 +37,15 @@ data = {
 }
 
 data_received = False
+gps_type_set = False
 
 while True:
     
     # Check at 1Hz until data is seen on the line, then check at 20Hz
     if data_received:
+        if not gps_type_set:
+            system('screen -S mavproxy -p 0 -X stuff "param set GPS_TYPE 14^M"')
+            gps_type_set = True
         time.sleep(0.05)
     else:
         time.sleep(1)

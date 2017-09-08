@@ -7,6 +7,9 @@ import argparse
 import grequests
 from pymavlink import mavutil
 
+from os import system
+system('screen -S mavproxy -p 0 -X stuff "param set GPS_TYPE 14^M"')
+
 master = mavutil.mavlink_connection('udpout:192.168.2.1:14550', source_system=2, source_component=1)
 
 parser = argparse.ArgumentParser(description="Driver for the Water Linked Underwater GPS system.")
