@@ -867,13 +867,13 @@ io.on('connection', function(socket) {
 			args += ' --port=' + data.port;
 		}
 		var cmd = child_process.exec('screen -dm -S wldriver ' + _companion_directory + '/tools/underwater-gps.py' + args, function(error, stdout, stderr) {
-			logger.log(error, stdout, stderr);
+			logger.log('Start waterlinked driver:', error, stdout, stderr);
 		});
 	});
 	
 	socket.on('stop WL driver', function(data) {
 		var cmd = child_process.exec('screen -X -S wldriver quit', function(error, stdout, stderr) {
-			logger.log(error, stdout, stderr);
+			logger.log('Stop waterlinked driver:', error, stdout, stderr);
 		});
 	});
 	
