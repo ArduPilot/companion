@@ -3,7 +3,11 @@
 REMOTE=$1
 REF=$2
 
+echo 'The update process will begin momentarily.'
+echo 'This update may take more than 15 minutes.'
+echo 'Please be patient and DO NOT REMOVE POWER FROM THE ROV!'
 
+sleep 10
 
 echo 'adding lock'
 touch /home/pi/.updating

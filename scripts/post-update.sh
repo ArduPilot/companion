@@ -8,7 +8,8 @@ if ! npm list nodegit | grep -q nodegit@0.18.3; then
     if [ $? -ne 0 ] # If "wget" failed:
     then
         echo 'Failed to retrieve nodegit packages; Aborting update'
-        echo 'Rebooting'
+        echo 'Rebooting to repair installation, this will take a few minutes'
+        echo 'Please DO NOT REMOVE POWER FROM THE ROV! (until QGC makes a connection again)'
         sleep 0.1
         sudo reboot
     fi
@@ -24,7 +25,8 @@ npm install
 if [ $? -ne 0 ] # If "npm install" failed:
 then
     echo 'Failed to install required npm modules; Aborting update'
-    echo 'Rebooting'
+        echo 'Rebooting to repair installation, this will take a few minutes'
+        echo 'Please DO NOT REMOVE POWER FROM THE ROV! (until QGC makes a connection again)'
     sleep 0.1
     sudo reboot
 fi
@@ -36,7 +38,8 @@ git submodule init && git submodule sync
 if [ $? -ne 0 ] # If either "git submodule" failed:
 then
     echo 'Failed to update submodules; Aborting update'
-    echo 'Rebooting'
+        echo 'Rebooting to repair installation, this will take a few minutes'
+        echo 'Please DO NOT REMOVE POWER FROM THE ROV! (until QGC makes a connection again)'
     sleep 0.1
     sudo reboot
 fi
@@ -48,13 +51,13 @@ MAVLINK_STATUS=$(git submodule status | grep mavlink | head -c 1)
 if [[ ! -z $MAVLINK_STATUS && ($MAVLINK_STATUS == '+' || $MAVLINK_STATUS == '-') ]]; then
     # Remove old mavlink directory if it exists
     [ -d ~/mavlink ] && sudo rm -rf ~/mavlink
-
     echo 'mavlink needs update.'
     git submodule update --recursive --init -f submodules/mavlink
     if [ $? -ne 0 ] # If mavlink submodule update failed:
     then
         echo 'Failed to update mavlink submodule; Aborting update'
-        echo 'Rebooting'
+        echo 'Rebooting to repair installation, this will take a few minutes'
+        echo 'Please DO NOT REMOVE POWER FROM THE ROV! (until QGC makes a connection again)'
         sleep 0.1
         sudo reboot
     fi
@@ -65,7 +68,8 @@ if [[ ! -z $MAVLINK_STATUS && ($MAVLINK_STATUS == '+' || $MAVLINK_STATUS == '-')
     if [ $? -ne 0 ] # If mavlink installation update failed:
     then
         echo 'Failed to install mavlink; Aborting update'
-        echo 'Rebooting'
+        echo 'Rebooting to repair installation, this will take a few minutes'
+        echo 'Please DO NOT REMOVE POWER FROM THE ROV! (until QGC makes a connection again)'
         sleep 0.1
         sudo reboot
     fi
@@ -83,7 +87,8 @@ if [[ ! -z $MAVPROXY_STATUS && ($MAVPROXY_STATUS == '+' || $MAVPROXY_STATUS == '
     if [ $? -ne 0 ] # If MAVProxy submodule update failed:
     then
         echo 'Failed to update MAVProxy submodule; Aborting update'
-        echo 'Rebooting'
+        echo 'Rebooting to repair installation, this will take a few minutes'
+        echo 'Please DO NOT REMOVE POWER FROM THE ROV! (until QGC makes a connection again)'
         sleep 0.1
         sudo reboot
     fi
@@ -94,7 +99,8 @@ if [[ ! -z $MAVPROXY_STATUS && ($MAVPROXY_STATUS == '+' || $MAVPROXY_STATUS == '
     if [ $? -ne 0 ] # If MAVProxy installation update failed:
     then
         echo 'Failed to install MAVProxy; Aborting update'
-        echo 'Rebooting'
+        echo 'Rebooting to repair installation, this will take a few minutes'
+        echo 'Please DO NOT REMOVE POWER FROM THE ROV! (until QGC makes a connection again)'
         sleep 0.1
         sudo reboot
     fi
@@ -127,7 +133,8 @@ else
     if [ $? -ne 0 ] # If "pip install pynmea2" failed:
     then
         echo 'Failed to install pynmea2; Aborting update'
-        echo 'Rebooting'
+        echo 'Rebooting to repair installation, this will take a few minutes'
+        echo 'Please DO NOT REMOVE POWER FROM THE ROV! (until QGC makes a connection again)'
         sleep 0.1
         sudo reboot
     fi
@@ -142,7 +149,8 @@ else
     if [ $? -ne 0 ] # If "wget" failed:
     then
         echo 'Failed to retrieve grequests packages; Aborting update'
-        echo 'Rebooting'
+        echo 'Rebooting to repair installation, this will take a few minutes'
+        echo 'Please DO NOT REMOVE POWER FROM THE ROV! (until QGC makes a connection again)'
         sleep 0.1
         sudo reboot
     fi
@@ -153,7 +161,8 @@ else
     if [ $? -ne 0 ] # If "pip install grequests" failed:
     then
         echo 'Failed to install grequests; Aborting update'
-        echo 'Rebooting'
+        echo 'Rebooting to repair installation, this will take a few minutes'
+        echo 'Please DO NOT REMOVE POWER FROM THE ROV! (until QGC makes a connection again)'
         sleep 0.1
         sudo reboot
     fi
