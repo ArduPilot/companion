@@ -51,9 +51,24 @@ if [[ ! -z $MAVLINK_STATUS && ($MAVLINK_STATUS == '+' || $MAVLINK_STATUS == '-')
 
     echo 'mavlink needs update.'
     git submodule update --recursive --init -f submodules/mavlink
+    if [ $? -ne 0 ] # If mavlink submodule update failed:
+    then
+        echo 'Failed to update mavlink submodule; Aborting update'
+        echo 'Rebooting'
+        sleep 0.1
+        sudo reboot
+    fi
+
     echo 'Installing mavlink...'
     cd /home/pi/companion/submodules/mavlink/pymavlink
-    sudo python setup.py build install || { echo 'mavlink installation failed!'; }
+    sudo python setup.py build install
+    if [ $? -ne 0 ] # If mavlink installation update failed:
+    then
+        echo 'Failed to install mavlink; Aborting update'
+        echo 'Rebooting'
+        sleep 0.1
+        sudo reboot
+    fi
 else
     echo 'mavlink is up to date.'
 fi
@@ -65,9 +80,24 @@ MAVPROXY_STATUS=$(git submodule status | grep MAVProxy | head -c 1)
 if [[ ! -z $MAVPROXY_STATUS && ($MAVPROXY_STATUS == '+' || $MAVPROXY_STATUS == '-') ]]; then
     echo 'MAVProxy needs update.'
     git submodule update --recursive -f submodules/MAVProxy
+    if [ $? -ne 0 ] # If MAVProxy submodule update failed:
+    then
+        echo 'Failed to update MAVProxy submodule; Aborting update'
+        echo 'Rebooting'
+        sleep 0.1
+        sudo reboot
+    fi
+
     echo 'Installing MAVProxy...'
     cd /home/pi/companion/submodules/MAVProxy
-    sudo python setup.py build install || { echo 'MAVProxy installation failed!'; }
+    sudo python setup.py build install
+    if [ $? -ne 0 ] # If MAVProxy installation update failed:
+    then
+        echo 'Failed to install MAVProxy; Aborting update'
+        echo 'Rebooting'
+        sleep 0.1
+        sudo reboot
+    fi
 else
     echo 'MAVProxy is up to date.'
 fi
