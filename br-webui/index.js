@@ -676,7 +676,7 @@ io.on('connection', function(socket) {
 				detached: true
 			});	
 		} else {
-			var args = ['origin', '', 'stable'];
+			var args = ['origin', '', 'stable', 'true']; // remote, branch, tag, copy repo for revert?
 			cmd = child_process.spawn(_companion_directory + '/scripts/update.sh', args, {
 				detached: true
 			});
