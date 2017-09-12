@@ -1,5 +1,16 @@
 #!/bin/bash
 
+# Bugfix for revert on first update. 0.0.7 had a bug in update.sh where the companion directory was not copied correctly (no -r option)
+# Do it the right way here so we can revert if
+cd /home/pi/companion
+WAS_0_0_7=$(git rev-list --count revert-point...0.0.7)
+if [ $WAS_0_0_7 == 0 ]; then
+    echo '0.0.7 update, repairing fall-back...'
+    cp -r /home/pi/companion /home/pi/.companion
+    cd /home/pi/.companion
+    git reset --hard 0.0.7
+fi
+
 cd /home/pi/companion/br-webui
 
 if ! npm list nodegit | grep -q nodegit@0.18.3; then
