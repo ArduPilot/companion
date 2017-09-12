@@ -62,9 +62,9 @@ with open(filename,'r') as f:
 		verified = False
 		attempts = 0
 		
-		while not verified and attempts < 3:
-			print "Sending " + name + " = " + str(value) + "\t\t\t", 
+		print "Sending " + name + " = " + str(value) + "\t\t\t", 
 		
+		while not verified and attempts < 3:
 			master.param_set_send(name,value)
 			start = time.time()
 						
