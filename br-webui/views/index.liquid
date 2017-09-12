@@ -95,14 +95,16 @@ setInterval(function() {
 				<h3 class="panel-title">Wifi Setup</h3>
 			</div>
 			<div class="panel-body">
-				<h3>Wifi SSID:</h3>
-				<select class="form-control" id="ssid" style="width: 200px;"></select>
-				<h3>Password:</h3>
-				<div class="form-group">
-					<input class="form-control" id="password" type="password" style="width: 200px;" />
-					<button id="joinButton" type="button" class="btn btn-primary" onclick="joinNetwork()">Join Network</button>
-					<i id="spinner" class="fa fa-refresh fa-spin fa-2x fa-fw" style="visibility:hidden"></i>
-				</div>
+				<form onsubmit="joinNetwork(); return false">
+					<h3>Wifi SSID:</h3>
+					<select class="form-control" id="ssid" style="width: 200px;"></select>
+					<h3>Password:</h3>
+					<div class="form-group">
+						<input class="form-control" id="password" type="password" style="width: 200px;" />
+						<button id="joinButton" type="submit" class="btn btn-primary">Join Network</button>
+						<i id="spinner" class="fa fa-refresh fa-spin fa-2x fa-fw" style="visibility:hidden"></i>
+					</div>
+				</form>
 			</div>
 		</div>
 	</div>

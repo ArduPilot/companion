@@ -224,7 +224,7 @@
 				<h3 class="panel-title">Create Serial Endpoint</h3>
 			</div>
 			<div class="panel-body">
-				<div id="serialConfig">
+				<form id="serialConfig" onsubmit="addSerialEndpoint(); return false">
 					<div class="form-group">
 						<label>Serial Port:</label>
 						<select class="form-control" id="serialPorts"></select>
@@ -233,8 +233,8 @@
 						<label>Baud Rate:</label>
 						<input type="text" class="form-control" id="baudrate" />
 					</div>
-					<button type="button" class="btn btn-primary" onclick="addSerialEndpoint()" >Add Serial Endpoint</button>
-				</div>
+					<button type="submit" class="btn btn-primary">Add Serial Endpoint</button>
+				</form>
 			</div>
 		</div>
 	</div>
@@ -244,7 +244,7 @@
 				<h3 class="panel-title">Create UDP Endpoint</h3>
 			</div>
 			<div class="panel-body">
-				<div id="udpConfig">
+				<form id="udpConfig" onsubmit="addUDPEndpoint(); return false">
 					<div class="form-group">
 						<label>UDP IP Address:</label>
 						<input type="text" class="form-control" id="udpIP"></input>
@@ -253,8 +253,8 @@
 						<label>UDP Port:</label>
 						<input type="text" class="form-control" id="udpPort"></input>
 					</div>
-					<button type="button" class="btn btn-primary" onclick="addUDPEndpoint()">Add UDP Endpoint</button>
-				</div>
+					<button type="submit" class="btn btn-primary">Add UDP Endpoint</button>
+				</form>
 			</div>
 		</div>
 	</div>
@@ -267,7 +267,7 @@
 				<h3 class="panel-title">Create Routes</h3>
 			</div>
 			<div class="panel-body">
-				<form class="form-inline">
+				<form class="form-inline" onsubmit="connect(); return false">
 					<div class="form-group">
 						<select class="form-control" id="source"></select>
 						<select class="form-control" id="direction">
@@ -277,7 +277,7 @@
 						</select>
 						<select class="form-control" id="target"></select>
 					</div>
-					<button type="button" class="btn btn-primary" onclick="connect()">Connect</button>
+					<button type="submit" class="btn btn-primary">Connect</button>
 				</form>
 			</div>
 		</div>

@@ -260,14 +260,14 @@ gitsetup.emit('authenticated?');
 
 
 <!--- Get Github Credentials --->
-<div id="authenticate" style="display: none">
+<form id="authenticate" style="display: none" onsubmit="authenticate(); return false">
 	<h1>Authentication Required</h1>
 	<span>github username</span>
 	<input class="form-control" id="username" style="width: 200px;" />
 	<span>github password</span>
 	<input class="form-control" id="password" type="password" style="width: 200px;" />
-	<input type="submit" class="btn btn-primary" value="Authenticate" onClick="authenticate()"/>
-</div>
+	<input type="submit" class="btn btn-primary" value="Authenticate"/>
+</form>
 
 
 <!--- Main Content --->
@@ -286,11 +286,11 @@ gitsetup.emit('authenticated?');
 					<h1>Current HEAD:</h1>
 					<h3 id="HEAD label"><h3>
 					<h1>Add new remote</h1>
-					<div class="form-group">
+					<form class="form-group" onsubmit="addRemote(); return false">
 						<input class="form-control" id="new remote name" style="width: 400px;" />
 						<input class="form-control" id="new remote url" style="width: 400px;" value="ssh://git@github.com/bluerobotics/repository.git" />
-						<input type="submit" class="btn btn-primary" value="Add New Remote" onClick="addRemote()" />
-					</div>
+						<input type="submit" class="btn btn-primary" value="Add New Remote" />
+					</form>
 					<h1>remotelist</h1>
 					<input type="submit" class="btn btn-primary" value="Checkout" onClick="checkoutCompanion()"/>
 					<input type="submit" class="btn btn-primary" value="Fetch" onClick="fetchCompanion()"/>
