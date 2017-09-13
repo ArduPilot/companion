@@ -25,3 +25,7 @@ Initial release
 - Allow adjusting/saving camera configuration used at boot
 - Factory firmware and parameter reset
 - Change the default password from 'raspberry' to 'companion'
+
+0.0.9:
+
+- Bugfix for determining hardware type before expanding filesystem on first boot
