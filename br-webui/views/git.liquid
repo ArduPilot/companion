@@ -7,9 +7,14 @@ var _refs = null;
 var _choiceElement = null;
 
 gitsetup.on('terminal output', function(data) {
-	var currentHTML = document.getElementById("terminal-output").innerHTML;
-	document.getElementById("terminal-output").innerHTML = currentHTML + data;
-	document.getElementById("terminal-output").scrollTop = document.getElementById("terminal-output").scrollHeight
+	var terminalEl = document.getElementById("terminal-output");
+	var html = terminalEl.innerHTML + data;
+	var autoscroll = terminalEl.scrollHeight - terminalEl.scrollTop
+		=== terminalEl.clientHeight;
+	terminalEl.innerHTML = html.replace(/\n.*?\r/g, "\n");
+	if (autoscroll) {
+		terminalEl.scrollTop = terminalEl.scrollHeight;
+	}
 });
 
 socket.on('current HEAD', setHEAD);
@@ -214,6 +219,7 @@ socket.on('authenticated', function(data) {
 	document.getElementById('authentication').style.display = "none";
 	document.getElementById('authenticate').style.display = data ? "none" : "inline";
 	document.getElementById('content').style.display = data ? "inline" : "none";
+	resizeDynamicWidthElement();
 });
 
 
@@ -250,6 +256,21 @@ gitsetup.emit('get remotes');
 
 // Ask backend if we are authenticated with github
 gitsetup.emit('authenticated?');
+
+// Set width of all "dynamic-parent-width" elements to parent width
+function resizeDynamicWidthElement() {
+	var elements = document.getElementsByClassName("dynamic-parent-width");
+	for (i=0; i<elements.length; i++) {
+		elements[i].style.width = elements[i].parentElement.clientWidth + "px";
+	}
+}
+
+// Create event listener to dynamically resize elements when page is resized
+window.addEventListener('resize', resizeDynamicWidthElement);
+
+window.addEventListener("DOMContentLoaded", function() {
+	resizeDynamicWidthElement();
+});
 </script>
 
 <!--- Checking Github Authentication Status --->
@@ -301,7 +322,9 @@ gitsetup.emit('authenticated?');
 						<!---populated by javascript--->
 					</div>
 					<div>
-						<textarea rows="20" cols="120" id="terminal-output" style="font-family:monospace"></textarea>
+						<textarea rows="20" cols="120" id="terminal-output"
+							style="font-family:monospace; resize: vertical"
+							class="dynamic-parent-width" readonly></textarea>
 					</div>
 				</div>
 			</div>
