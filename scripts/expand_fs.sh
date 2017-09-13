@@ -3,8 +3,8 @@
 # Borrowed and modified from Raspbian usr/lib/raspi-config/init_resize.sh
 
 # Abort if we are not on a Raspberry Pi
-if grep -q 'Hardware : BCM2' /proc/cpuinfo; then
-    echo "RPI BUILD!"
+if grep -q 'Hardware.*: BCM2' /proc/cpuinfo; then
+    echo "Expanding file system on Raspberry Pi!"
     RPI="1"
 else
     echo "This script should only be run on a Raspberry Pi!"
