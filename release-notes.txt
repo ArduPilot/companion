@@ -29,3 +29,7 @@ Initial release
 0.0.9:
 
 - Bugfix for determining hardware type before expanding filesystem on first boot
+
+0.0.10:
+
+- Update post-sideload.sh for zipped updates
