@@ -36,6 +36,12 @@ time sudo ./flashall.sh # ~4 minutes
 
 # nb: flashing Edison while in PH2 is possible; check USB connections at PH2; right-most micro-USB is used for flashing
 
+# immediately after flash 201709182117
+#user@edison:~$ df -H /
+#Filesystem      Size  Used Avail Use% Mounted on
+#/dev/root       1.1G  434M  561M  44% /
+#user@edison:~$ 
+
 # STEP4 : install packages
 #    power on the edison
 #    have cable in left-most (console) port of Edison
@@ -53,7 +59,10 @@ sudo rm -f /etc/apt/apt.conf.d/50proxy # may not be available
 
 IFACE=enp0s20u2u2c2
 sudo ip a a 192.168.2.1/24 dev $IFACE
-sudo iptables -t nat -A POSTROUTING --source 192.168.2.15/24 -j SNAT --to-source 192.168.1.196
+sudo iptables -t nat -A POSTROUTING --source 192.168.2.15/24 -j SNAT --to-source 192.168.1.194
+
+# add a default route from edison:
+sudo ip r a default dev usb0 via 192.168.2.1
 
 # For those running Windows, you should be able to share your Internet
   connection with Edison to allow it to access the Internet.
@@ -66,20 +75,20 @@ echo "/dev/mmcblk0p10     /home       auto    noauto,comment=systemd.automount,n
 sudo mount /home # make sure that worked
 sudo reboot # just to ensure we're starting clean
 
+# log back in as user
 sudo chown -R user.user ~user # correct permissions
 
 # create an apsync user:
 sudo useradd -s /bin/bash -m -U -G sudo,netdev,users,dialout,video apsync
 sudo passwd apsync # apsync
 
-# add a default route from edison:
-sudo ip r a default dev usb0 via 192.168.2.1
+# log out as user
 
-# proceed working as the apsync user:
+# proceed working as the apsync user over ssh:
+ssh-copy-id apsync@192.168.2.15
 ssh apsync@192.168.2.15
 
 echo "nameserver 8.8.8.8" | sudo dd of=/etc/resolv.conf
-sudo ip r a default dev usb0 via 192.168.2.1
 time sudo apt-get -f -y install # fix some package issues first, 43s
 time sudo apt-get update # 80s
 sudo apt-get install -y ntpdate # clock needs setting for cert. validation
@@ -89,31 +98,43 @@ sudo ntpdate -s ntp.iinet.net.au
 # proceed to install packages:
 time sudo apt-get install -y git  # 2m30
 
+echo "nameserver 8.8.8.8" | sudo dd of=/etc/resolv.conf
+
 pushd ~ 
 mkdir GitHub
 pushd ~/GitHub
 time git clone https://github.com/ArduPilot/companion.git
+# at this time I usually rsync over this repository to ensure I'm getting current changes!
 pushd companion/Intel_Edison/Debian
 sudo ./set-hostname   # reset the machine's hostname
 time sudo ./2_install_packages.sh # 20m
-time sudo ./install_niceties || echo "Failed"
-time sudo ./3_wifi_access_point.sh
+time sudo ./install_niceties || echo "Failed"  # 45s
+time sudo ./3_wifi_access_point.sh # 
 sudo reboot # wifi up needs a reboot
 sudo nmcli c u WiFiAP # bring it up once on reboot
+
+# now is probably a good time to connect to WiFi
 
 pushd ~/GitHub/companion/Intel_Edison/Debian
 time sudo ./6_setup_cmavnode.sh # ~10m
 time sudo ./7_dflogger.sh # ~15m
 time sudo ./5_setup_mavproxy.sh # ~3s
-popd
 
 time sudo ./setup_video_streaming || echo "Failed"  # 1m
 time sudo ./install_avahi # 46s
+
+time sudo apt-get install -y libxml2-dev libxslt1.1 libxslt1-dev # 3s
+time sudo pip install future lxml # 4m
+time sudo ./install_pymavlink # new version required for apweb #1m
+time sudo ./install_apweb # 2m
 
 # REMEMBER: set dataflash logging up on the autopilot!
 # on a PixHawk2 with an Edison inside:
 # param set SERIAL2_BAUD 921600
 # param set LOG_BACKEND_TYPE 3
+
+# reboot...
+sudo reboot
 
 # follow instructions in testing.txt to make sure image works!
 
@@ -131,29 +152,30 @@ cp -a edison-ToFlash $APSYNC_TOFLASH
 pushd $APSYNC_TOFLASH
 rm edison-image-edison.ext4 edison-image-edison.hddimg
 
-# on both host and edison:
-HOST_IP=10.0.1.36
-HOST_IP=192.168.2.1
+# on host (e.g.)
+HOST_IP=10.0.1.116
 
 # on host:
-nc -l $HOST_IP 9876 | dd >edison-image-apsync-boot.hddimg
+nc -w 5 -l $HOST_IP 9876 | dd status=progress >edison-image-apsync-boot.hddimg
 # on Edison:
 time (sudo dd if=/dev/mmcblk0p7 | nc $HOST_IP 9876) # ~14s
 
 # on host:
-nc -l $HOST_IP 9876 | dd >edison-image-apsync-root.ext4
+nc -w 5 -l $HOST_IP 9876 | dd status=progress >edison-image-apsync-root.ext4
 # on Edison:
 time (sudo dd if=/dev/mmcblk0p8 | nc $HOST_IP 9876) # ~6 minutes
 
 # on host:
-nc -l $HOST_IP 9876 | dd >edison-image-apsync-home.ext4
+nc -w 5 -l $HOST_IP 9876 | dd status=progress >edison-image-apsync-home.ext4
 # on Edison:
 time (sudo dd if=/dev/mmcblk0p10 | nc $HOST_IP 9876) # ~5 minutes
 
 # override some files, add some convenience for Windows users
-COMPANION_HOME=... # e.g. $HOME/rc/companion
+# on host:
+COMPANION_HOME=$HOME/rc/companion # e.g.
 EDISON_HOME=$COMPANION_HOME/Intel_Edison/Debian
 EDISON_EXTRAFILES="$EDISON_HOME/extra"
+ls $EDISON_EXTRAFILES
 for file in flashall.bat flashall.sh dfu-util.exe libusb-1.0.dll README.txt; do
     cp $EDISON_EXTRAFILES/$file .
 done
@@ -163,9 +185,7 @@ popd
 # create the tarball:
 TARNAME="$APSYNC_TOFLASH.tar"
 time tar cf $TARNAME $APSYNC_TOFLASH # ~10s
-date
-time xz -e $TARNAME # ~20 minutes
+time xz -v -e $TARNAME # ~20 minutes
 TARBALL="$TARNAME.xz"
 ls -la --si $TARBALL # ~345MB
 rsync -aP --bwlimit=100k $TARBALL autotest@autotest.ardupilot.org:APM/buildlogs/binaries/Companion/next/ # ~53 minutes
-

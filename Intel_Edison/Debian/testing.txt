@@ -1,1 +1,5 @@
+- connect powered  USB hub to the edison's right-hand port
+ - see if plugging in a camera gives a /dev/video0
+
 - Test according to instructions in ../../Common/Ubuntu/testing.txt
+
