@@ -17,14 +17,15 @@ shift
 STREAM_TO_PORT=5600
 
 SOURCE_DEVICE=/dev/video0
+WIDTH=1920
+HEIGHT=1080
+FRAMERATE=30/1
 
-gst-launch-1.0 -v \
-    v4l2src device=$SOURCE_DEVICE ! \
-    'video/x-raw,framerate=10/1,width=160,height=120' ! \
-    x264enc ! \
-    'video/x-h264, stream-format=(string)byte-stream' ! \
-    rtph264pay ! \
-    udpsink host=$STREAM_TO_IP port=$STREAM_TO_PORT
+gst-launch-1.0 -e v4l2src device=$SOURCE_DEVICE ! \
+	video/x-h264,width=$WIDTH,height=$HEIGHT,framerate=$FRAMERATE ! \
+	h264parse ! \
+	rtph264pay config-interval=1 pt=96 ! \
+	udpsink host=$STREAM_TO_IP port=$STREAM_TO_PORT
 
 exit(1)
 
