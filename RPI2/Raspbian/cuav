@@ -1,0 +1,30 @@
+#!/bin/bash
+
+if [ $(id -u) -ne 0 ]; then
+   echo >&2 "Must be run as root"
+   exit 1
+fi
+
+set -e
+set -x
+
+pushd GitHub
+
+# temporarily install git version of mavproxy
+git clone https://github.com/ArduPilot/mavproxy
+pushd mavproxy
+python setup.py build install --user --force
+popd
+
+
+
+apt-get install -y libusb-1.0.0-dev libdc1394-22-dev libopencv-dev python-wxgtk2.8
+
+
+git clone https://github.com/CanberraUAV/cuav
+pushd cuav
+python setup.py build install --user --force
+
+cat >>$HOME/.mavinit.scr <<EOF
+module load cuav.modules.camera
+EOF

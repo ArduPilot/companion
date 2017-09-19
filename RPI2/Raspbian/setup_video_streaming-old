@@ -1,0 +1,26 @@
+#!/bin/bash
+
+if [ $(id -u) -ne 0 ]; then
+   echo >&2 "Must be run as root"
+   exit 1
+fi
+
+set -e
+set -x
+
+# live video related packages
+pushd GitHub
+
+git clone https://github.com/silvanmelchior/RPi_Cam_Web_Interface.git
+cd RPi_Cam_Web_Interface
+chmod u+x *.sh
+./install.sh
+<apache option>
+
+
+cvlc --no-audio v4l2:///dev/video0  --v4l2-fps 30  --v4l2-width 1920 --v4l2-height 1080 --v4l2-chroma MJPG --sout '#standard{access=http,mux=ts,dst=:8554/}'
+
+cvlc --no-audio v4l2:///dev/video0 --v4l2-width 1920 --v4l2-height 1080 --v4l2-chroma h264 --v4l2-fps 30 --v4l2-hflip 1 --v4l2-vflip 1 --sout '#standard{access=http,mux=ts,dst=:8555}' -I dummy
+
+sudo modprobe bcm2835-v4l2
+cvlc v4l2:///dev/video0 --v4l2-width 1920 --v4l2-height 1080 --v4l2-chroma h264 --sout '#standard{access=http,mux=ts,dst=0.0.0.0:12345}'

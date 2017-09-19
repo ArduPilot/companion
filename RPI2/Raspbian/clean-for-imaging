@@ -19,4 +19,6 @@ rm -f /home/pi/.ssh/authorized_keys
 dd if=/dev/zero of=$HOME/zeroes || true
 rm -f $HOME/zeroes
 
+./resize_filesystem_on_next_boot
+
 echo "Success"

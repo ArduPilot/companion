@@ -4,53 +4,68 @@
 # work for RPi3 and RPi1
 
 # Download Raspbian image from
-# https://www.raspberrypi.org/downloads/raspbian/ (lite image)
+# https://www.raspberrypi.org/downloads/raspbian/ (stretch lite image)
 
 # Flash image onto SD card per instructions linked from that page
 # on linux this will look something like:
-# time (sudo dd if=2017-03-02-raspbian-jessie-lite.img of=/dev/sdb && sync)
+# NOTE: make sure you use a 4GB card!
+# time (sudo dd status=progress if=2017-08-16-raspbian-stretch-lite.img of=/dev/mmcblk0 && sync)
 # (~7 minutes)
 
 # Boot Raspberry Pi.
 
-# Log in on the RPi console and:
+# Log in on the RPi console (pi/raspberry) and:
 # enable ssh:
 sudo systemctl enable ssh
 sudo systemctl start ssh
 
-#Setup is easier if you can ssh into the vehicle from an existing
+# Setup is easier if you can ssh into the vehicle from an existing
 #  desktop environment.  Use the ethernet connection for this.
 
 # create an apsync user:
 sudo useradd -s /bin/bash -m -U -G sudo,netdev,users,dialout,video apsync
 sudo passwd apsync # apsync
 
-# at this point logout of "pi" and log back in as "apsync"!
+# at this point logout of "pi"
+
+# authorize your identity on apsync, from your host machine:
+ssh-copy-id apsync@raspberrypi
+
+# and log back in as "apsync"!
 
 # enable the camera:
 sudo raspi-config
 # navigate Interfacing Options -> P1 Camera
 # select yes and confirm, reboot
 
+# log back in as apsync/apsync
+
+# update apt repository metadata
+time sudo apt-get update # 1m
+
 # install git
-sudo apt-get install -y git
+time sudo apt-get install -y git # 1m30s
 
 # get a copy of the companion repository onto the Pi:
 mkdir GitHub
 pushd GitHub
-git clone https://github.com/ArduPilot/companion
+time git clone https://github.com/ArduPilot/companion
+# usually at this point I rsync over the top of this checkout with the same repo on my laptop
 
 # run the installation scripts:
 pushd companion/RPI2/Raspbian || echo "Failed"
 sudo ./set-hostname   # reset the machine's hostname
 time sudo ./2_install_packages.sh || echo "Failed" # ~14m
-time sudo ./install_niceties || echo "Failed"
+time sudo ./install_niceties || echo "Failed" # 1m
 sudo ./2_setup_uart.sh || echo "Failed"
-time sudo ./2_use_networkmanager.sh || echo "Failed"
+time sudo ./2_use_networkmanager.sh || echo "Failed" # ~1m
 sudo reboot # network goes screwy after nm installed
+# log back in again as apsync/apsync
+ssh apsync@apsync
 pushd GitHub/companion/RPI2/Raspbian || echo "Failed"
-time sudo ./3_wifi_access_point.sh || echo "Failed"
+time sudo ./3_wifi_access_point.sh || echo "Failed" # Failure expected!
 sudo reboot   # reboot required before AP will work
+# log back in again as apsync/apsync
 sudo nmcli connection up WiFiAP #  apparently required first time!
 pushd GitHub/companion/RPI2/Raspbian || echo "Failed"
 time sudo ./6_setup_cmavnode.sh || echo "Failed" # ~9m
@@ -59,9 +74,15 @@ time sudo ./6_setup_video.sh || echo "Failed"  #31m
 time sudo ./setup_video_streaming || echo "Failed"  # 1m
 time sudo ./8_red_balloon_finder.sh || echo "Failed" # 18s
 time sudo ./5_setup_mavproxy.sh # 2s
+time sudo ./install_pymavlink # new version required for apweb # 3m
+time sudo ./install_apweb # 2m33s
+time sudo ./resize_filesystem_on_next_boot
 popd
 
 popd
+
+# sudo reboot
+# unplug ethernet
 
 # test image by following testing.txt
 
@@ -72,7 +93,7 @@ sudo poweroff
 TIMESTAMP="$(date -u '+%Y%m%d%H%M%S')"
 FILENAME="apsync-rpi-$TIMESTAMP.img"
 DEVICE=/dev/sdc
-time (sudo dd if=$DEVICE of=$FILENAME) # ~1G/minute
+time (sudo dd status=progress if=$DEVICE of=$FILENAME status=progress) # ~1G/minute
 date; time xz --verbose -e "$FILENAME"  #~47m
 COMPRESSED="$FILENAME.xz"
 ls -l --si "$COMPRESSED" # ~870MB
