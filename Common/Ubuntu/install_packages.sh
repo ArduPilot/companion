@@ -21,7 +21,7 @@ apt-get dist-upgrade -y
 apt-get -y install python-dev python-numpy python3-numpy python-pip python-opencv
 
 # pymavlink deps:
-apt-get install -y libxml2-dev libxslt1.1 libxslt1-dev
+apt-get install -y libxml2-dev libxslt1.1 libxslt1-dev libz-dev
 time pip install future lxml
 
 # install dronekit

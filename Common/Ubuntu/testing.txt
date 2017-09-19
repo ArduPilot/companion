@@ -1,6 +1,6 @@
 Testing regime for new image:
 -----------------------------
-# make sure ethernet is unplugged!
+# make sure (USB) ethernet is unplugged!
 
 # Check if AP exists
 
@@ -9,22 +9,46 @@ Testing regime for new image:
 # ssh into device
 ssh apsync@10.0.1.128
 
-# Check "screen -list" includes cmavnode, DataFlashLogger:
+# Check "screen -list" includes cmavnode, DataFlashLogger, cherrypy:
 screen -list
+
+apsync@apsync:~ $ screen -list
+There are screens on:
+	758.cherrypy	(07/09/17 01:44:01)	(Detached)
+	727.DataFlashLogger	(07/09/17 01:44:01)	(Detached)
+	713.cmavnode	(07/09/17 01:44:01)	(Detached)
+3 Sockets in /run/screen/S-apsync.
+apsync@apsync:~ $ 
+
+# Check APWeb is running:
+sudo screen -list
+
+apsync@apsync:~ $ sudo screen -list
+[sudo] password for apsync: 
+There is a screen on:
+	564.apweb	(07/09/17 11:35:36)	(Detached)
+1 Socket in /run/screen/S-root.
+apsync@apsync:~ $ 
+
 
 # ensure mavproxy starts on the apsync image:
 mavproxy.py --master :14550
 
-# make sure dflogger is creating dataflash logs:
-# arm the vehcile, then:
-watch ls dflogger/dataflash -l
+# we lock on for port 14550, so reboot
+reboot
 
 # Can you connect using a GCS using the broadcast packets on port 14550?
 # on host machine:
 mavproxy.py --mav10 --master :14550
 
+# make sure dflogger is creating dataflash logs:
+# arm the vehicle *and turn the safety off*, then:
+watch ls dflogger/dataflash -l
+
+
 # can you connect to to the AP using a mobile phone and/or tablet?
 
+# BEFORE testing the following, disable internet access on the phone!
 # Test Each of Tower on Android, QGC on Android, QGC on Linux, MP on Windows:
  # can you connect to the vehicle?
  # can you control the vehicle?
@@ -42,5 +66,63 @@ mavproxy.py --mav10 --master :14550
 
 
 # web interface testing
- Ensure you get a response when connecting to http://apsync/
+  Ensure you get a response when connecting to http://10.0.1.128/
+  Click "Download DataFlash Logs"
+    Download a dataflash log
+    Ensure sizes match on download file and original
+      Check checksums on files match
  
+  Click "FileSystem Access"
+    Ensure you can download a file
+
+  Click "System Control" link
+   Change WiFi access point name and key
+   Reboot Device
+   Make sure you can connect to renamed AP
+
+  Click "System Control" link
+     Test "Reboot Flight Board"
+     Test "Reboot CC"
+
+  Click "System Status" link
+    Click "System" tab
+      Ensure values are updating
+      Adjust refresh rate
+        Ensure values are updating faster
+
+    Click "IMU" tab
+      Ensure graphs respond to flight controller movement
+      Ensure tables respond to flight controller movement
+      
+    Click "Baro" tab
+      (n.b.) Rover doesn't supply Baro data
+      Ensure graphs respond to flight controller movement
+      Ensure tables respond to flight controller movement
+  
+    Click "GPS" tab
+      Ensure table values are updating
+  
+    Click "EKF" tab
+      Ensure values are updating
+      
+    Click "Transmitter" tab
+      Ensure values are updating
+  
+  Click "Calibration" link
+
+    Click "Accelerometer" tab
+      Click "Start Six Axis Accelerometer Calibration"
+        Should ge a message to place vehicle level
+      Ensure values for sensor state are updating
+
+    Click "Magnetometer" tab
+      Click "Start Magnetometer Calibration"
+        Should get a message, calibration started"
+      Ensure sensor state values are updating
+
+  Click "Flight Parameters" link
+    Change "Parameter Category" dropdown, ensure list of parameter is reduced
+    Add an entry into the "Search parameters" box, ensure list is filtered appopriately
+    Change a parameter value to something distinct
+    Reboot the flight controller and reload the page, ensure the parameter value has stuck (or use a GCS to check)
+    

@@ -19,7 +19,7 @@ sudo systemctl disable dnsmasq
 # Create Access Point
 APNAME="WiFiAP"
 SSID="ardupilot"
-KEY="enRouteArduPilot"
+KEY="ardupilot"
 
 # add IP address range to /etc/dnsmasq.conf
 dd of=/etc/dnsmasq.d/$APNAME.conf <<EOF

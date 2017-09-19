@@ -18,3 +18,5 @@ apt-get install -y \
 	usbutils \
 	tree \
 	wireless-tools
+
+updatedb
