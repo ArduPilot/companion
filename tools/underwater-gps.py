@@ -96,19 +96,37 @@ while True:
     
     try:
         datagram = sockit.recvfrom(4096)
-        payload = json.loads(datagram[0])
-        payload['depth'] = max(min(100, payload['depth']), 0)
-        payload['temp'] = max(min(100, payload['temp']), 0)
-        payload = json.dumps(payload)
-         
+        recv_payload = json.loads(datagram[0])
+        
+        # Send depth/temp to external/depth api
+        ext_depth = {}
+        ext_depth['depth'] = max(min(100, recv_payload['depth']), 0)
+        ext_depth['temp'] = max(min(100, recv_payload['temp']), 0)
+        
+        send_payload = json.dumps(ext_depth)
+        
         headers = {'Content-type': 'application/json'}
-         
+        
         url = gpsUrl + "/api/v1/external/depth"
-        print 'sending', payload, 'to', url
-
+        print 'sending', send_payload, 'to', url
+        
         # Equivalent
         # curl -X PUT -H "Content-Type: application/json" -d '{"depth":1,"temp":2}' "http://37.139.8.112:8000/api/v1/external/depth"
-        request = grequests.put(url, session=s, headers=headers, data=payload, hooks={'response': notifyPutResponse})
+        request = grequests.put(url, session=s, headers=headers, data=send_payload, hooks={'response': notifyPutResponse})
+        grequests.send(request)
+        
+        # Send heading to external/orientation api
+        ext_orientation = {}
+        ext_orientation['orientation'] = max(min(360, recv_payload['orientation']), 0)
+        
+        send_payload = json.dumps(ext_orientation)
+        
+        headers = {'Content-type': 'application/json'}
+        
+        url = gpsUrl + "/api/v1/external/orientation"
+        print 'sending', send_payload, 'to', url
+        
+        request = grequests.put(url, session=s, headers=headers, data=send_payload, hooks={'response': notifyPutResponse})
         grequests.send(request)
 
     except socket.error as e:
