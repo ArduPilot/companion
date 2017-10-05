@@ -62,18 +62,10 @@ while True:
                     data['alt'] = float(msg.altitude)
                     data['satellites_visible'] = int(msg.num_sats)
                     #data['fix'] = int(msg.gps_qual)
-                '''
                 elif msg.sentence_type == 'RMC':
-                    if msg.lat_dir == 'N':
-                        data['lat'] = int(float(msg.lat) * 1e5)
-                    else:
-                        data['lat'] = -int(float(msg.lat) * 1e5)
+                    data['lat'] = msg.latitude * 1e7
+                    data['lon'] = msg.longitude * 1e7
 
-                    if msg.lon_dir == 'E':
-                        data['lon'] = int(float(msg.lon) * 1e5)
-                    else:
-                        data['lon'] = -int(float(msg.lon) * 1e5)
-                '''
                 buf = json.dumps(data)
                 print data
                 sockit.sendto(buf, (ip, portnum))
