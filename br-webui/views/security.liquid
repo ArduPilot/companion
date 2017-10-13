@@ -1,0 +1,69 @@
+{% include ../_includes/header.liquid %}
+
+<script src="socket.io-file-client.js"></script>
+<script>
+var socket = io();
+
+
+function updatePassword() {
+	// Read password entries
+	var oldpass  = document.getElementById('oldpass').value;
+	var newpass1 = document.getElementById('newpass1').value;
+	var newpass2 = document.getElementById('newpass2').value;
+
+	// Make sure there's an input for all 3 fields
+	if (oldpass.length && newpass1.length && newpass2.length) {
+
+	}
+}
+
+</script>
+
+<h1>Login & Security Settings</h1>
+
+<div class="row">
+	<div class="col-md-12">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">
+					Change Password
+				</h3>
+			</div>
+			<div class="panel-body">
+				<div>
+					<div class="form-group">
+						<label>Old password:</label>
+						<input type="password" class="form-control"
+							id="oldpass">
+						</input>
+					</div>
+					<div class="form-group">
+						<label>New password:</label>
+						<input type="password" class="form-control"
+							id="newpass1">
+						</input>
+					</div>
+					<div class="form-group">
+						<label>Confirm new password:</label>
+						<input type="password" class="form-control"
+							id="newpass2">
+						</input>
+					</div>
+					<table>
+					<tr>
+						<td>
+							<button type="button" class="btn btn-primary"
+							onclick="updatePassword()">Update password</button>
+						</td>
+						<td style="padding-left: 10px;">
+							<div id="passinfo"></div>
+						</td>
+					</tr>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% include ../_includes/footer.liquid %}

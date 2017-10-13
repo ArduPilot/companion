@@ -63,6 +63,10 @@ app.get('/waterlinked', function(req, res) {
 	res.render('waterlinked', {});
 });
 
+app.get('/security', function(req, res) {
+	res.render('security', {});
+});
+
 
 // Thank you > https://github.com/nesk/network.js/issues/8
 app.get('/test', function(req, res) {
