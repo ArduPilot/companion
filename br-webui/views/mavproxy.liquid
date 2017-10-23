@@ -1,0 +1,119 @@
+{% include ../_includes/header.liquid %}
+
+<script>
+var socket = io();
+
+const MAVPROXY_PARAM_FILE = 'mavproxy.param';
+
+var mavproxy_params_loaded = false;
+
+function saveOptions() {
+    var mavOptions = document.getElementById('mavOptions').value;
+    socket.emit('save params', {
+        'file':MAVPROXY_PARAM_FILE,
+        'params':mavOptions
+    });
+
+    // Disable inputs
+    document.getElementById('mavOptions').disabled      = true;
+    document.getElementById('mavRestartBtn').disabled   = true;
+    document.getElementById('resetOptionsBtn').disabled = true;
+}
+
+function loadOptions() {
+    socket.emit('load params', {'file':MAVPROXY_PARAM_FILE});
+}
+
+function resetOptions() {
+    socket.emit('delete params', {'file':MAVPROXY_PARAM_FILE});
+
+    // Disable inputs
+    document.getElementById('mavOptions').disabled      = true;
+    document.getElementById('mavRestartBtn').disabled   = true;
+    document.getElementById('resetOptionsBtn').disabled = true;
+}
+
+socket.on('save params response', function(data) {
+    // Enable inputs
+    document.getElementById('mavOptions').disabled      = false;
+    document.getElementById('mavRestartBtn').disabled   = false;
+    document.getElementById('resetOptionsBtn').disabled = false;
+});
+
+socket.on('load params response', function(data) {
+    document.getElementById('mavOptions').value = data.params;
+    cam_params_loaded = true;
+
+    // Enable inputs
+    document.getElementById('mavOptions').disabled     = false;
+    document.getElementById('mavRestartBtn').disabled  = false;
+    if (data.file.toString().indexOf("default") == -1) {
+        // Only enable restore default button if the loaded file is not default
+        document.getElementById('resetOptionsBtn').disabled = false;
+    }
+});
+
+socket.on('delete params response', function(data) {
+    // Re-load default parameters
+    socket.emit('restart mavproxy', null);
+    loadOptions();
+});
+
+function restartMAVProxy() {
+    // Send options to server to be saved to param file
+    saveOptions();
+
+    // Wait 1000 ms before requesting a restart of MAVProxy to allow for update
+    setTimeout(function() {
+        socket.emit('restart mavproxy', null);
+    },1000);
+}
+
+loadOptions();
+
+// Set width of all "dynamic-parent-width" elements to parent width
+function resizeDynamicWidthElement() {
+    var elements = document.getElementsByClassName("dynamic-parent-width");
+    for (i=0; i<elements.length; i++) {
+        elements[i].style.width = elements[i].parentElement.clientWidth + "px";
+    }
+}
+
+// Create event listener to dynamically resize elements when page is resized
+window.addEventListener('resize', resizeDynamicWidthElement);
+
+window.addEventListener("DOMContentLoaded", function() {
+    resizeDynamicWidthElement();
+});
+</script>
+
+<h1>MAVProxy Setup</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Edit Telemetry Splitter Options</h3>
+            </div>
+            <div class="panel-body">
+                <div>
+                    <h4>MAVProxy options:</h4>
+                    <textarea rows="20" id="mavOptions" disabled
+                        style="font-family:monospace; width:100%;
+                        resize: vertical;" class="dynamic-parent-width"
+                        >Loading...
+                    </textarea>
+                </div>
+                <div>
+                    <button class="btn btn-primary" id="mavRestartBtn" disabled
+                        onclick="restartMAVProxy()">Restart MAVProxy</button>
+                    <button class="btn btn-primary" id="resetOptionsBtn"
+                        disabled onclick="resetOptions()">
+                        Restore Default Options</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include ../_includes/footer.liquid %}
