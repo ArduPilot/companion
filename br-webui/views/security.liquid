@@ -6,22 +6,64 @@ var socket = io();
 
 
 function updatePassword() {
+	// Clear previous message
+	document.getElementById('passinfo').innerHTML = "";
+
 	// Read password entries
 	var oldpass  = document.getElementById('oldpass').value;
 	var newpass1 = document.getElementById('newpass1').value;
 	var newpass2 = document.getElementById('newpass2').value;
-	var args = {};
-	args.oldpass = oldpass;
-	args.newpass = newpass1;
-	socket.emit('set password', args);
 
 	// Make sure there's an input for all 3 fields
 	if (oldpass.length && newpass1.length && newpass2.length) {
+		// And that newpass1 and newpass2 match
+		if (newpass1 === newpass2) {
+			// Ask server to update password
+			var args = {};
+			args.oldpass = oldpass;
+			args.newpass = newpass1;
+			socket.emit('set password', args);
+		} else {
+			// Tell the user that their passwords don't match
+			var message = "New and Confirmation passwords do not match";
+			document.getElementById('passinfo').style     = "color:red;";
+			document.getElementById('passinfo').innerHTML = message;
+		}
+	} else {
+		// Tell the user what they missed
+		var missing = [];
+		if (!oldpass.length) {
+			missing.push("old password");
+		}
+		if (!newpass1.length) {
+			missing.push("new password");
+		}
+		if (!newpass2.length) {
+			missing.push("new password confirmation");
+		}
 
+		// Display message
+		var message = "Missing entries: " + missing.join(', ');
+		document.getElementById('passinfo').style     = "color:red;";
+		document.getElementById('passinfo').innerHTML = message;
 	}
 }
 
 socket.on('set password response', function(data) {
+	switch(parseInt(data)) {
+	case 0:
+		document.getElementById('passinfo').style     = "color:green;";
+		document.getElementById('passinfo').innerHTML = "Password set";
+		break;
+	case 1:
+		document.getElementById('passinfo').style     = "color:red;";
+		document.getElementById('passinfo').innerHTML = "Incorrect password";
+		break;
+	default:
+		document.getElementById('passinfo').style     = "color:red;";
+		document.getElementById('passinfo').innerHTML = "Password set error";
+		break;
+	}
 	console.log(data);
 });
 
