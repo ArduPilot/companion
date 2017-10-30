@@ -10,12 +10,20 @@ function updatePassword() {
 	var oldpass  = document.getElementById('oldpass').value;
 	var newpass1 = document.getElementById('newpass1').value;
 	var newpass2 = document.getElementById('newpass2').value;
+	var args = {};
+	args.oldpass = oldpass;
+	args.newpass = newpass1;
+	socket.emit('set password', args);
 
 	// Make sure there's an input for all 3 fields
 	if (oldpass.length && newpass1.length && newpass2.length) {
 
 	}
 }
+
+socket.on('set password response', function(data) {
+	console.log(data);
+});
 
 </script>
 

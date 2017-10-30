@@ -901,7 +901,37 @@ io.on('connection', function(socket) {
 			logger.log(err.toString());
 		});	
 	});
-	
+
+	socket.on('set password', function(data) {
+		logger.log('Updating Password');
+		var user	= 'pi';
+		var cmd = child_process.spawn('sudo',
+            [_companion_directory + '/tools/set-password.py', '--user=' + user,
+            '--oldpass=' + data.oldpass, '--newpass=' + data.newpass], {
+			detached: true
+		});
+
+		cmd.unref();
+
+		cmd.stdout.on('data', function (data) {
+			logger.log(data.toString());
+		});
+
+		cmd.stderr.on('data', function (data) {
+			logger.log(data.toString());
+		});
+
+		cmd.on('exit', function (code) {
+			logger.log('password set exited with code ' + code.toString());
+			socket.emit('set password response', code.toString());
+		});
+
+		cmd.on('error', (err) => {
+			logger.log('Failed to start child process.');
+			logger.log(err.toString());
+		});
+	});
+
 	socket.on('start WL driver', function(data) {
 		var args = '';
 		if (data.ip) {
