@@ -3,94 +3,510 @@
 <script>
 	var socket = io();
 
-	const GST_PARAM_FILE = 'gstreamer.param';
-	const CAM_PARAM_FILE = 'rpicamera.param';
-
-	var gst_params_loaded = false;
-	var cam_params_loaded = false;
-
-	function saveOptions() {
-		var rpiOptions = document.getElementById('rpiOptions').value;
-		var gstOptions = document.getElementById('gstOptions').value;
-		socket.emit('save params', {
-			'file':CAM_PARAM_FILE,
-			'params':rpiOptions
-		});
-		socket.emit('save params', {
-			'file':GST_PARAM_FILE,
-			'params':gstOptions
-		});
+	var _cameras = [];
+	var _activeFormat = {};
+	
+	var _allLoaded = false;
+	
+	const GST_PARAM_FILE = 'gstreamer2.param';
+	
+	function updateGst(reset) {
+		disableAll(true);
+	
+		var gstOptions;
+		
+		if (!reset) {
+			gstOptions = document.getElementById('gstOptions').value;
+		}
+		console.log("update gst");
+		socket.emit('update gstreamer', gstOptions);
 	}
-
+	
 	function loadOptions() {
-		socket.emit('load params', {'file':CAM_PARAM_FILE});
 		socket.emit('load params', {'file':GST_PARAM_FILE});
 	}
-
+		
 	socket.on('load params response', function(data) {
 		switch(data.file) {
-		case CAM_PARAM_FILE:
-			document.getElementById('rpiOptions').value = data.params;
-			cam_params_loaded = true;
-			break;
 		case GST_PARAM_FILE:
 			document.getElementById('gstOptions').value = data.params;
-			gst_params_loaded = true;
+			document.getElementById('gstOptions').disabled = false;
 			break;
 		}
-
-		// If both are loaded, enable inputs
-		if (cam_params_loaded && gst_params_loaded) {
-			document.getElementById('rpiOptions').disabled = false;
-			document.getElementById('gstOptions').disabled = false;
-			document.getElementById('camRestartBtn').disabled = false;
-			document.getElementById('saveOptionsBtn').disabled = false;
-		}
 	});
-
-	function restartCamera() {
-		saveOptions();
-
-		var rpiOptions = document.getElementById('rpiOptions').value.replace(/\n/g, ' ');
-		var gstOptions = document.getElementById('gstOptions').value.replace(/\n/g, ' ');
-		console.log('rpiOptions', rpiOptions);
-		console.log('gstOptions', gstOptions);
-		socket.emit('restart video', {
-			'rpiOptions':rpiOptions,
-			'gstOptions':gstOptions
-		});
+	
+	function getCameraSelection() {
+		return document.getElementById("v4l2 camera select").value;
 	}
 
-	loadOptions();
+	function getFormatSelection() {
+		return document.getElementById("v4l2 format select").value;
+		
+	}
+	
+	function getFrameSizeSelection() {
+		return document.getElementById("v4l2 frame size select").value;
+	}
+	
+	function getFpsSelection() {
+		return document.getElementById("v4l2 fps select").value;
+	}
+	
+	function getCameraSelection() {
+		return document.getElementById("v4l2 camera select").value;
+	}
+	
+	function getCameraById(id) {
+		var ret = undefined
+		_cameras.forEach(function(camera) {
+			if (camera.device == id) {
+				console.log("found match");
+				ret = camera;
+			}
+		});
+		
+		return ret;
+	}
+	
+	var formats = {};
+	
+	socket.on("video up", function() {
+		loadOptions();
+		disableAll(false);
+	});
+	
+	function disableAll(disable) { 
+		console.log("disabled:",disable);
+		$(".panel-body *").attr("disabled", disable);
+	}
+	
+	function fpsSelected() {
+		console.log("fps selected!", getFpsSelection());
+		if (!_allLoaded) {
+			console.log("abort set format: still loading");
+			return;
+		}
+		
+		disableAll(true);
+		socket.emit("set v4l2 format", {
+			format: formats[getFormatSelection()].formatName,
+			width: getFrameSizeSelection().split('x')[0],
+			height: getFrameSizeSelection().split('x')[1],
+			interval: {
+				numerator: 1,
+				denominator: getFpsSelection()
+			},
+			id: getCameraSelection()
+		});
+		
+		_activeFormat.format = formats[getFormatSelection()].formatName;
+		_activeFormat.frameSize = getFrameSizeSelection();
+		_activeFormat.frameRate = getFpsSelection();
+		_activeFormat.device = getCameraSelection();
+	}
+
+	function frameSizeSelected() {
+		console.log("frame size selected!", getFrameSizeSelection());
+		
+		var fps_select = document.getElementById("v4l2 fps select");
+		
+		var old_selection = fps_select.options.length ? fps_select.options[fps_select.selectedIndex].value : null;
+		
+		// delete all children
+		while (fps_select.firstChild) {
+			fps_select.removeChild(fps_select.firstChild);
+		}
+		
+		formats[getFormatSelection()].frameSizes[getFrameSizeSelection()].forEach(function(fps) {
+			var option = document.createElement("option");
+			option.innerHTML = fps;
+			option.value = fps;
+			option.selected = option.value == _activeFormat.frameRate;
+			fps_select.appendChild(option);
+		});
+		
+		fpsSelected();
+	}
+	
+	function formatSelected() {
+		console.log("format selected!", getFormatSelection());
+		var frame_size_select = document.getElementById("v4l2 frame size select");
+		
+		var old_selection = frame_size_select.options.length ? frame_size_select.options[frame_size_select.selectedIndex].value : null;
+		
+		while (frame_size_select.firstChild) {
+			frame_size_select.removeChild(frame_size_select.firstChild);
+		}
+	
+		for(var frame_size in formats[getFormatSelection()].frameSizes) {
+			var option = document.createElement("option");
+			option.innerHTML = frame_size;
+			option.value = frame_size;
+			option.selected = option.value == _activeFormat.frameSize;
+			frame_size_select.appendChild(option);
+		}
+		
+		frameSizeSelected();
+	}
+	
+	socket.on('v4l2 cameras', function(data) {
+		console.log("got cameras", data);
+		
+		_allLoaded = false;
+		if (!data) {
+			return;
+		}
+		_cameras = data.cameras;
+		
+		_activeFormat = data.activeFormat;
+		
+		var profileSelect = document.getElementById("v4l2 profile select");
+		
+		while (profileSelect.firstChild) {
+			profileSelect.removeChild(profileSelect.firstChild);
+		}
+		
+		var option = document.createElement("option");
+		option.selected = true;
+		profileSelect.appendChild(option);
+		
+		for (var profile in data.profiles) {
+			var option = document.createElement("option");
+			option.innerHTML = profile;
+			option.value = profile;
+			option.selected = option.value == data.activeProfile;
+			profileSelect.appendChild(option);
+		}
+		
+		profileSelect.oninput = function(data) {
+			var name = profileSelect.options[profileSelect.selectedIndex].value;
+			if (!name) {
+				console.log("no name for profile!");
+				return;
+			}
+			disableAll(true);
+			socket.emit("load v4l2 profile", name);
+		}
+		
+		var cameraSelect = document.getElementById("v4l2 camera select");
+		
+		if (!cameraSelect) {
+			cameraSelect = document.createElement("select");
+			cameraSelect.id = "v4l2 camera select";
+		}
+
+		while (cameraSelect.firstChild) {
+			cameraSelect.removeChild(cameraSelect.firstChild);
+		}
+		
+		_cameras.forEach(function(camera) {
+			var option = document.createElement("option");
+			option.innerHTML = camera.device;
+			option.value = camera.device;
+			if (camera.device == _activeFormat.device) {
+				option.selected = true;
+			}
+			cameraSelect.appendChild(option);
+		});
+		
+		cameraSelect.oninput = function() {
+			cameraSelected();
+			document.getElementById("v4l2 profile select").selectedIndex = 0; // Reset profile selection, they are per-camera only
+		}
+
+		cameraSelected();
+		
+		_allLoaded = true;
+		
+		disableAll(false);
+	});
+	
+	function resetDefaults() {
+		socket.emit('reset v4l2 defaults', getCameraSelection());
+	}
+	
+	function cameraSelected() {
+		var sliderContainer = document.getElementById("v4l2controls");
+		sliderContainer.innerHTML = "";
+		
+		console.log("camera selected!", getCameraSelection());
+		
+		var camera = getCameraById(getCameraSelection());
+		
+		camera.controls.forEach(function(control) {
+			
+			var new_element;
+			new_element = document.createElement('input');
+			
+			var h5 = document.createElement('h5');
+			h5.innerHTML = control.name;
+
+			if (control.type == "bool") {
+				new_element.type = "checkbox";
+				new_element.checked = control.value;
+				
+				new_element.onchange = function(data) {
+					console.log('set v4l2 control', new_element.name, new_element.id, new_element.checked);
+					
+					/*
+					var el = document.getElementById("CTRL_" + new_element.name.replace(", Auto", ""));
+					if (el && el != new_element) {
+						console.log("found", el);
+						console.log("checked:", new_element.checked);
+						el.disabled = new_element.checked;
+						el.style.opacity = 0.5 + !new_element.checked * 0.5;
+					}
+					*/
+					
+					socket.emit('set v4l2 control', {
+						device: camera.device,
+						id: new_element.ctrl_id,
+						value: new_element.checked
+					});
+				}
+			} else if (control.type == "int" || control.type == "int_menu") {
+				var h6 = document.createElement('h6');
+				h6.style.display = "inline";
+				h6.innerHTML = "\t" + control.value;
+				h5.appendChild(h6);
+	
+				new_element.type = "range";
+				new_element.class = "slider";
+				new_element.min = control.min;
+				new_element.max = control.max;
+				new_element.step = control.step;
+			
+				new_element.value = control.value;
+				
+				/*
+				// The effects of some controls are dictated by the current value of others
+				// ie. we can't set the white balance temp control while the auto white balance control is enabled.
+				var el = document.getElementById("CTRL_" + control.name + ", Auto");
+				if (el) {
+					console.log("found", el);
+					new_element.disabled = el.checked;
+					new_element.style.opacity = 0.5 + !el.checked * 0.5;
+				}
+				*/
+					
+				new_element.onchange = function(data) {
+					h6.innerHTML = "\t" + new_element.value;
+					control.value = new_element.value;
+					console.log('set v4l2 control', new_element.name, new_element.id, new_element.value);
+					socket.emit('set v4l2 control', {
+						device: camera.device,
+						id: new_element.ctrl_id,
+						value: new_element.value
+					});
+				}
+				
+			} else if (control.type == "menu") {
+				new_element = document.createElement('select');
+				var i = 0;
+				control.menu.forEach(function(menuItem) {
+					if (menuItem != "") {
+						var option = document.createElement("option");
+						option.innerHTML = menuItem;
+						option.value = i;
+						new_element.appendChild(option);
+					}
+					i = i + 1;
+				});
+				
+				new_element.oninput = function(data) {
+					control.value = new_element.value;
+					console.log('set v4l2 control', new_element.name, new_element.id, new_element.value);
+					socket.emit('set v4l2 control', {
+						device: camera.device,
+						id: new_element.ctrl_id,
+						value: new_element.value
+					});
+				}
+				new_element.selectedIndex = control.value;
+			} else if (control.type == "class") {
+				h5.innerHTML = "";
+				new_element = document.createElement("h4");
+				new_element.innerHTML = control.name;
+			} else {
+				console.log('skipping unsupported type:', control.name, control.type);
+				return;
+			}
+				
+			new_element.ctrl_id = control.id;
+			new_element.name = control.name;
+	
+			new_element.id = "CTRL_" + control.name;
+			
+			var exists = false;
+			
+			sliderContainer.childNodes.forEach(function(child) {
+				if (child.id == new_element.id) {
+					exists = true;
+					// break;
+				}
+			});
+			
+			if (!exists) {
+				sliderContainer.appendChild(h5);
+				sliderContainer.appendChild(new_element);
+			}
+		});
+		
+		// <binary format flag>: {
+		//     formatName: "H264"
+		//     frameSizes:
+		//         {
+		//             720x1080: [5,10,15,20],
+		//             1080x1920: [5,10,15,20]
+		//         }
+		
+		formats = {};
+		
+		camera.formats.forEach(function(format) {
+			var new_format
+			
+			if (!formats[format.format]) {
+				formats[format.format] = { formatName: format.formatName, frameSizes: {} };
+			}
+			
+			if (!formats[format.format].frameSizes[String(format.width) + "x" + String(format.height)]) {
+				formats[format.format].frameSizes[String(format.width) + "x" + String(format.height)] = [];
+			}
+			
+			if (formats[format.format].frameSizes[String(format.width) + "x" + String(format.height)].indexOf(format.interval.denominator/format.interval.numerator) == -1) {
+				formats[format.format].frameSizes[String(format.width) + "x" + String(format.height)].push(format.interval.denominator/format.interval.numerator);
+			}
+		});
+		
+		console.log(formats);
+		
+		var formatSelect = document.getElementById("v4l2 format select");
+		var frameSelect = document.getElementById("v4l2 frame size select");
+		var fpsSelect = document.getElementById("v4l2 fps select");
+		
+		while (formatSelect.firstChild) {
+			formatSelect.removeChild(formatSelect.firstChild);
+		}
+		
+		while (frameSelect.firstChild) {
+			frameSelect.removeChild(frameSelect.firstChild);
+		}
+		
+		while (fpsSelect.firstChild) {
+			fpsSelect.removeChild(fpsSelect.firstChild);
+		}
+		
+		formatSelect.oninput = formatSelected;
+		frameSelect.oninput = frameSizeSelected;
+		fpsSelect.oninput = fpsSelected;
+		
+		
+		for(var format in formats) {
+			console.log("checking format:",format); 
+			if (formats[format].formatName == "H264") { // h264 only for now
+				var option = document.createElement("option");
+				option.innerHTML = formats[format].formatName;
+				option.value = format;
+				if (formats[format].formatName == _activeFormat.format) {
+					option.selected = true;
+				}
+				formatSelect.appendChild(option);
+			}
+		}
+		
+		formatSelected();
+	}
+	
+	function newProfile() {
+		var name = prompt("Enter a name for the new profile:");
+		saveProfile(name);
+	}
+	
+	function updateProfile() {
+		var select = document.getElementById("v4l2 profile select");
+		var name = select.options[select.selectedIndex].value;
+		saveProfile(name);
+	}
+	
+	function saveProfile(name) {
+		if (!name) {
+			console.log("no name for profile!");
+			return;
+		}
+		socket.emit("save v4l2 profile", name);
+	}
+	
+	function deleteProfile() {
+		var select = document.getElementById("v4l2 profile select");
+		var name = select.options[select.selectedIndex].value;
+		if (!name) {
+			console.log("no name for profile!");
+			return;
+		}
+		socket.emit("delete v4l2 profile", name);
+	}
+	
+	disableAll(true);
+	
+	loadOptions(); // get gstreamer options
+	
+	socket.emit('get v4l2 cameras'); // get v4l2 options
+	
 </script>
 
-<h1>Camera Setup</h1>
+<h1 id="camera setup">Camera Setup</h1>
 
 <div class="row">
-	<div class="col-md-12">
+	<div class="col-md-6">
 		<div class="panel panel-default">
 			<div class="panel-heading">
-				<h3 class="panel-title">Edit Streaming Options</h3>
+				<h3 class="panel-title">Streaming Settings</h3>
 			</div>
 			<div class="panel-body">
-				<div class="col-md-6">
-					<h4>raspivid options:</h4>
-					<textarea rows="20" id="rpiOptions" disabled
-						style="font-family:monospace; width:100%;">Loading...
-					</textarea>
-				</div>
-				<div class="col-md-6">
+					<h4>Active Camera:
+						<select id="v4l2 camera select"></select>
+					</h4>
+					<h4>Format:
+						<select id="v4l2 format select"></select>
+					</h4>
+					<h4>Frame Size:
+						<select id="v4l2 frame size select"></select>
+					</h4>
+					<h4>Frame Rate (FPS):
+						<select id="v4l2 fps select"></select>
+					</h4>
+				
 					<h4>gstreamer options:</h4>
-					<textarea rows="20" id="gstOptions" disabled
-						style="font-family:monospace; width:100%;">Loading...
+					<textarea rows="10" id="gstOptions" disabled
+						style="font-family:monospace; width:100%;" onfocus="gstOptionsChanged()">Loading...
 					</textarea>
-				</div>
-				<div class="col-md-12">
-					<button class="btn btn-primary" id="camRestartBtn" disabled
-						onclick="restartCamera()">Restart Camera</button>
-					<button class="btn btn-primary" id="saveOptionsBtn" disabled
-						onclick="saveOptions()">Save Options</button>
-				</div>
+					
+					<button id="reset-gst" class="btn btn-primary"
+						onclick="updateGst(true)">Default gstreamer options</button>
+					<button id="update-gst" class="btn btn-primary"
+						onclick="updateGst(false)">Apply gstreamer options</button>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Camera Settings</h3>
+			</div>
+			<div class="panel-body">
+					<h4>Preset Profile:
+						<select id="v4l2 profile select"></select>
+					</h4>
+					<button class="btn btn-primary"
+						onclick="resetDefaults()">Reset to Defaults</button>
+					<button class="btn btn-primary" 
+						onclick="newProfile()">New Profile</button>
+					<button class="btn btn-primary" 
+						onclick="updateProfile()">Update Profile</button>
+					<button class="btn btn-primary" 
+						onclick="deleteProfile()">Delete Profile</button>
+
+					<div id="v4l2controls"></div>
 			</div>
 		</div>
 	</div>
