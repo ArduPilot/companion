@@ -80,6 +80,7 @@ socket.on('cpu stats', function(data) {
 	document.getElementById('ramFree').innerHTML = data.ram_free.toFixed(3) + ' MB';
 	document.getElementById('ramUsed').innerHTML = data.ram_used.toFixed(3) + ' MB';
 	document.getElementById('ramTotal').innerHTML = data.ram_total.toFixed(3) + ' MB';
+	document.getElementById('cpuStatus').innerHTML = data.cpu_status;
 });
 
 // Convert Bytes per second to Megabits per second
@@ -122,6 +123,8 @@ function testDownload() {
 						<dd id="ramUsed"></dd>
 					<dt>Total RAM: </dt>
 						<dd id="ramTotal"></dd>
+					<dt>CPU Status: </dt>
+						<dd id="cpuStatus"></dd>
 				</dl>
 			</div>
 		</div>

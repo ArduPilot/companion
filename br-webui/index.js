@@ -606,8 +606,48 @@ function updateCPUStats () {
 	cpu_stats.ram_total = os.totalmem()/(1024*1024); // MB
 	cpu_stats.ram_used	= cpu_stats.ram_total - cpu_stats.ram_free; // MB
 
-	// stream collected data
-	io.emit('cpu stats', cpu_stats);
+	cpu_stats.cpu_status    = ""
+	// Get cpu status
+	getCpuStatus(function(status) {
+		throttled = status.split("=");
+
+		// If command fail, return no status
+		if (throttled[0] != "throttled") {
+			cpu_stats.cpu_status = "No status"
+			io.emit('cpu stats', cpu_stats);
+			return;
+		}
+
+		// Decode command
+		throttled_code = parseInt(throttled[1])
+		var throttled_list =
+		[
+			{bit: 18, type: "Throttling has occurred"},
+			{bit: 17, type: "Arm frequency capped has occurred"},
+			{bit: 16, type: "Under-voltage has occurred"},
+			{bit: 2, type: "Currently throttled"},
+			{bit: 1, type: "Currently arm frequency capped"},
+			{bit: 0, type: "Currently under-voltage"}
+		];
+
+		for (i = 0; i < throttled_list.length; i++) {
+			if ((throttled_code >> throttled_list[i].bit) & 1) {
+				if (cpu_stats.cpu_status != "") {
+					cpu_stats.cpu_status += ", "
+				}
+				cpu_stats.cpu_status += throttled_list[i].type
+			}
+		}
+
+		// stream collected data
+		io.emit('cpu stats', cpu_stats);
+	})
+}
+
+function getCpuStatus(callback) {
+	var cmd = child_process.exec('vcgencmd get_throttled', function (error, stdout, stderr) {
+		callback(stdout);
+	});
 }
 
 // Make updateCPUStats() run once every 5 seconds (=os.loadavg() update rate)
