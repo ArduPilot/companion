@@ -29,7 +29,8 @@ EOF
 
 sudo systemctl disable dnsmasq
 
-nmcli connection add type wifi ifname wlan0 con-name $APNAME ssid $SSID
+IFNAME=wlan0
+nmcli connection add type wifi ifname $IFNAME con-name $APNAME ssid $SSID
 nmcli connection modify $APNAME connection.autoconnect yes
 nmcli connection modify $APNAME 802-11-wireless.mode ap
 nmcli connection modify $APNAME 802-11-wireless.band bg
