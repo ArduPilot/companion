@@ -12,10 +12,11 @@
 # e.g.:
 # mkdir jetpack
 # cd jetpack
-# choose JetPack L4T 3.0 to install
+# sh /vagrant/JetPack-L4T-3.1-linux-x64.run
 #  -  may need to run it twice to get the GUI to actualy run
 #    select Jetson TX1 Development Kit and Ubuntu Host
 #    On JetPack L4T Component Manager:
+#        Choose JetPack L4T 3.1 to install
 #        - Custom
 #        * Host: set "no action" for everything
 #        * For Target - Jetson TX1: mixed
@@ -97,6 +98,7 @@ time sudo ./3_wifi_access_point.sh # 20s
 sudo ./4_setup_log_rotation
 time sudo ./6_setup_video.sh # 1m
 time sudo ./8_setup_cmavnode.sh # ~4m
+time sudo ./setup_mavlink-router # ~2m
 time sudo ./7_dflogger.sh # ~210s
 sudo ./5_setup_mavproxy.sh
 time sudo ./setup-video-streaming # 11s
@@ -105,6 +107,8 @@ time sudo apt-get install -y libxml2-dev libxslt1.1 libxslt1-dev
 time sudo pip install future lxml # 4m
 time sudo ./install_pymavlink # new version required for apweb #1m
 time sudo ./install_apweb # 2m
+
+time sudo ./install_openkai.sh
 
 # reboot and test image according to testing.txt
 sudo reboot
