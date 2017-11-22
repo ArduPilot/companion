@@ -30,3 +30,10 @@ systemctl disable wpa_supplicant
 killall -9 /sbin/wpa_supplicant || true
 
 echo "Success"
+exit 0
+
+# client mode:
+echo 4 | sudo dd of=/sys/module/bcm4334x/parameters/op_mode  #
+
+# AP mode:
+echo 2 | sudo dd of=/sys/module/bcm4334x/parameters/op_mode  #
