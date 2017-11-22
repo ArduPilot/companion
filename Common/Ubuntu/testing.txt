@@ -66,6 +66,11 @@ watch ls dflogger/dataflash -l
 
 
 # web interface testing
+# ! ENSURE NO GCS IS RUNNING BEFORE DOING THESE INTERFACE TESTS !
+# this testing script must be run through for:
+#   firefox
+#   chromium-browser
+#   edge
   Ensure you get a response when connecting to http://10.0.1.128/
   Click "Download DataFlash Logs"
     Download a dataflash log
