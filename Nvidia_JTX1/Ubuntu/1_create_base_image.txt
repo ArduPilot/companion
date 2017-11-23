@@ -1,7 +1,9 @@
 # TX1 setup script for use as companion computer
 
-# STEP1 : install NVidia image onto TX1 (skip this step if you already have a factory image (created in Step2) for the current release of JetPack
-#
+# STEP1: Run ONE of STEP1A or STEP1B
+
+# STEP1a : install NVidia image onto TX1 (skip this step if you already have a factory image (created in Step2) for the current release of JetPack
+
 # Connect TX1 via USB to Ubuntu machine and put TX1 into bootloader mode:
 #    Hold Force Recovery button (aka "REC"), press Reset button(aka "RST"), Release Force Recovery button
 #    On Ubuntu machine "lsusb", and look for "NVidia Corp"
@@ -16,7 +18,7 @@
 #  -  may need to run it twice to get the GUI to actualy run
 #    select Jetson TX1 Development Kit and Ubuntu Host
 #    On JetPack L4T Component Manager:
-#        Choose JetPack L4T 3.1 to install
+#        Choose JetPack L4T 3.0 to install
 #        - Custom
 #        * Host: set "no action" for everything
 #        * For Target - Jetson TX1: mixed
@@ -65,6 +67,7 @@ sudo $TEGRAFLASH --bl $CBOOT --applet $APPLET --chip 0x21 --cmd "write APP $IMAG
 # Step 3 : install packages on TX1
 #    power on the TX1
 #    log onto TX1 as ubuntu/ubuntu (you may be able to do this over ethernet using the tegra-ubuntu hostname)
+# ssh ubuntu@tegra-ubuntu
 #    create an apsync user:
 sudo useradd -s /bin/bash -m -U -G sudo,netdev,users,dialout,video apsync
 sudo passwd apsync # apsync
@@ -86,21 +89,23 @@ cd ~
 mkdir GitHub
 pushd GitHub
 git clone https://github.com/ArduPilot/companion.git
-# usually at this point I rsync over that repository
+# usually at this point I rsync over that repository:
+# rsync -aP companion/ apsync@tegra-ubuntu:GitHub/companion --delete --delete-excluded --exclude=*.img.xz --exclude=*actory.img
 pushd companion/Nvidia_JTX1/Ubuntu
 sudo ./set-hostname   # reset the machine's hostname
+sudo apt-get autoremove -y # avoid repeated no-longer-required annoyance
 sudo ./remove-unattended-upgrades # 
 sudo ./ensure_rc_local.sh
 sudo ./disable_console.sh
 time sudo ./2_install_packages.sh # 20m
 time sudo ./install_niceties || echo "Failed" # 20s
 time sudo ./3_wifi_access_point.sh # 20s
-sudo ./4_setup_log_rotation
+sudo ./4_setup_log_rotation # instant
 time sudo ./6_setup_video.sh # 1m
 time sudo ./8_setup_cmavnode.sh # ~4m
 time sudo ./setup_mavlink-router # ~2m
 time sudo ./7_dflogger.sh # ~210s
-sudo ./5_setup_mavproxy.sh
+sudo ./5_setup_mavproxy.sh # instant
 time sudo ./setup-video-streaming # 11s
 
 time sudo apt-get install -y libxml2-dev libxslt1.1 libxslt1-dev
@@ -109,9 +114,6 @@ time sudo ./install_pymavlink # new version required for apweb #1m
 time sudo ./install_apweb # 2m
 
 time sudo ./install_openkai.sh
-
-# disable lock on screen saver activation:
-gsettings set org.gnome.desktop.screensaver lock-enabled false
 
 # reboot and test image according to testing.txt
 sudo reboot
@@ -126,9 +128,11 @@ sudo poweroff
 #    put TX1 into bootloader mode: Hold Force Recovery button (aka "REC"), press Reset button(aka "RST"), Release Force Recovery button
 watch lsusb
 #    cd to directory where JetPack was installed (i.e. JetPack-2.3.1)
-cd 64_TX1/Linux_for_Tegra_64_tx1/bootloader
+BASEDIR=~/jetpack
+cd $BASEDIR/64_TX1/Linux_for_Tegra_64_tx1/bootloader
 #    run download_image.sh from this repo:
 TIMESTAMP=`date '+%Y%m%d%H%M'`
+# consider using an absolute path for IMAGE_NAME here! e.g. /vagrant/...
 IMAGE_NAME="apsync-tx1-$TIMESTAMP.img"
 
 TEGRAFLASH=$BASEDIR/64_TX1/Linux_for_Tegra_64_tx1/bootloader/tegraflash.py
@@ -138,12 +142,14 @@ ls $APPLET
 CBOOT=$BASEDIR/64_TX1/Linux_for_Tegra_64_tx1/bootloader/t210ref/cboot.bin
 ls $CBOOT
 
-sudo $TEGRAFLASH --bl $CBOOT --applet $APPLET --chip 0x21 --cmd "read APP $IMAGE_NAME"
+sudo $TEGRAFLASH --bl $CBOOT --applet $APPLET --chip 0x21 --cmd "read APP $IMAGE_NAME" # about 1 hour 45 minutes
 
-time /vagrant/download_image.sh "$IMAGE_NAME"  #  <-- image will be saved to this file.  this will take about 1hour and 40 minutes
 ls -l $IMAGE_NAME
 time xz --verbose -e $IMAGE_NAME # about 7.5 hours
 COMPRESSED_IMAGE_NAME="$IMAGE_NAME.xz"
+ls -l --si  $COMPRESSED_IMAGE_NAME # ~5.2GB
+
+# on host machine (not on the Vagrant VM!)
+COMPRESSED_IMAGE_NAME="..."
 ls -l --si  $COMPRESSED_IMAGE_NAME
-# may need to copy cboot.bin into 64_TX1/Linux_for_Tegra_64_tx1/bootloader here
 time rsync -aP $COMPRESSED_IMAGE_NAME autotest@autotest.ardupilot.org:APM/buildlogs/binaries/Companion/next/$COMPRESSED_IMAGE_NAME # about 11.5 hours
