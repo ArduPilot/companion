@@ -20,3 +20,8 @@ Release 201709
  - Edison
   - added modules for USB ethernet dongles
   - patched kernel against usb-otg bug, however this seems ineffective
+
+Release 201711
+ - APWeb time-setting
+ - APWeb Sort files in directory listings
+ - send telemetry to multiple GCSs on 14550
