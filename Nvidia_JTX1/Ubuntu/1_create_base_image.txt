@@ -110,6 +110,9 @@ time sudo ./install_apweb # 2m
 
 time sudo ./install_openkai.sh
 
+# disable lock on screen saver activation:
+gsettings set org.gnome.desktop.screensaver lock-enabled false
+
 # reboot and test image according to testing.txt
 sudo reboot
 
