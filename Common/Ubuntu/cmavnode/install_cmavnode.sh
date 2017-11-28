@@ -50,5 +50,5 @@ EOF
 
 
 # add line below to bottom of /etc/rc.local to call start script
-LINE="sudo -H -u $NORMAL_USER /bin/bash -c '~$NORMAL_USER/start_cmavnode/autostart_cmavnode.sh'"
+LINE="# sudo -H -u $NORMAL_USER /bin/bash -c '~$NORMAL_USER/start_cmavnode/autostart_cmavnode.sh'"
 perl -pe "s%^exit 0%$LINE\\n\\nexit 0%" -i /etc/rc.local
