@@ -18,7 +18,7 @@ parser = pynmea2.NMEAStreamReader()
 data = {
     'time_usec' : 0,                        # (uint64_t) Timestamp (micros since boot or Unix epoch)
     'gps_id' : 0,                           # (uint8_t) ID of the GPS for multiple GPS inputs
-    'ignore_flags' : 56,  # (uint16_t) Flags indicating which fields to ignore (see GPS_INPUT_IGNORE_FLAGS enum). All other fields must be provided.
+    'ignore_flags' : 56,                    # (uint16_t) Flags indicating which fields to ignore (see GPS_INPUT_IGNORE_FLAGS enum). All other fields must be provided.
     'time_week_ms' : 0,                     # (uint32_t) GPS time (milliseconds from start of GPS week)
     'time_week' : 0,                        # (uint16_t) GPS week number
     'fix_type' : 3,                         # (uint8_t) 0-1: no fix, 2: 2D fix, 3: 3D fix. 4: 3D with DGPS. 5: 3D with RTK
@@ -38,6 +38,7 @@ data = {
 
 data_received = False
 gps_type_set = False
+last_output_t = 0;
 
 while True:
     
@@ -61,7 +62,6 @@ while True:
                     data['hdop'] = float(msg.horizontal_dil)
                     data['alt'] = float(msg.altitude)
                     data['satellites_visible'] = int(msg.num_sats)
-                    #data['fix'] = int(msg.gps_qual)
                 elif msg.sentence_type == 'RMC':
                     data['lat'] = msg.latitude * 1e7
                     data['lon'] = msg.longitude * 1e7
@@ -73,10 +73,13 @@ while True:
                     data['lon'] = msg.longitude * 1e7
                     data['satellites_visible'] = int(msg.num_sats)
                     data['hdop'] = float(msg.hdop)
-
-                buf = json.dumps(data)
-                print data
-                sockit.sendto(buf, (ip, portnum))
+                    
+        if time.time() > last_output_t + 0.1:
+            last_output_t = time.time();
+            buf = json.dumps(data)
+            print "Sending: ", data
+            sockit.sendto(buf, (ip, portnum))
+            
     except socket.error as e:
         if e.errno == 11:
             pass
