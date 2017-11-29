@@ -184,19 +184,20 @@ var _authenticated = false;
 //	'remotes' :  {
 //		
 //		'upstream' : {
+//			'url' : https://github.com... ,
+//			'authenticated : false,
 //			'branches' : [],
 //			'tags'     : []
 //		},
 //		
 //		'origin' : {
+//			'url' : https://github.com... ,
+//			'authenticated : true,
 //			'branches' : [],
 //			'tags'     : []
 //		}
 //	}
 //}
-
-// TODO open/init git repository in callback here
-checkGithubAuthentication();
 
 var _refs = { 'remotes' : {} };
 
@@ -222,16 +223,30 @@ function updateCurrentHEAD(repository) {
 var fetchOptions = new Git.FetchOptions();
 var remoteCallbacks = new Git.RemoteCallbacks();
 
+// So there's this crazy thing where nodegit gets stuck in an infinite callback loop here if
+// we return sshKeyFromAgent, and we do not actually have valid credentials stored in the agent.
+// There is no public method to check if the credentials are valid before returning them.
+// So we return sshKeyFromAgent the first time, and if we get called again immediately after with
+// the same request, we assume it is the bug and return defaultNew to break the loop.
+var requests = {};
+
 remoteCallbacks.credentials = function(url, userName) {
 	logger.log('credentials required', url, userName);
-
-	if (!_authenticated) {
-		return null;
-	}
+	var id = userName + "@" + url;
 	
-	var creds = Git.Cred.sshKeyFromAgent(userName);
-	return creds;
+	if (requests[id]) {
+		return Git.Cred.defaultNew();
+	}
+	requests[id] = true;
+	setTimeout(function() {
+		requests[id] = false;
+		console.log(requests);
+	}, 500);
+
+	
+	return Git.Cred.sshKeyFromAgent(userName);
 }
+
 fetchOptions.callbacks = remoteCallbacks;
 fetchOptions.downloadTags = 1;
 
@@ -240,21 +255,25 @@ fetchOptions.downloadTags = 1;
 function formatRemote(remoteName) {
 	// Add new remote to our list
 	var newRemote = {
+			'url' : '',
 			'branches' : [],
-			'tags' : []
+			'tags' : [],
+			'authenticated' :  false
 		}
 	_refs.remotes[remoteName] = newRemote;
 	
-	companionRepository.getRemote(remoteName)
+	return companionRepository.getRemote(remoteName)
 		.then(function(remote) {
-			logger.log('connecting to remote', remote.name());
-			remote.connect(Git.Enums.DIRECTION.FETCH, remoteCallbacks)
+			newRemote.url = remote.url();
+			logger.log('connecting to remote', remote.name(), remote.url());
+			return remote.connect(Git.Enums.DIRECTION.FETCH, remoteCallbacks)
 			.then(function(errorCode) {
 				// Get a list of refs
-				remote.referenceList()
+				return remote.referenceList()
 				.then(function(promiseArrayRemoteHead) {
 					// Get the name of each ref, determine if it is a branch or tag
 					// and add it to our list
+					newRemote.authenticated = true;
 					promiseArrayRemoteHead.forEach(function(ref) {
 						var branch
 						var tag
@@ -267,13 +286,12 @@ function formatRemote(remoteName) {
 							_refs.remotes[remoteName].tags.push(newRef);
 						}
 					});
-					
-					// Update frontend with most recent list
-					io.emit('refs', _refs);
 				})
 				.catch(function(err) { logger.log(err); });
 			})
-			.catch(function(err) { logger.log(err); });
+			.catch(function(err) {
+				logger.log("Error connecting to remote", remote.name(), err); 
+			});
 		})
 		.catch(function(err) { logger.log(err); });
 }
@@ -282,7 +300,18 @@ function formatRemote(remoteName) {
 // Fetch, format, emit the refs on each remote
 function formatRemotes(remoteNames) {
 	logger.log('formatRemotes', remoteNames);
-	remoteNames.forEach(formatRemote);
+	
+	var promises = [];
+	
+	remoteNames.forEach(function(remote) {
+		promises.push(formatRemote(remote));
+	});
+	
+	// callback for when all async operations complete
+	return Promise.all(promises)
+	.then(function() {
+		io.emit('refs', _refs);
+	});
 }
 
 
@@ -292,39 +321,13 @@ function emitRemotes() {
 		return;
 	}
 	
+	_refs = { 'remotes' : {} };
+	
 	updateCurrentHEAD(companionRepository);
 	
 	companionRepository.getRemotes()
 		.then(formatRemotes)
 		.catch(function(err) { logger.log(err); });
-}
-
-
-//Check to see if we have ssh authentication with github
-function checkGithubAuthentication(callback) {
-	var cmd = 'ssh -T git@github.com';
-	child_process.exec(cmd, function(err, stdout, stderr) {
-		logger.log(cmd + ' returned ' + err ? err.code : '0');
-		logger.log('stdout:\n' + stdout);
-		logger.log('stderr:\n' + stderr);
-		
-		// github greeting comes through stderr
-		_authenticated = err ? err.code == 1 && stderr.indexOf('successfully authenticated') > -1 : false;
-		
-		logger.log(err.code == 1);
-		logger.log(stderr.indexOf('successfully authenticated'));
-		logger.log(_authenticated);
-		
-		if (callback) {
-			callback(_authenticated);
-		}
-	});
-}
-
-
-// Let frontend know if we are authenticated or not
-function emitAuthenticationStatus(status) {
-	io.emit('authenticated', status);
 }
 
 
@@ -445,23 +448,25 @@ gitsetup.on('connection', function(socket) {
 			});
 	});
 	
-	// Frontend requesting authentication status
-	socket.on('authenticated?', function(data) {
-		checkGithubAuthentication(emitAuthenticationStatus)
-	});
-	
 	// Get credentials from frontend, authenticate and update
 	socket.on('credentials', function(data) {
-		var cmd = _companion_directory + '/scripts/authenticate-github.sh ' + data.username + ' ' + data.password;
-		child_process.exec(cmd, function(err, stdout, stderr) {
-			logger.log('Authentication returned ' + err);
-			logger.log('stdout:\n' + stdout);
-			logger.log('stderr:\n' + stderr);
-			checkGithubAuthentication(function(status) {
-				emitAuthenticationStatus(status);
+		logger.log("git credentials");
+		
+		console.log(_refs);
+		console.log(data);
+		if (!_refs.remotes[data.remote]) {
+			logger.log("no matching ref", data.name);
+			return;
+		}
+		if (_refs.remotes[data.remote].url.indexOf("ssh://git@github.com") > -1) {
+			var cmd = _companion_directory + '/scripts/authenticate-github.sh ' + data.username + ' ' + data.password;
+			child_process.exec(cmd, function(err, stdout, stderr) {
+				logger.log('Authentication returned ' + err);
+				logger.log('stdout:\n' + stdout);
+				logger.log('stderr:\n' + stderr);
 				emitRemotes();
 			});
-		});
+		}
 	});
 	
 	// Add a remote to the local repository
@@ -469,6 +474,20 @@ gitsetup.on('connection', function(socket) {
 		logger.log('add remote', data);
 		Git.Remote.create(companionRepository, data.name, data.url)
 			.then(function(remote) {
+				emitRemotes();
+			})
+			.catch(function(err) {
+				logger.log(err);
+				socket.emit('git error', err);
+			});
+	});
+	
+	// Add a remote to the local repository
+	socket.on('remove remote', function(data) {
+		logger.log('remove remote', data);
+		Git.Remote.delete(companionRepository, data)
+			.then(function(result) {
+				logger.log("remove remote result:", result);
 				emitRemotes();
 			})
 			.catch(function(err) {

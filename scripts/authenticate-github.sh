@@ -3,13 +3,12 @@
 USERNAME=$1
 PASSWORD=$2
 
-echo 'Removing old key'
-rm -f ~/.ssh/id_rsa ~/.ssh/id_rsa.pub
+if [ ! -e ~/.ssh/id_rsa ]; then
+  echo 'Generating new ssh key'
+  ssh-keygen -f ~/.ssh/id_rsa -q -N ""
+fi
 
-echo 'Generating new ssh key'
-ssh-keygen -f ~/.ssh/id_rsa -q -N ""
-
-echo 'Registering new key with ssh-agent'
+echo 'Registering key with ssh-agent'
 ssh-add ~/.ssh/id_rsa
 
 # spit out the public key and form JSON request

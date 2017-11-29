@@ -19,6 +19,25 @@ gitsetup.on('terminal output', function(data) {
 
 socket.on('current HEAD', setHEAD);
 
+
+function authenticate(remote) {
+	console.log('authenticating', remote);
+	
+	username = prompt("Enter a username for " + _refs.remotes[remote].url, "");
+	password = prompt("Enter a password for " + _refs.remotes[remote].url, "");
+	
+	if (!username || !password) {
+		console.log("missing credentials!");
+		return;
+	}
+	
+	gitsetup.emit('credentials', {
+		'remote' : remote,
+		'username' : username,
+		'password' : password
+	});
+}
+
 function setHEAD(head) {
 	document.getElementById('HEAD label').innerHTML = head;
 }
@@ -70,6 +89,7 @@ function checkoutCompanion() {
 // references, then build a collapsible menu
 socket.on('refs', function(data) {
 	console.log('refs', data);
+	_refs = data;
 	buildRefOptions(data);
 });
 
@@ -99,7 +119,35 @@ function buildRefOptions (refs) {
 		
 		// collapsable remote name
 		var remoteLabel = document.createElement('h4');
-		remoteLabel.innerHTML = name;	
+		remoteLabel.innerHTML = "\t" + name + " (" + refs.remotes[name].url + ")";
+		remoteLabel.style.display = "inline";
+		var authenticateButton = document.createElement("h4");
+		authenticateButton.style.display = "inline";
+		
+		if (!refs.remotes[name].authenticated) {
+			
+			authenticateButton.innerHTML = "\t\uD83D\uDD12";
+			
+			authenticateButton.onclick = (function() { 
+				// Thank you https://stackoverflow.com/questions/3495679/passing-parameters-in-javascript-onclick-event
+				return function() { 
+					authenticate(name);
+				}
+			})();
+			//remoteLabel.appendChild(authenticateButton);
+		}
+		
+		var removeButton = document.createElement('h4');
+		removeButton.style.display = "inline";
+		removeButton.innerHTML ='&nbsp;<i class="fa fa-trash" aria-hidden="true"></i>';
+		removeButton.onclick = (function() { 
+				// Thank you https://stackoverflow.com/questions/3495679/passing-parameters-in-javascript-onclick-event
+				return function() { 
+					removeRemote(name);
+				}
+			})();
+		
+		
 		var remoteDiv = document.createElement('div');
 
 		//remoteDiv.setAttribute=("class", "accordion-body collapse");
@@ -193,15 +241,17 @@ function buildRefOptions (refs) {
 		remoteDiv.appendChild(tagsLabel);
 		remoteDiv.appendChild(tagsDiv);
 		
+		remoteEntry.appendChild(removeButton);
 		remoteEntry.appendChild(remoteLabel);
+		remoteEntry.appendChild(authenticateButton);
 		remoteEntry.appendChild(remoteDiv);
 		
-		document.getElementById('remoteList').appendChild(remoteLabel);
 		document.getElementById('remoteList').appendChild(remoteEntry);
 		
 		console.log('added', name);
 	});
 }
+
 
 function selectChoice(choiceElement) {
 	if (_choiceElement) {
@@ -211,16 +261,6 @@ function selectChoice(choiceElement) {
 	choiceElement.style.backgroundColor = "yellow";
 	console.log(_choiceElement.style);
 }
-
-// Hide content until it is verified that we have
-// authenticated with github
-socket.on('authenticated', function(data) {
-	console.log('Authenticated?', data);
-	document.getElementById('authentication').style.display = "none";
-	document.getElementById('authenticate').style.display = data ? "none" : "inline";
-	document.getElementById('content').style.display = data ? "inline" : "none";
-	resizeDynamicWidthElement();
-});
 
 
 // Clear the list of remotes
@@ -232,14 +272,6 @@ function removeChildren(id) {
 	}
 }
 
-function authenticate() {
-	username = document.getElementById('username').value;
-	password = document.getElementById('password').value;
-	gitsetup.emit('credentials', {
-		'username' : username,
-		'password' : password
-	});
-}
 
 function addRemote() {
 	var name = document.getElementById('new remote name').value;
@@ -251,11 +283,13 @@ function addRemote() {
 	});
 }
 
-// Ask backend for a list of remotes so we can populate the list
-gitsetup.emit('get remotes');
 
-// Ask backend if we are authenticated with github
-gitsetup.emit('authenticated?');
+function removeRemote(remote) {
+	if (confirm("Are you sure you want to delete the remote " + remote + "?")) {
+		gitsetup.emit('remove remote', remote);
+	}
+}
+
 
 // Set width of all "dynamic-parent-width" elements to parent width
 function resizeDynamicWidthElement() {
@@ -265,6 +299,9 @@ function resizeDynamicWidthElement() {
 	}
 }
 
+// Ask backend for a list of remotes so we can populate the list
+gitsetup.emit('get remotes');
+
 // Create event listener to dynamically resize elements when page is resized
 window.addEventListener('resize', resizeDynamicWidthElement);
 
@@ -273,27 +310,8 @@ window.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 
-<!--- Checking Github Authentication Status --->
-<div id="authentication">
-	<h1>Checking Authentication Status</h1>
-	<i class="fa fa-refresh fa-spin fa-2x fa-fw"></i>
-</div>
-
-
-<!--- Get Github Credentials --->
-<form id="authenticate" style="display: none" onsubmit="authenticate(); return false">
-	<h1>Authentication Required</h1>
-	<span>github username</span>
-	<input class="form-control" id="username" style="width: 200px;" />
-	<span>github password</span>
-	<input class="form-control" id="password" type="password" style="width: 200px;" />
-	<input type="submit" class="btn btn-primary" value="Authenticate"/>
-</form>
-
-
 <!--- Main Content --->
-<!--- Hidden until github ssh authentication is confirmed from backend --->
-<div id="content" style="display:none">
+<div id="content">
 	<div class="row">
 		<div class="col-md-12">
 			<div class="panel panel-default">
@@ -312,7 +330,7 @@ window.addEventListener("DOMContentLoaded", function() {
 						<input class="form-control" id="new remote url" style="width: 400px;" value="ssh://git@github.com/bluerobotics/repository.git" />
 						<input type="submit" class="btn btn-primary" value="Add New Remote" />
 					</form>
-					<h1>remotelist</h1>
+					<h1>Remotes:</h1>
 					<input type="submit" class="btn btn-primary" value="Checkout" onClick="checkoutCompanion()"/>
 					<input type="submit" class="btn btn-primary" value="Fetch" onClick="fetchCompanion()"/>
 					<input type="submit" class="btn btn-primary" value="Update" onClick="updateCompanion()"/>
@@ -321,6 +339,7 @@ window.addEventListener("DOMContentLoaded", function() {
 					<div class="col-md-12" id="remoteList">
 						<!---populated by javascript--->
 					</div>
+					
 					<div>
 						<textarea rows="20" cols="120" id="terminal-output"
 							style="font-family:monospace; resize: vertical"
