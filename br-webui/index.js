@@ -567,13 +567,15 @@ networking.on('connection', function(socket) {
 						line = fields[i].split("=");
 						if (line[0] == "ssid") {
 							var ssid = line[1];
+						} else if (line[0] == "ip_address") {
+							var ip = " (" + line[1] + ")";
 						}
 					}
 					
 					if (stdout.indexOf("HANDSHAKE") > -1) {
 						socket.emit('wifi status', '<h4>Connecting: ' + ssid + '</h1>');
 					} else {
-						socket.emit('wifi status', '<h4 style="color:green;">Connected: ' + ssid + '</h1>');
+						socket.emit('wifi status', '<h4 style="color:green;">Connected: ' + ssid + ip + '</h4>');
 					}
 				}
 			}
