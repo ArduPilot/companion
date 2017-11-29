@@ -198,6 +198,12 @@ if (( $PRE_0_0_8 > 0 )); then
     echo "pi:companion" | sudo chpasswd
 fi
 
+if ! git remote | grep -q local; then
+    echo 'Adding local reference'
+    cd ~/companion
+    git remote add local ~/companion
+fi
+
 echo 'Update Complete, refresh your browser'
 
 sleep 0.1
