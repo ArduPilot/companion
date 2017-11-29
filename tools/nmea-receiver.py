@@ -49,6 +49,7 @@ while True:
             gps_type_set = True
         time.sleep(0.05)
     else:
+        print "waiting for data"
         time.sleep(1)
         
     try:
@@ -77,15 +78,13 @@ while True:
         if time.time() > last_output_t + 0.1:
             last_output_t = time.time();
             buf = json.dumps(data)
-            print "Sending: ", data
+            print("Sending: ", data)
             sockit.sendto(buf, (ip, portnum))
             
     except socket.error as e:
         if e.errno == 11:
             pass
         else:
-            print e
+            print("Error:", e)
     except Exception as e:
-        print e
-
-
+        print("Got error:", e)
