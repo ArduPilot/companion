@@ -65,6 +65,14 @@ while True:
                 elif msg.sentence_type == 'RMC':
                     data['lat'] = msg.latitude * 1e7
                     data['lon'] = msg.longitude * 1e7
+                elif msg.sentence_type == 'GLL':
+                    data['lat'] = msg.latitude * 1e7
+                    data['lon'] = msg.longitude * 1e7
+                elif msg.sentence_type == 'GNS':
+                    data['lat'] = msg.latitude * 1e7
+                    data['lon'] = msg.longitude * 1e7
+                    data['satellites_visible'] = int(msg.num_sats)
+                    data['hdop'] = float(msg.hdop)
 
                 buf = json.dumps(data)
                 print data
