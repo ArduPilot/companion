@@ -53,7 +53,7 @@ while True:
         time.sleep(1)
         
     try:
-        datagram = sockit.recvfrom(4096)
+        datagram,address = sockit.recvfrom(4096)
         data_received = True
         for byte in datagram:
             for msg in parser.next(byte):
