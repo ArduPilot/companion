@@ -13,7 +13,7 @@ fi
 
 cd /home/pi/companion/br-webui
 
-if ! npm list nodegit | grep -q nodegit@0.18.3; then
+if ! npm list nodegit 2>&1 | grep -q nodegit@0.18.3; then
     echo 'Fetching nodegit packages for raspberry pi...'
     wget --timeout=15 --tries=2 https://s3.amazonaws.com/downloads.bluerobotics.com/Pi/dependencies/nodegit/nodegit_required_modules.zip -O /tmp/nodegit_required_modules.zip
     if [ $? -ne 0 ] # If "wget" failed:
