@@ -103,6 +103,29 @@ function testUpload() {
 function testDownload() {
 	net.download.start();
 }
+
+function isValidIP(ip) {
+	return /^(?=\d+\.\d+\.\d+\.\d+$)(?:(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9])\.?){4}$/.test(ip);
+}
+
+function validateIp(elementId) {
+	var ip = document.getElementById(elementId).value;
+	if (!isValidIP(ip)) {
+		document.getElementById(elementId).setAttribute("style", "width: 300px; border:2px solid #ff0000")
+		return false
+	}
+	document.getElementById(elementId).setAttribute("style", "width: 300px; border:2px solid #00ff00")
+	return ip
+}
+
+function setCompanionDefaultClientIP() {
+	var ip = validateIp('client ip')
+	if (!ip) {
+		return
+	}
+	socket.emit('set default ip', ip);
+}
+
 </script>
 
 <!-- Companion Computer Status -->
@@ -126,6 +149,30 @@ function testDownload() {
 						<dd id="ramTotal"></dd>
 					<dt>CPU Status: </dt>
 						<dd id="cpuStatus"></dd>
+				</dl>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Companion Computer IP Configuration -->
+<div class="row">
+	<div class="col-md-12">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">
+					Companion Computer IP Configuration
+				</h3>
+			</div>
+			<div class="panel-body">
+				<dl class="dl-horizontal">
+					<div class="form-group">
+						<h3>IP Address:</h3>
+						<input type="text" class="form-control" id="client ip" value="192.168.2.2" style="width: 300px;"></input>
+					</div>
+					<button type="button" class="btn btn-primary"
+						id="ethernet ip" onclick="setCompanionDefaultClientIP()">
+						Change Companion Default Client IP</button>
 				</dl>
 			</div>
 		</div>

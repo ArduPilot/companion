@@ -1025,4 +1025,14 @@ io.on('connection', function(socket) {
 	uploader.on('abort', (fileInfo) => {
 		logger.log('Aborted: ', fileInfo);
 	});
+
+	// used for dhcp configuration
+	socket.on('set default ip', function(ip) {
+		logger.log("set default ip", ip);
+
+		child_process.exec('/home/pi/companion/scripts/set_default_client_ip.sh ' + ip, function (error, stdout, stderr) {
+			logger.log(stdout + stderr);
+		});
+
+	});
 });
