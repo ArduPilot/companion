@@ -198,6 +198,13 @@ function restoreParams() {
 	}
 }
 
+function rebootPixhawk() {
+	if (confirm("Are you sure you want to reboot the Pixhawk ?")) {
+		document.getElementById('reboot pixhawk').disabled = true;
+		socket.emit('reboot px');
+	}
+}
+
 socket.on('restore px fw complete', function(data){
 	document.getElementById('restore fw').disabled = false;
 });
@@ -205,6 +212,11 @@ socket.on('restore px fw complete', function(data){
 socket.on('restore px params complete', function(data){
 	document.getElementById('restore params').disabled = false;
 });
+
+socket.on('reboot px complete', function(data){
+	document.getElementById('reboot pixhawk').disabled = false;
+});
+
 </script>
 
 <h1>Software Status and Update</h1>
@@ -265,6 +277,11 @@ socket.on('restore px params complete', function(data){
 					<button type="button" class="btn btn-primary"
 						id="restore params" onclick="restoreParams()">
 						Restore Default Parameters</button>
+
+					<h4>Reboot Pixhawk</h4>
+					<button type="button" class="btn btn-primary"
+						id="reboot pixhawk" onclick="rebootPixhawk()">
+						🔃</button>
 				</div>
 				<br />
 				<div>
