@@ -18,8 +18,8 @@ if [ -z "$4" ]; then
 else
     echo 'removing old stash'
     rm -rf /home/pi/.companion
-    
-    echo 'stashing current repo'
+
+    echo 'backup current repo'
     cp -r /home/pi/companion /home/pi/.companion
 fi
 
