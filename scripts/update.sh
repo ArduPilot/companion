@@ -25,6 +25,9 @@ fi
 
 cd /home/pi/companion
 
+echo 'stash everything and start from the beginning'
+git stash
+
 echo 'tagging revert-point as' $(git rev-parse HEAD)
 git tag revert-point -f
 
