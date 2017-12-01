@@ -74,13 +74,15 @@ app.get('/test', function(req, res) {
 	var module = req.param('module');
 	//console.log("Dealing with: ", module);
 
+	// Match headers found @ https://github.com/nesk/network.js/blob/master/server/server.php
 	res.set({
 		// Make sure the connection closes after each request
 		'Connection': 'close',
 		// Don't let any caching happen
 		'Cache-Control': 'no-cache, no-store, no-transform',
 		'Pragma': 'no-cache',
-	})
+		'Access-Control-Allow-Origin': '*',
+	});
 	
 
 	if (module && module == 'download') {
