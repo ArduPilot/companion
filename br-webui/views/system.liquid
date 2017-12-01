@@ -57,7 +57,7 @@ function updateCompanion(fileInfo) {
 }
 
 function companionProgress(fileInfo) {
-	document.getElementById('companionProgress').innerHTML = `Uploading: ${fileInfo.sent} / ${fileInfo.size} byte(s)`;
+	document.getElementById('companionProgress').innerHTML = 'Uploading: ' + fileInfo.sent + '/' + fileInfo.size + ' byte(s)';
 }
 
 function updatePixhawkFile(fileInfo) {
@@ -80,7 +80,7 @@ function updatePixhawk(option) {
 }
 
 function pixhawkProgress(fileInfo) {
-	document.getElementById('pixhawkProgress').innerHTML = `Uploading: ${fileInfo.sent} / ${fileInfo.size} byte(s)`;
+	document.getElementById('pixhawkProgress').innerHTML = 'Uploading: ' + fileInfo.sent + '/' + fileInfo.size + ' byte(s)';
 }
 
 socket.on('pixhawk update complete', function(data) {
