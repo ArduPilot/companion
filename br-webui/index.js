@@ -214,7 +214,7 @@ var companionRepository = null;
 Git.Repository.open(_companion_directory)
 	.then(function(repository) {
 		companionRepository = repository;
-		updateCurrentHead(companionRepository);
+		updateCurrentHEAD(companionRepository);
 		emitRemotes();
 	})
 	.catch(function(err) { logger.log(err); });
