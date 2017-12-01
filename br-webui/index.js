@@ -70,7 +70,7 @@ app.get('/security', function(req, res) {
 
 
 app.get('/test', function(req, res) {
-	var module = req.param('module');
+	var module = req.query['module'];
 	//console.log("Dealing with: ", module);
 
 	// Match headers found @ https://github.com/nesk/network.js/blob/master/server/server.php
@@ -121,7 +121,7 @@ app.get('/test', function(req, res) {
 });
 
 app.post('/test', function(req, res) {
-	var module = req.param('module');
+	var module = req.query['module'];
 	//console.log("Dealing with: ", module);
 	res.set('Content-Type', 'text/html; charset=UTF-8');
 	res.set('Connection', 'close');
