@@ -196,10 +196,11 @@
 	};
 	
 	function loadAllSoft() {
-		loadAll(soft=true);
+		loadAll(true);
 	};
 	
-	function loadAll(soft=false) {
+	function loadAll(soft) {
+		soft = typeof soft === 'undefined' ? false : soft;
 		var filename = '$HOME/SAVED.conf'
 		socket.emit('routing request', {
 			'request' : 'load all',
