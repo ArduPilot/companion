@@ -224,7 +224,7 @@ function updateCurrentHEAD(repository) {
 		.then(function(reference) {
 			_current_HEAD = reference.target().tostrS().substring(0,8);
 			io.emit('current HEAD', _current_HEAD);
-			console.log('Current HEAD:', reference.target().tostrS().substring(0,8));
+			logger.log('Current HEAD:', reference.target().tostrS().substring(0,8));
 		});
 }
 
