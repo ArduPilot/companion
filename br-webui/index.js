@@ -14,6 +14,7 @@ app.use('/js', express.static(__dirname + '/node_modules/jquery/dist')); // redi
 app.use('/font-awesome', express.static(__dirname + '/node_modules/font-awesome')); // redirect JS jQuery
 app.use('/css', express.static(__dirname + '/node_modules/bootstrap/dist/css')); // redirect CSS bootstrap
 app.use('/style.css', express.static(__dirname + '/style.css')); // redirect CSS bootstrap
+app.use('/js', express.static(__dirname + '/node_modules/network-js/dist'));
 
 var fs = require("fs");
 var expressLiquid = require('express-liquid');

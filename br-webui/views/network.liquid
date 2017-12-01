@@ -1,6 +1,6 @@
 {% include ../_includes/header.liquid %}
 
-<script src="network.min.js"></script>
+<script src="/js/network.js"></script>
 <script>
 
 var settings = {
@@ -23,10 +23,15 @@ var settings = {
 var net = new Network(settings);
 
 // Listen for the "end" event which provides the calculated latencies. 
-net.latency.on('end', function(averageLatency, allLatencies) {
+net.latency
+	.on('end', function(averageLatency, allLatencies) {
 	console.log('end', averageLatency, allLatencies);
 	document.getElementById("latency results").innerHTML = averageLatency.toFixed(3) + ' ms';
 });
+
+
+
+
 
 net.upload
 	.on('start', function(dataSize) {
