@@ -4,7 +4,7 @@
 <script>
 var socket = io();
 
-function startWLDriver() {
+function restartWLDriver() {
 	var ip = document.getElementById('wlIP').value;
 	var port = document.getElementById('wlPort').value;
 	var args = {}
@@ -14,11 +14,7 @@ function startWLDriver() {
 	if (port.length) {
 		args.port = port;
 	}
-	socket.emit('start WL driver', args);
-}
-
-function stopWLDriver() {
-	socket.emit('stop WL driver');
+	socket.emit('restart WL driver', args);
 }
 
 </script>
@@ -43,8 +39,7 @@ function stopWLDriver() {
 						<label>Water Linked Port:</label>
 						<input type="text" class="form-control" id="wlPort" value="80"></input>
 					</div>
-					<button type="button" class="btn btn-primary" onclick="startWLDriver()">Start Water Linked Driver</button>
-					<button type="button" class="btn btn-primary" onclick="stopWLDriver()">Stop Water Linked Driver</button>
+					<button type="button" class="btn btn-primary" onclick="restartWLDriver()">Restart Water Linked Driver</button>
 				</div>
 			</div>
 		</div>

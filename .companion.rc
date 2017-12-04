@@ -8,6 +8,7 @@ if [ ! -f /home/pi/.updating ]; then
 	sudo -H -u pi screen -dm -S audio $COMPANION_DIR/scripts/start_audio.sh
 	sudo -H -u pi screen -dm -S file-manager node --harmony $COMPANION_DIR/br-webui/node_modules/node-file-manager/lib/index.js -p 7777 -d /
 	sudo -H -u pi screen -dm -S nmearx $COMPANION_DIR/tools/nmea-receiver.py
+	sudo -H -u pi screen -dm -S wldriver $COMPANION_DIR/tools/underwater-gps.py --ip=192.168.2.94 --port=80
 else
 	sudo -H -u pi echo 'UPDATE FAILED!' >> /home/pi/.update_log
 	rm -f /home/pi/.updating

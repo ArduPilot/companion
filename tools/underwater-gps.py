@@ -8,7 +8,7 @@ import grequests
 from pymavlink import mavutil
 
 from os import system
-system('screen -S mavproxy -p 0 -X stuff "param set GPS_TYPE 14^M"')
+
 
 master = mavutil.mavlink_connection('udpout:192.168.2.1:14550', source_system=2, source_component=1)
 
@@ -16,6 +16,17 @@ parser = argparse.ArgumentParser(description="Driver for the Water Linked Underw
 parser.add_argument('--ip', action="store", type=str, default="37.139.8.112", help="remote ip to query on.")
 parser.add_argument('--port', action="store", type=str, default="8000", help="remote port to query on.")
 args = parser.parse_args()
+
+
+connected = False
+while not connected:
+    time.sleep(5)
+    print("scanning for Water Linked underwater GPS...")
+    connected = not system('ping -c1 ' + args.ip)
+
+print("Found Water Linked underwater GPS!")
+
+system('screen -S mavproxy -p 0 -X stuff "param set GPS_TYPE 14^M"')
 
 sockit = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sockit.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
