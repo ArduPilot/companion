@@ -41,7 +41,35 @@
 #       Select network adapter to use to connect to TX (i.e. eth0 if your Ubuntu machine uses eth0 to access your local internet)
 #       when "Post Installation Jetson TX1, Following actions will be performed at this stage.." screen appears click Next
 #    Black screen, "Please put your device to Force USB Recovery Mode", press <Enter>
+#       Vagrant: use "watch lsusb" on the VM and get the nvidia device showing
 #       Eventually, "Finished Flashing OS, Please press Reset button on device, Press Enter key to continue" will be displayed, press <Enter>
+#       If it gets stuck at "Determining the IP address of the target" (typical when using Vagrant), you can log onto the console of the TX1 and modify the IP address in report_ip_address_to_host script; 192.168.1.100
+
+# 
+cd jetpack
+NEW_DTB_FILENAME=tegra210-jetson-tx1-p2597-2180-a01-devkit.dtb
+wget https://github.com/NVIDIA-Jetson/redtail/raw/master/tools/install/tx1-uart-patch/$NEW_DTB_FILENAME -O /tmp/$NEW_DTB_FILENAME
+for old in ./64_TX1/Linux_for_Tegra_64_tx1/bootloader/tegra210-jetson-tx1-p2597-2180-a01-devkit.dtb ./64_TX1/Linux_for_Tegra_64_tx1/rootfs/boot/tegra210-jetson-tx1-p2597-2180-a01-devkit.dtb ./64_TX1/Linux_for_Tegra_64_tx1/kernel/dtb/tegra210-jetson-tx1-p2597-2180-a01-devkit.dtb; do
+  TS=$(date '+%Y%m%d%H%M%S')
+  sudo cp $old{,-$TS}
+  sudo cp $NEW_DTB_FILENAME $old
+done
+
+# relaunch Launcher:
+_installer/Launcher
+# deselect everything except Flash OS Image to Target and everything as "Install on Target" specifies above
+
+#
+# STEP1A part 2 : Download base image from TX1 (e.g. if you want to take a copy of the factory image)
+#    put TX1 into bootloader mode: Hold Force Recovery button (aka "REC"), press Reset button(aka "RST"), Release Force Recovery button
+#    cd to directory where JetPack was installed (e.g. ~/jetpack)
+cd 64_TX1/Linux_for_Tegra_64_tx1/bootloader
+REPO=/vagrant # (e.g.)
+IMAGE=/vagrant/tx1_image_jetpack31_factory.img
+$REPO/download_image.sh $IMAGE  #  <-- image will be saved to this file.  this will take about 1hour and 40 minutes
+
+
+#
 #
 # STEP1B: if you want to re-use a factory image (e.g. one downloaded in STEP2):
 #   (possibly bring up Vagrant virtual machine)
@@ -50,24 +78,16 @@ TEGRAFLASH=$BASEDIR/64_TX1/Linux_for_Tegra_64_tx1/bootloader/tegraflash.py
 ls $TEGRAFLASH
 APPLET=$BASEDIR/64_TX1/Linux_for_Tegra_64_tx1/bootloader/nvtboot_recovery.bin
 ls $APPLET
-CBOOT=$BASEDIR/64_TX1/Linux_for_Tegra_64_tx1/bootloader/t210ref/cboot.bin
+CBOOT=$BASEDIR/64_TX1/Linux_for_Tegra_64_tx1/bootloader/cboot.bin
 ls $CBOOT
-IMAGE_NAME="/vagrant/image-factory-20170112/image_jetpack_factory.img" # (e.g.)
-IMAGE_NAME="apsync-tx1-$TIMESTAMP.img" # (e.g.)
+IMAGE_NAME="/vagrant/image-factory-20171124/image_jetpack_3.1_factory-app.img" # (e.g.)
 ls $IMAGE_NAME
 sudo $TEGRAFLASH --bl $CBOOT --applet $APPLET --chip 0x21 --cmd "write APP $IMAGE_NAME"  # about 60m
 #
-# STEP2 : Download base image from TX1 (e.g. if you want to take a copy of the factory image)
-#    put TX1 into bootloader mode: Hold Force Recovery button (aka "REC"), press Reset button(aka "RST"), Release Force Recovery button
-#    cd to directory where JetPack was installed (i.e. JetPack-2.3.1)
-#    cd 64_TX1/Linux_for_Tegra_64_tx1/bootloader
-#    copy in download_image.sh from this repo
-#    ./download_image.sh tx1_image_jetpack231_factory.img    <-- image will be saved to this file.  this will take about 1hour and 40 minutes
-#
-# Step 3 : install packages on TX1
+# Step 2 : install packages on TX1
 #    power on the TX1
-#    log onto TX1 as ubuntu/ubuntu (you may be able to do this over ethernet using the tegra-ubuntu hostname)
-# ssh ubuntu@tegra-ubuntu
+#    log onto TX1 as nvidia/nvidia (you may be able to do this over ethernet using the tegra-ubuntu hostname)
+# ssh nvidia@tegra-ubuntu
 #    create an apsync user:
 sudo useradd -s /bin/bash -m -U -G sudo,netdev,users,dialout,video apsync
 sudo passwd apsync # apsync
