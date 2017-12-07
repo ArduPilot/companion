@@ -1,0 +1,57 @@
+#!/bin/bash
+
+if [ $(id -u) -ne 0 ]; then
+   echo >&2 "Must be run as root"
+   exit 1
+fi
+
+if [ -z "$TELEM_SERIAL_PORT" ]; then
+    echo 'TELEM_SERIAL_PORT must be set (e.g. "/dev/ttyS1" or "/dev/ttyMFD1")'
+    exit 1
+fi
+
+set -e
+set -x
+
+# apt-get install -y cmake libboost-dev libboost-thread-dev libboost-program-options-dev libconfig++-dev libreadline-dev
+
+adduser $NORMAL_USER dialout
+
+# install mavlink-router to provide a fast mavlink proxy for the serial port
+sudo -u $NORMAL_USER -H bash <<EOF
+set -e
+set -x
+
+# auto start mavlink_router
+MAVLINK_ROUTER_HOME=~/start_mavlink-router
+rm -rf \$MAVLINK_ROUTER_HOME
+if [ ! -d \$MAVLINK_ROUTER_HOME ]; then
+    mkdir \$MAVLINK_ROUTER_HOME
+fi
+cp start_mavlink-router.sh \$MAVLINK_ROUTER_HOME/
+cp autostart_mavlink-router.sh \$MAVLINK_ROUTER_HOME/
+ cp mavlink-router.conf \$MAVLINK_ROUTER_HOME/
+ perl -pe 's%/dev/ttyUSB0%$TELEM_SERIAL_PORT%' -i \$MAVLINK_ROUTER_HOME/mavlink-router.conf
+
+pushd ~/GitHub
+ rm -rf mavlink-router
+ git clone --recurse-submodules https://github.com/01org/mavlink-router
+ pushd mavlink-router
+  git remote add peterbarker https://github.com/peterbarker/mavlink-router
+  git fetch peterbarker
+  git checkout apsync
+  git submodule update --init --recursive
+  ./autogen.sh && ./configure CFLAGS='-g -O2' \
+            --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib64 \
+            --prefix=/usr
+  time make
+  cp mavlink-routerd  \$MAVLINK_ROUTER_HOME/
+ popd
+popd
+
+EOF
+
+
+# add line below to bottom of /etc/rc.local to call start script
+LINE="sudo -H -u $NORMAL_USER /bin/bash -c '~$NORMAL_USER/start_mavlink-router/autostart_mavlink-router.sh'"
+perl -pe "s%^exit 0%$LINE\\n\\nexit 0%" -i /etc/rc.local
