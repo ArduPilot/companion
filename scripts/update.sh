@@ -14,9 +14,9 @@ touch /home/pi/.updating
 
 
 if [ -z "$4" ]; then
-    echo 'skipping stash...'
+    echo 'skipping backup...'
 else
-    echo 'removing old stash'
+    echo 'removing old backup'
     rm -rf /home/pi/.companion
 
     echo 'backup current repo'
@@ -26,7 +26,7 @@ fi
 cd /home/pi/companion
 
 echo 'stash everything and start from the beginning'
-git stash
+git -c user.name="companion-update" -c user.email="companion-update" stash
 
 echo 'tagging revert-point as' $(git rev-parse HEAD)
 git tag revert-point -f
