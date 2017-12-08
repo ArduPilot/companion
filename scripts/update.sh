@@ -25,7 +25,7 @@ fi
 
 cd /home/pi/companion
 
-echo 'stash everything and start from the beginning'
+echo 'stashing local changes'
 git -c user.name="companion-update" -c user.email="companion-update" stash
 
 echo 'tagging revert-point as' $(git rev-parse HEAD)
