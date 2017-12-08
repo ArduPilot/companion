@@ -139,7 +139,7 @@ for (var i = 0; ;i++) {
 
 // root
 app.get('/', function(req, res) {
-	res.render('index', {});
+	res.redirect('/network');
 });
 
 app.get('/routing', function(req, res) {

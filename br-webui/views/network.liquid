@@ -3,6 +3,94 @@
 <script src="/js/network.js"></script>
 <script>
 
+// WiFi Setup
+var networking = io('/networking');
+
+networking.on('wifi aps', function(data) {
+
+	console.log('got wifi aps')
+	var select = document.getElementById("ssid");
+	
+	if (select.options[select.selectedIndex]) {
+		var currentSSID = select.options[select.selectedIndex].text;
+		console.log('current SSID:' + currentSSID);
+	}
+	
+	while (select.hasChildNodes()) {
+		select.removeChild(select.lastChild);
+	}
+	
+	var index = 0;
+	var newIndex = 0;
+	
+	data.forEach(function(line) {
+		var option = document.createElement('option');
+		option.value = line;
+		option.innerHTML = line;
+		if (currentSSID && line == currentSSID) {
+			newIndex = index;
+			console.log('match! new index:' + index);
+		}
+		select.appendChild(option);
+		index++;
+		console.log(index);
+	});
+	
+	select.selectedIndex = newIndex;
+});
+
+socket.on('internet status', function(data) {
+	console.log('got internet status')
+	console.log(data);
+	var statusIndicator = document.getElementById("internet-status");
+	if (data == true) {
+		statusIndicator.innerHTML = '<h4 style="color:green;">Connected</h1>';
+	} else {
+		statusIndicator.innerHTML = '<h4 style="color:red;">Not Connected</h1>';
+	}
+});
+
+networking.on('wifi status', function(data) {
+	console.log('got wifi status')
+	console.log(data);
+	var statusIndicator = document.getElementById("wifi-status");
+	statusIndicator.innerHTML = data;
+});
+
+networking.on('join complete', function(data) {
+	disableButton(false);
+});
+
+function joinNetwork() {
+	disableButton(true);
+	var select = document.getElementById("ssid");
+	var ssid = select.options[select.selectedIndex].text;
+	networking.emit('join network', {
+		"ssid" : ssid,
+		"password" : document.getElementById('password').value
+	});
+};
+
+function disableButton(disabled) {
+	document.getElementById('joinButton').disabled = disabled;
+	document.getElementById('spinner').style.visibility = disabled ? "visible" : "hidden";
+}
+
+networking.emit('get wifi status');
+networking.emit('get wifi aps');
+
+setInterval(function() {
+	networking.emit('get wifi status');
+}, 3000);
+
+setInterval(function() {
+	networking.emit('get wifi aps');
+}, 6000);
+
+// \WiFi Setup
+
+// Bandwidth testing
+
 var settings = {
 	endpoint: '/test', // Where to GET/POST
 	delay: 5000,
@@ -62,6 +150,28 @@ net.download
 		console.log('end', averageSpeed, allInstantSpeeds);
 		document.getElementById("download results").innerHTML = formatMbps(averageSpeed);
 	});
+	
+// Convert Bytes per second to Megabits per second
+function formatMbps(Bps) {
+	var Mbps = Bps * 8 * 0.000001;
+	var formatted = Mbps.toFixed(3) + ' Mbps';
+	return formatted;
+}
+	
+function testLatency() {
+	// Once all the configuration is done, start the requests for this module. 
+	net.latency.start();
+}
+
+function testUpload() {
+	net.upload.start();
+}
+
+function testDownload() {
+	net.download.start();
+}
+	
+// \Bandwidth testing
 
 // Set up socket
 var socket = io();
@@ -83,26 +193,6 @@ socket.on('cpu stats', function(data) {
 	document.getElementById('ramTotal').innerHTML = data.ram_total.toFixed(3) + ' MB';
 	document.getElementById('cpuStatus').innerHTML = data.cpu_status;
 });
-
-// Convert Bytes per second to Megabits per second
-function formatMbps(Bps) {
-	var Mbps = Bps * 8 * 0.000001;
-	var formatted = Mbps.toFixed(3) + ' Mbps';
-	return formatted;
-}
-	
-function testLatency() {
-	// Once all the configuration is done, start the requests for this module. 
-	net.latency.start();
-}
-
-function testUpload() {
-	net.upload.start();
-}
-
-function testDownload() {
-	net.download.start();
-}
 
 function isValidIP(ip) {
 	return /^(?=\d+\.\d+\.\d+\.\d+$)(?:(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9])\.?){4}$/.test(ip);
@@ -150,6 +240,43 @@ function setCompanionDefaultClientIP() {
 					<dt>CPU Status: </dt>
 						<dd id="cpuStatus"></dd>
 				</dl>
+			</div>
+		</div>
+	</div>
+</div>
+
+<h1>Network Setup</h1>
+<!-- Wifi Setup -->
+<div class="row">
+	<div class="col-md-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Wifi Setup</h3>
+			</div>
+			<div class="panel-body">
+				<form onsubmit="joinNetwork(); return false">
+					<h3>Wifi SSID:</h3>
+					<select class="form-control" id="ssid" style="width: 200px;"></select>
+					<h3>Password:</h3>
+					<div class="form-group">
+						<input class="form-control" id="password" type="password" style="width: 200px;" />
+						<button id="joinButton" type="submit" class="btn btn-primary">Join Network</button>
+						<i id="spinner" class="fa fa-refresh fa-spin fa-2x fa-fw" style="visibility:hidden"></i>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Wifi Status</h3>
+			</div>
+			<div class="panel-body">
+				<h3>Wifi Status:</h3>
+				<h4><span id="wifi-status">Pending</span></h4>
+				<h3>Internet Status:</h3>
+				<h4><span id="internet-status">Pending</span></h4>
 			</div>
 		</div>
 	</div>
