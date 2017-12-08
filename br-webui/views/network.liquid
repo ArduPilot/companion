@@ -180,23 +180,27 @@ function isValidIP(ip) {
 	return /^(?=\d+\.\d+\.\d+\.\d+$)(?:(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9])\.?){4}$/.test(ip);
 }
 
-function validateIp(elementId) {
-	var ip = document.getElementById(elementId).value;
-	if (!isValidIP(ip)) {
-		document.getElementById(elementId).setAttribute("style", "width: 300px; border:2px solid #ff0000")
-		return false
-	}
-	document.getElementById(elementId).setAttribute("style", "width: 300px; border:2px solid #00ff00")
-	return ip
-}
+function setCompanionEthernetIP() {
+	var ip_addr = prompt("Please enter a new IP Address");
 
-function setCompanionDefaultClientIP() {
-	var ip = validateIp('client ip')
-	if (!ip) {
+	var valid_ip = isValidIP(ip_addr)
+	if (!valid_ip) {
+		alert("Invalid IP address: " + ip_addr);
 		return
 	}
-	socket.emit('set default ip', ip);
+	
+	if (confirm("Are you sure you want to change the ethernet IP to " + ip_addr + "?")) {
+		socket.emit('set default ip', ip_addr);
+	}
+	alert("New IP will take affect after reboot");
 }
+
+socket.emit('get current ip');
+
+socket.on('current ip', function(data) {
+	console.log("got ethernet ip:", data);
+	$("#ethernet-ip").html("Current IP: " + data);
+});
 
 </script>
 
@@ -237,24 +241,21 @@ function setCompanionDefaultClientIP() {
 	</div>
 </div>
 
-<!-- Companion Computer IP Configuration -->
+<!-- Ethernet Setup -->
 <div class="row">
 	<div class="col-md-12">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title">
-					Companion Computer IP Configuration
+					Ethernet Setup
 				</h3>
 			</div>
 			<div class="panel-body">
+				<h4 id="ethernet-ip">Current IP:</h4>
 				<dl class="dl-horizontal">
-					<div class="form-group">
-						<h3>IP Address:</h3>
-						<input type="text" class="form-control" id="client ip" value="192.168.2.2" style="width: 300px;"></input>
-					</div>
 					<button type="button" class="btn btn-primary"
-						id="ethernet ip" onclick="setCompanionDefaultClientIP()">
-						Change Companion Default Client IP</button>
+						id="eth0 ip button" onclick="setCompanionEthernetIP()">
+						Change Companion Default Ethernet IP</button>
 				</dl>
 			</div>
 		</div>
