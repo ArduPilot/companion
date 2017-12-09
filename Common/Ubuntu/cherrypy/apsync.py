@@ -10,6 +10,7 @@ Simple interface to control various aspects of the APSync Companion Computer ima
 import os
 import sys
 import string
+import subprocess
 import time
 import traceback
 import threading
@@ -80,6 +81,12 @@ class APSync(object):
         for line in fh.readlines():
             (address, count_str) = string.split(line, sep=" ")
             count = int(count_str)
+            if address.find('127.0.0.1') != -1:
+                # ignore anything from localhost
+                continue
+            if address.find('0.0.0.0') != -1:
+                # ignore anything broadcast
+                continue
             if address.find('.255') != -1:
                 # ignore any broadcast addresses
                 continue
@@ -90,12 +97,33 @@ class APSync(object):
         fh.close()
         return ret
 
+    def good_video0(self):
+        path = "/dev/video0"
+        if not os.path.exists(path):
+            return False
+
+        try:
+            output = subprocess.check_output(["v4l2-ctl", "-D", "-d", path])
+        except CalledProcessError as e:
+            print("Failed to get description of (%s)", path)
+            return False
+
+        if output.find("ZED") != -1:
+            print("/dev/video0 is ZED!")
+            return False
+        return True
+
+
     def video_stream_starter_main(self):
         '''Monitor a file in /tmp/ for telemtry traffic (currently written by
         cmavnode), possibly redirect video stream out that way
         '''
         while not self.auto_streaming_enabled():
 #            print("Auto streaming currently disabled")
+            time.sleep(1)
+
+        while not self.good_video0():
+            print("Waiting for good video0")
             time.sleep(1)
 
         winner = None
