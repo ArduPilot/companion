@@ -90,9 +90,9 @@ class APSync(object):
             if address.find('.255') != -1:
                 # ignore any broadcast addresses
                 continue
-            if address.find("14550") == -1:
+            #if address.find("14550") == -1:
                 # ignore any non-14550 lines for now
-                continue
+             #   continue
             ret[address] = count
         fh.close()
         return ret
