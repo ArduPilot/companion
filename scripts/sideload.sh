@@ -12,10 +12,10 @@ fi
 echo 'adding lock'
 touch /home/pi/.updating
 
-echo 'removing old stash'
+echo 'removing old backup'
 rm -rf /home/pi/.companion
 
-echo 'stashing repository'
+echo 'backing up repository'
 mv /home/pi/companion /home/pi/.companion
 
 echo 'extracting archive: ' $1
