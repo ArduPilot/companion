@@ -6,6 +6,9 @@
   "main": "index.js",
   "dependencies": {
     "bootstrap": "3.3.7",
+    "bootstrap-select": "1.12.4",
+    "bootstrap-slider": "10.0.0",
+    "bootstrap-switch": "3.3.4",
     "express": "4.15.2",
     "express-liquid": "0.2.6",
     "font-awesome": "4.7.0",

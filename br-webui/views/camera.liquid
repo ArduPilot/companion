@@ -1,4 +1,10 @@
 {% include ../_includes/header.liquid %}
+<link href="css/bootstrap-switch.css" rel="stylesheet">
+<script src="js/bootstrap-switch.js"></script>
+<link href="css/bootstrap-select.css" rel="stylesheet">
+<script src="js/bootstrap-select.js"></script>
+<link href="css/bootstrap-slider.css" rel="stylesheet">
+<script src="js/bootstrap-slider.js"></script>
 
 <script>
 	var socket = io();
@@ -78,10 +84,20 @@
 	function disableAll(disable) { 
 		console.log("disabled:",disable);
 		$(".panel-body *").attr("disabled", disable);
+		$("select").selectpicker('refresh');
+		if(disable) {
+			$("input[type=range]").slider("disable");
+		} else {
+			$("input[type=range]").slider("enable");
+		}
+		$("input[type=checkbox]").bootstrapSwitch('disabled', disable);
 	}
 	
 	function fpsSelected() {
 		console.log("fps selected!", getFpsSelection());
+
+		$("select").selectpicker();
+
 		if (!_allLoaded) {
 			console.log("abort set format: still loading");
 			return;
@@ -275,9 +291,11 @@
 				new_element.min = control.min;
 				new_element.max = control.max;
 				new_element.step = control.step;
-			
 				new_element.value = control.value;
-				
+				new_element.setAttribute('data-slider-min', control.min);
+				new_element.setAttribute('data-slider-max', control.max);
+				new_element.setAttribute('data-slider-step', control.step);
+				new_element.setAttribute('data-slider-value', control.value);
 				/*
 				// The effects of some controls are dictated by the current value of others
 				// ie. we can't set the white balance temp control while the auto white balance control is enabled.
@@ -289,7 +307,7 @@
 				}
 				*/
 					
-				new_element.onchange = function(data) {
+				new_element.onslideStop = function(data) {
 					h6.innerHTML = "\t" + new_element.value;
 					control.value = new_element.value;
 					console.log('set v4l2 control', new_element.name, new_element.id, new_element.value);
@@ -349,6 +367,13 @@
 			if (!exists) {
 				sliderContainer.appendChild(h5);
 				sliderContainer.appendChild(new_element);
+				if(new_element.type == 'checkbox') {
+					$(new_element).bootstrapSwitch();
+				} else if($(new_element).is('select')) {
+					$(new_element).selectpicker();
+				} else if(new_element.type == 'range') {
+					$(new_element).slider({tooltip:'hide'});
+				}
 			}
 		});
 		

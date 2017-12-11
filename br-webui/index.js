@@ -15,6 +15,12 @@ app.use('/font-awesome', express.static(__dirname + '/node_modules/font-awesome'
 app.use('/css', express.static(__dirname + '/node_modules/bootstrap/dist/css')); // redirect CSS bootstrap
 app.use('/style.css', express.static(__dirname + '/style.css')); // redirect CSS bootstrap
 app.use('/js', express.static(__dirname + '/node_modules/network-js/dist'));
+app.use('/js', express.static(__dirname + '/node_modules/bootstrap-switch/dist/js'));
+app.use('/css', express.static(__dirname + '/node_modules/bootstrap-switch/dist/css/bootstrap2'));
+app.use('/js', express.static(__dirname + '/node_modules/bootstrap-select/dist/js'));
+app.use('/css', express.static(__dirname + '/node_modules/bootstrap-select/dist/css'));
+app.use('/js', express.static(__dirname + '/node_modules/bootstrap-slider/dist'));
+app.use('/css', express.static(__dirname + '/node_modules/bootstrap-slider/dist/css'));
 
 var fs = require("fs");
 var expressLiquid = require('express-liquid');

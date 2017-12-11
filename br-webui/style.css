@@ -32,3 +32,7 @@ body {
   border-top: #555 solid 2px;
   padding: 10px;
 }
+
+.slider {
+  width: 100% !important;
+}
