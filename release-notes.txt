@@ -33,3 +33,23 @@ Initial release
 0.0.10:
 
 - Update post-sideload.sh for zipped updates
+
+0.0.11:
+
+- Add CPU load, RAM usage, and throttling status to /system page
+- Add password change functionality at /security
+- Output ROV heading to Water Linked system
+- Add support for RMC, GLL, and GNS NMEA sentences to USBL/GPS input parser
+- Add reboot pixhawk button on /system page
+- Move wifi setup to /network page
+- Display current wifi and ethernet IP addresses in /network page
+- Allow changing default static ip address on ethernet interface in /network page
+- Remove latency testing from /network page, it was unreliable
+- Auto-detect/auto-start Water Linked Underwater GPS driver
+- Bugfix some broken pages on Internet Explorer
+- Remove audio streaming easter egg from web interface, and stream audio via RTP on port 5601
+- Update default ArduSub firmware and parameters to 3.5.2
+- Add Mavproxy configuration to /mavproxy
+- New and improved camera configuration options. It is easy to select video source, framerate, resolution and all user-adjustable camera parameters.
+- Generic support for UVC-compliant, H.264 capable usb video cameras
+- Many various bugfixes and usability improvements
