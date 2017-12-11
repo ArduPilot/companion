@@ -178,7 +178,7 @@
 			profileSelect.appendChild(option);
 		}
 		
-		profileSelect.oninput = function(data) {
+		profileSelect.onchange = function(data) {
 			var name = profileSelect.options[profileSelect.selectedIndex].value;
 			if (!name) {
 				console.log("no name for profile!");
@@ -209,7 +209,7 @@
 			cameraSelect.appendChild(option);
 		});
 		
-		cameraSelect.oninput = function() {
+		cameraSelect.onchange = function() {
 			cameraSelected();
 			document.getElementById("v4l2 profile select").selectedIndex = 0; // Reset profile selection, they are per-camera only
 		}
@@ -339,7 +339,7 @@
 			
 			var exists = false;
 			
-			sliderContainer.childNodes.forEach(function(child) {
+			$.each(sliderContainer.childNodes, function(child) {
 				if (child.id == new_element.id) {
 					exists = true;
 					// break;
@@ -396,9 +396,9 @@
 			fpsSelect.removeChild(fpsSelect.firstChild);
 		}
 		
-		formatSelect.oninput = formatSelected;
-		frameSelect.oninput = frameSizeSelected;
-		fpsSelect.oninput = fpsSelected;
+		formatSelect.onchange = formatSelected;
+		frameSelect.onchange = frameSizeSelected;
+		fpsSelect.onchange = fpsSelected;
 		
 		
 		for(var format in formats) {
