@@ -205,9 +205,10 @@ if (( $PRE_0_0_11 > 0 )); then
     ~/companion/scripts/start_video.sh $(cat ~/companion/params/vidformat.param.default)
 fi
 
+# add local repo as a remote so it will show up in webui
+cd ~/companion
 if ! git remote | grep -q local; then
     echo 'Adding local reference'
-    cd ~/companion
     git remote add local ~/companion
 fi
 
