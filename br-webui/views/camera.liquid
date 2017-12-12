@@ -331,7 +331,7 @@
 					i = i + 1;
 				});
 				
-				new_element.oninput = function(data) {
+				new_element.onchange = function(data) {
 					control.value = new_element.value;
 					console.log('set v4l2 control', new_element.name, new_element.id, new_element.value);
 					socket.emit('set v4l2 control', {
