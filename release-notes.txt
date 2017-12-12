@@ -53,3 +53,7 @@ Initial release
 - New and improved camera configuration options. It is easy to select video source, framerate, resolution and all user-adjustable camera parameters.
 - Generic support for UVC-compliant, H.264 capable usb video cameras
 - Many various bugfixes and usability improvements
+
+0.0.12:
+
+- Bugfix broken select elements on camera page
