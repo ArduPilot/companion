@@ -36,7 +36,7 @@ sockit.bind(('0.0.0.0', 25102))
 gpsUrl = "http://" + args.ip + ":" + args.port
 
 def processMasterPosition(response, *args, **kwargs):
-    print 'got master response:', response.text
+    print('got master response:', response.text)
     result = response.json()
     master.mav.heartbeat_send(
         0,                     # type                      : Type of the MAV (quadrotor, helicopter, etc., up to 15 types, defined in MAV_TYPE ENUM) (uint8_t)
@@ -68,7 +68,7 @@ def processMasterPosition(response, *args, **kwargs):
     )
     
 def processLocatorPosition(response, *args, **kwargs):
-    print 'got global response:', response.text
+    print('got global response:', response.text)
     result = response.json()
     result['lat'] = result['lat'] * 1e7
     result['lon'] = result['lon'] * 1e7
@@ -78,12 +78,12 @@ def processLocatorPosition(response, *args, **kwargs):
     result['satellites_visible'] = 10
     result['ignore_flags'] = 8 | 16 | 32
     result = json.dumps(result);
-    print 'sending      ', result
+    print('sending      ', result)
     
     sockit.sendto(result, ('0.0.0.0', 25100))
     
 def notifyPutResponse(response, *args, **kwargs):
-    print 'PUT response:', response.text
+    print('PUT response:', response.text)
 
 update_period = 0.25
 last_master_update = 0
@@ -94,14 +94,14 @@ while True:
     if time.time() > last_locator_update + update_period:
         last_locator_update = time.time()
         url = gpsUrl + "/api/v1/position/global"
-        print 'requesting data from', url
+        print('requesting data from', url)
         request = grequests.get(url, session=s, hooks={'response': processLocatorPosition})
         job = grequests.send(request)
         
     if time.time() > last_master_update + update_period:
         last_master_update = time.time()
         url = gpsUrl + "/api/v1/position/master"
-        print 'requesting data from', url
+        print('requesting data from', url)
         request = grequests.get(url, session=s, hooks={'response': processMasterPosition})
         job = grequests.send(request)
     
@@ -119,7 +119,7 @@ while True:
         headers = {'Content-type': 'application/json'}
         
         url = gpsUrl + "/api/v1/external/depth"
-        print 'sending', send_payload, 'to', url
+        print('sending', send_payload, 'to', url)
         
         # Equivalent
         # curl -X PUT -H "Content-Type: application/json" -d '{"depth":1,"temp":2}' "http://37.139.8.112:8000/api/v1/external/depth"
@@ -135,7 +135,7 @@ while True:
         headers = {'Content-type': 'application/json'}
         
         url = gpsUrl + "/api/v1/external/orientation"
-        print 'sending', send_payload, 'to', url
+        print('sending', send_payload, 'to', url)
         
         request = grequests.put(url, session=s, headers=headers, data=send_payload, hooks={'response': notifyPutResponse})
         grequests.send(request)
@@ -144,6 +144,6 @@ while True:
         if e.errno == 11:
             pass # no data available for udp read
         else:
-            print e
+            print(e)
 
     time.sleep(0.02)
