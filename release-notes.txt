@@ -57,3 +57,7 @@ Initial release
 0.0.12:
 
 - Bugfix broken select elements on camera page
+
+0.0.13:
+
+- Bugfix broken ArduSub firmware upload
