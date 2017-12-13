@@ -61,3 +61,7 @@ Initial release
 0.0.13:
 
 - Bugfix broken ArduSub firmware upload
+
+0.0.14:
+
+- Bugfix startup options for mavproxy
