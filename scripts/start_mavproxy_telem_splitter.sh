@@ -10,8 +10,5 @@ if [ -e mavproxy.param ]; then
 else
     paramFile="companion/params/mavproxy.param.default"
 fi
-# Replace all whitespace characters between quote marks with the hex
-# representation of a space, remove quote marks
-mavOptions=$(cat $paramFile \
-    | awk '!(NR%2){gsub(FS,"\\x20")}1' RS=\" ORS=)
-mavproxy.py $mavOptions
+
+xargs -a $paramFile mavproxy.py
