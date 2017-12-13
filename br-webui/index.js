@@ -176,6 +176,10 @@ app.get('/security', function(req, res) {
 	res.render('security', {});
 });
 
+app.get('/vlc.sdp', function (req, res) {
+  var file = __dirname + '/files/vlc.sdp';
+  res.download(file);
+});
 
 app.get('/test', function(req, res) {
 	var module = req.query['module'];
