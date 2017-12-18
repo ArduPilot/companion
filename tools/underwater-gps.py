@@ -13,8 +13,8 @@ from os import system
 master = mavutil.mavlink_connection('udpout:192.168.2.1:14550', source_system=2, source_component=1)
 
 parser = argparse.ArgumentParser(description="Driver for the Water Linked Underwater GPS system.")
-parser.add_argument('--ip', action="store", type=str, default="37.139.8.112", help="remote ip to query on.")
-parser.add_argument('--port', action="store", type=str, default="8000", help="remote port to query on.")
+parser.add_argument('--ip', action="store", type=str, default="demo.waterlinked.com", help="remote ip to query on.")
+parser.add_argument('--port', action="store", type=str, default="80", help="remote port to query on.")
 args = parser.parse_args()
 
 
