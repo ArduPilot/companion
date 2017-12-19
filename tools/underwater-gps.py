@@ -10,7 +10,7 @@ from pymavlink import mavutil
 from os import system
 
 
-master = mavutil.mavlink_connection('udpout:192.168.2.1:14550', source_system=2, source_component=1)
+master = mavutil.mavlink_connection('udpout:192.168.2.1:14400', source_system=2, source_component=1)
 
 parser = argparse.ArgumentParser(description="Driver for the Water Linked Underwater GPS system.")
 parser.add_argument('--ip', action="store", type=str, default="demo.waterlinked.com", help="remote ip to query on.")
