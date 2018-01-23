@@ -22,7 +22,7 @@ connected = False
 while not connected:
     time.sleep(5)
     print("scanning for Water Linked underwater GPS...")
-    connected = not system('ping -c1 ' + args.ip)
+    connected = not system('curl ' + args.ip + ':' + args.port + '/api/v1/about/')
 
 print("Found Water Linked underwater GPS!")
 
