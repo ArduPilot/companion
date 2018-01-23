@@ -65,3 +65,8 @@ Initial release
 0.0.14:
 
 - Bugfix startup options for mavproxy
+
+0.0.15:
+
+- Add vlc.sdp
+- Update Water Linked driver
