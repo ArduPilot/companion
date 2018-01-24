@@ -10,6 +10,8 @@ set -x
 
 . config.env
 
+rm ~/cuda-l4t/cuda-repo-l4t-8-0-local_8.0.34-1_arm64.deb
+
 pushd ../../Common/Ubuntu/
  ./clean-for-imaging
 popd
