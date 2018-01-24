@@ -1,3 +1,22 @@
-- Test according to instructions in ../../Common/Ubuntu/testing.txt
+# EITHER: Test calibration:
+killall OpenKAI # running any ZED-SDK tool will (racily) overwrite the calibration file with a bad downloaded one!
+
+/usr/local/zed/tools/ZED\ Calibration # must be run on console
+
+# OR Copy SN2021.conf into /usr/local/ZED/settings:
+scp zed-configs/SN2021.conf apsync@apsync:/usr/local/ZED/settings/
+
+# reboot required for zed to work (for me)
+sudo reboot
 
 - make sure that the graphical UI is logged in as apsync by default
+
+# Check "screen -list" includes OpenKAI
+screen -list | grep OpenKAI
+	1777.OpenKAI	(12/08/2017 03:00:54 AM)	(Detached)
+
+# connect mavproxy via mav20 and ensure visual odometry messages are being generated and received
+
+# ensure TX1 boots reliably when PixHawk is powered on
+
+# Test according to instructions in ../../Common/Ubuntu/testing.txt

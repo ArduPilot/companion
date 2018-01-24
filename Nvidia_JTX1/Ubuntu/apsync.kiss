@@ -49,7 +49,7 @@
 	"name":"apUDPclient",
 	"class":"_UDPclient",
 	"bInst":0,
-	"bLog":1,
+	"bLog":0,
 	"FPS":100,
 	"Window":"apView",
 	"addr":"127.0.0.1",
@@ -62,7 +62,7 @@
 	"name":"apUDPserver",
 	"class":"_UDPserver",
 	"bInst":1, /* temporarily disabled to test outgoing packet only */
-	"bLog":1,
+	"bLog":0,
 	"FPS":100,
 	"Window":"apView",
 	"port":14765,
@@ -83,7 +83,7 @@
 	"name":"apMavlink",
 	"class":"_Mavlink",
 	"bInst":1,
-	"bLog":1,
+	"bLog":0,
 	"FPS":100,
 	"Window":"apView",
 	"_IOBase":"apUDPserver", /* Using outgoing only for test at the moment */
