@@ -1,6 +1,6 @@
 Testing regime for new image:
 -----------------------------
-# make sure (USB) ethernet is unplugged!
+# make sure (USB?) ethernet is unplugged!
 
 # Check if AP exists
 
@@ -12,38 +12,39 @@ ssh apsync@10.0.1.128
 # Check "screen -list" includes cmavnode, DataFlashLogger, cherrypy:
 screen -list
 
-apsync@apsync:~ $ screen -list
+screen -list
 There are screens on:
-	758.cherrypy	(07/09/17 01:44:01)	(Detached)
-	727.DataFlashLogger	(07/09/17 01:44:01)	(Detached)
-	713.cmavnode	(07/09/17 01:44:01)	(Detached)
-3 Sockets in /run/screen/S-apsync.
-apsync@apsync:~ $ 
+	1754.cherrypy	(12/08/2017 03:00:54 AM)	(Detached)
+	1733.DataFlashLogger	(12/08/2017 03:00:54 AM)	(Detached)
+	1704.mavlink-router	(12/08/2017 03:00:54 AM)	(Detached)
 
 # Check APWeb is running:
 sudo screen -list
+There is a screen on:
+	1765.apweb	(12/08/2017 03:00:54 AM)	(Detached)
 
 apsync@apsync:~ $ sudo screen -list
 [sudo] password for apsync: 
 There is a screen on:
 	564.apweb	(07/09/17 11:35:36)	(Detached)
-1 Socket in /run/screen/S-root.
-apsync@apsync:~ $ 
 
 
 # ensure mavproxy starts on the apsync image:
 mavproxy.py --master :14550
-
-# we lock on for port 14550, so reboot
-reboot
+# make sure you can fetch parameters:
+param fetch
 
 # Can you connect using a GCS using the broadcast packets on port 14550?
 # on host machine:
 mavproxy.py --mav10 --master :14550
+# make sure you can fetch parameters:
+param fetch
+
+# ensure you can connect multiple GCS at the same time!
 
 # make sure dflogger is creating dataflash logs:
 # arm the vehicle *and turn the safety off*, then:
-watch ls dflogger/dataflash -l
+watch "ls dflogger/dataflash -lt | head"
 
 
 # can you connect to to the AP using a mobile phone and/or tablet?
@@ -62,7 +63,6 @@ watch ls dflogger/dataflash -l
 
 # Video Streaming testing:
  Use a web browser to connect on port 8000; make sure start/stop work
- Ensure autostart/stop works
 
 
 # web interface testing
