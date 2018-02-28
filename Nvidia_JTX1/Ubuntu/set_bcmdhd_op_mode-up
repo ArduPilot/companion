@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# this script is put into 
+
+TIMESTAMP=$(date '+%Y%m%d%H%M%S')
+DEBUGFILE="/tmp/$0-$TIMESTAMP.env"
+set >$DEBUGFILE
+
+function set_opmode()
+{
+    VAL=$1
+    echo "** Setting opmode to $VAL" >>$DEBUGFILE
+    echo $VAL >/sys/module/bcmdhd/parameters/op_mode
+}
+
+if [ $DEVICE_IFACE == "wlan0" ]; then
+	if [ $CONNECTION_ID == "WiFiAP" ]; then
+	    set_opmode 2
+	else
+	    set_opmode 0
+	fi
+fi
+
+exit 0

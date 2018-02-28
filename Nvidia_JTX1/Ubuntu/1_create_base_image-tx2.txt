@@ -130,6 +130,7 @@ pushd GitHub/companion/Nvidia_JTX1/Ubuntu
 time sudo -E ./2_install_packages.sh # 20m
 time sudo -E ./install_niceties || echo "Failed" # 20s
 time sudo -E ./3_wifi_access_point.sh # 20s
+time sudo ./wifi_client.sh # instant
 sudo ./4_setup_log_rotation # instant
 time sudo -E ./6_setup_video.sh # 1m
 time sudo -E ./8_setup_cmavnode.sh # ~4m

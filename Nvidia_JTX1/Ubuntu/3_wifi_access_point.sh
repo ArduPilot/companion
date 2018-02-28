@@ -11,8 +11,8 @@ set -x
 . config.env
 
 # the hardware must be told to go into AP mode:
-echo "options bcmdhd op_mode=2" | tee -a /etc/modprobe.d/bcmdhd.conf
-echo 2 >/sys/module/bcmdhd/parameters/op_mode
+install -o root -g root -m 755 set_bcmdhd_op_mode-up /etc/NetworkManager/dispatcher.d/pre-up.d/
+install -o root -g root -m 755 set_bcmdhd_op_mode-down /etc/NetworkManager/dispatcher.d/pre-down.d/
 
 # most of this is common:
 pushd ../../Common/Ubuntu
