@@ -38,4 +38,6 @@ nmcli connection modify $APNAME ipv4.method shared
 nmcli connection modify $APNAME wifi-sec.key-mgmt wpa-psk
 nmcli connection modify $APNAME ipv4.addresses 10.0.1.128/24
 nmcli connection modify $APNAME wifi-sec.psk "$KEY"
+nmcli connection modify $APNAME 802-11-wireless-security.group ccmp
+nmcli connection modify $APNAME 802-11-wireless-security.pairwise ccmp
 nmcli connection up $APNAME
