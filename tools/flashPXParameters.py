@@ -25,6 +25,9 @@ if options.file is not None:
 else:
     filename = 'standard.params'
 
+# Stop screen session with mavproxy
+print "Stopping mavproxy"
+os.system("screen -X -S mavproxy quit")
 
 # Port settings
 port = ''
@@ -43,10 +46,6 @@ except:
 	time.sleep(6)
 	master = mavutil.mavlink_connection(port)
 	master.wait_heartbeat()
-
-# Stop screen session with mavproxy
-print "Stopping mavproxy"
-os.system("screen -X -S mavproxy quit")
 
 # Upload parameter file
 print "Uploading parameter file."
