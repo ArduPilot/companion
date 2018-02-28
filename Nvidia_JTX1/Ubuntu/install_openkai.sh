@@ -25,7 +25,12 @@ TMP_PATH=/tmp/tmp-path
 mkdir -p \$TMP_PATH
 ln -sf  /bin/cat \$TMP_PATH/less
 export PATH=\$TMP_PATH:\$PATH
-ZED_SDK_RUNFILE=ZED_SDK_Linux_JTX1_v2.2.1.run
+ZED_SDK_RUNFILE=ZED_SDK_Linux_JTX1_v2.3.2.run
+if grep t186ref /etc/nv_tegra_release; then
+   # TX2 / JetPack 3.1
+   ZED_SDK_RUNFILE=ZED_SDK_Linux_JTX2_JP3.2_v2.4.0.run
+fi
+ZED_SDK_URL="https://cdn.stereolabs.com/developers/downloads/\$ZED_SDK_RUNFILE"
 
 BASE_SRC_DIR=~/GitHub/OpenKAI
 rm -rf \$BASE_SRC_DIR
@@ -52,7 +57,7 @@ popd
 # (Optional) Install ZED driver
 
 ##For Jetson TX1:
-wget --no-check-certificate https://www.stereolabs.com/developers/downloads/\$ZED_SDK_RUNFILE
+wget --no-check-certificate \$ZED_SDK_URL
 chmod u+x \$ZED_SDK_RUNFILE
 ./\$ZED_SDK_RUNFILE -- silent
 
@@ -102,6 +107,8 @@ popd
 
 git clone https://github.com/yankailab/OpenKAI.git
 pushd OpenKAI
+  git checkout 90db9cf2c68e09395ba70d20f00c72c3bbe1db2d
+  perl -pe 's/ sl_depthcore sl_tracking//' -i CMakeLists.txt # bodgy SDK compat
   mkdir build
   pushd build
     cmake .. -DUSE_ORB_SLAM2=0 -DCUDA_include=/home/apsync/GitHub/OpenKAI/jetson-inference/build/aarch64/include -DTensorRT_build=/home/apsync/GitHub/OpenKAI/jetson-inference/build/aarch64 -DUSE_ZED=1

@@ -12,6 +12,9 @@ set -x
 
 sudo apt-get purge -y whoopsie
 
+# install a couple of packages from the local repo:
+sudo apt-get install -y --allow-unauthenticated libcudnn7-dev libcudnn7
+
 # install packages common to all
 pushd ../../Common/Ubuntu
  ./install_packages.sh

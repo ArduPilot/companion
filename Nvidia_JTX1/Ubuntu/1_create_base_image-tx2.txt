@@ -1,0 +1,177 @@
+# TX1 setup script for use as companion computer
+
+# STEP1: Run ONE of STEP1A or STEP1B
+
+# STEP1a : install NVidia image onto JTX2 (skip this step if you already have a factory image (created in Step2) for the current release of JetPack.  This is required as the flashing of the APsync image only updates one partition - the other partitions on the device must match the one we are putting onto the device.
+
+# Connect the TX device via USB to Ubuntu machine and put it into bootloader mode:
+#    Hold Force Recovery button (aka "REC"), press Reset button(aka "RST"), Release Force Recovery button
+#    On Ubuntu machine "lsusb", and look for "NVidia Corp"
+
+# Get JetPack
+
+# download https://developer.nvidia.com/embedded/downloads#?search=jetpack%203.2 (nvidia login required)
+
+# Install JetPack on an Ubuntu 16.04 machine.
+# A Vagrantfile has been supplied.
+# Run the JetPack installer:
+mkdir jetpack
+cd jetpack
+# consider storing the downloads somewhere else:
+ln -s /vagrant/jetpack_download
+
+# Consider exporting a http_proxy environment variable
+# e.g. export http_proxy="http://bogg.local:3128"
+# sh /vagrant/JetPack-L4T-3.2-linux-x64_b196.run
+# _installer/Launcher
+#    On installation configuration, consider changing download directory to something persistent e.g. /vagrant/jetpack_download
+#    select Jetson TX2
+#    On JetPack L4T Component Manager:
+#        * Host: set "no action" for everything
+#        * For Target - Jetson TX2: mixed
+#           * Linux for Tegra Host Side Imae Setup: install
+#              * File System and OS: install
+#              * Drivers: install
+#           * Flash OS Image to Target: install
+#        Install on Target
+#           * VisionWorks Pack: no action
+#           * CUDA Toolkit: install
+#           * Compile CUDA Samples: no action
+#           * cuDNN Package: install
+#           * TensorRT: install
+#           * OpenCV: install
+#           * Multimedia API package: no action
+#    Click Next, and Accept All
+#    "Network Layout" screen should appear:
+#       Select "Device accesses Internet via router/switch", Next
+#       Select network adapter to use to connect to TX (i.e. eth0 if your Ubuntu machine uses eth0 to access your local internet)
+#       when "Post Installation Jetson TX1, Following actions will be performed at this stage.." screen appears click Next
+#    Black screen, "Please put your device to Force USB Recovery Mode", press <Enter>
+#       Eventually, "Finished Flashing OS, Please press Reset button on device, Press Enter key to continue" will be displayed, press <Enter>
+#
+
+# TX2 only, apply auvidea fixes to JetPack:
+mkdir auvidea-changes
+pushd auvidea-changes
+ wget https://auvidea.com/download/firmware/TX2/v1.5/ChangesTX2J140_Kernel_r28.1_v1.5.tar.gz
+ tar xfz ChangesTX2J140_Kernel_r28.1_v1.5.tar.gz
+popd
+FOO=$PWD/auvidea-changes/ChangesTX2J140_Kernel_r28.1
+ls $FOO
+for i in $FOO/BCT/tegra186-mb1-bct-pmic-quill-p3310-1000-c0{1,2,3,4}.cfg; do
+  echo "Copying $i"
+  cp "$i" 64_TX2/Linux_for_Tegra/bootloader/t186ref/BCT/
+done
+
+for i in tegra186-quill-p3310-1000-a00-00-base.dtb tegra186-quill-p3310-1000-c03-00-base.dtb tegra186-quill-p3310-1000-c03-00-dsi-hdmi-dp.dtb; do
+ ls $FOO/dtb/$i
+ cp $FOO/dtb/$i 64_TX2/Linux_for_Tegra/kernel/dtb/
+done
+
+# reflash just the DTB partition:
+pushd 64_TX2/Linux_for_Tegra
+sudo ./flash.sh -r -k kernel-dtb jetson-tx2 mmcblk0p1
+
+# reflash everything:
+cd 64_TX2/Linux_for_Tegra
+sudo ./flash.sh -r jetson-tx2 mmcblk0p1
+# note that after doing that you will want to do the "Install on Target" stuff from the Launcher
+
+
+#
+# Step 3 : install packages on TX?
+#    power on the TX
+#    log onto TX as nvidia/nvidia (you may be able to do this over ethernet using the tegra-ubuntu hostname)
+TEGRA=tegra-ubuntu.local
+ssh nvidia@$TEGRA
+#    create an apsync user:
+sudo useradd -s /bin/bash -m -U -G sudo,netdev,users,dialout,video apsync
+sudo passwd apsync # apsync
+
+# move all of the Jetson stuff to be under APSync:
+JETSON_STUFF_USER=ubuntu
+if [ -d "/home/nvidia" ]; then
+    JETSON_STUFF_USER=nvidia
+fi
+
+sudo rsync -aPH --delete /home/$JETSON_STUFF_USER/ /home/apsync
+sudo chown -R apsync.apsync /home/apsync
+pushd /home/$JETSON_STUFF_USER
+  sudo rm -rf cudnn nv-gie-repo-ubuntu1604-ga-cuda8.0-trt2.1-20170614_1-1_arm64.deb cuda-l4t /home/nvidia/OpenCV4Tegra
+popd
+
+logout
+
+# copy your private key over:
+ssh-copy-id apsync@$TEGRA
+
+# log in again
+ssh apsync@$TEGRA
+
+cd ~
+mkdir GitHub
+pushd GitHub
+git clone https://github.com/ArduPilot/companion.git
+# usually at this point I rsync over that repository:
+# rsync -aP companion/ apsync@$TEGRA:GitHub/companion --delete --delete-excluded --exclude=*.img.xz --exclude=*actory.img --exclude mav.tlog --exclude mav.tlog.raw --exclude=*/jetpack_download/*
+pushd companion/Nvidia_JTX1/Ubuntu
+sudo ./set-hostname   # reset the machine's hostname
+sudo apt-get autoremove -y # avoid repeated no-longer-required annoyance
+sudo ./change-autologin-user.sh
+sudo ./remove-unattended-upgrades # 
+sudo ./ensure_rc_local.sh
+sudo ./disable_console.sh
+sudo reboot # ensure hostname correct / console disabling OK / autologin working
+TEGRA=apsync.local # on your laptop....
+ssh apsync@$TEGRA
+pushd GitHub/companion/Nvidia_JTX1/Ubuntu
+# consider exporting a http proxy:
+# export http_proxy=http://bogg.local:3128/
+time sudo -E ./2_install_packages.sh # 20m
+time sudo -E ./install_niceties || echo "Failed" # 20s
+time sudo -E ./3_wifi_access_point.sh # 20s
+sudo ./4_setup_log_rotation # instant
+time sudo -E ./6_setup_video.sh # 1m
+time sudo -E ./8_setup_cmavnode.sh # ~4m
+time sudo -E ./setup_mavlink-router # ~2m
+time sudo -E ./7_dflogger.sh # ~210s
+sudo ./5_setup_mavproxy.sh # instant
+time sudo -E ./setup-video-streaming # 11s
+
+time sudo -E apt-get install -y libxml2-dev libxslt1.1 libxslt1-dev
+time sudo pip install future lxml # 4m
+time sudo ./install_pymavlink # new version required for apweb #1m
+time sudo ./install_apweb # 2m
+
+# OpenKAI not available due to OpenCV compatability issues....
+# time sudo -E ./install_openkai.sh
+
+# reboot and test image according to testing.txt
+sudo reboot
+
+# Step 4: cleanup
+time (pushd ~/GitHub/companion/Nvidia_JTX1/Ubuntu && sudo ./clean-for-imaging)
+
+
+sudo poweroff
+
+# Step 5: download apsync image from TX2:
+#    put TX2 into bootloader mode: Hold Force Recovery button (aka "REC"), press Reset button(aka "RST"), Release Force Recovery button
+watch lsusb
+BASEDIR=~/jetpack
+L4T=$BASEDIR/64_TX2/Linux_for_Tegra
+#    run download_image.sh from this repo:
+TIMESTAMP=`date '+%Y%m%d%H%M'`
+# consider using an absolute path for IMAGE_NAME here! e.g. /vagrant/...
+IMAGE_NAME="/vagrant/apsync-tx2-$TIMESTAMP.img"
+
+cd $L4T
+time sudo ./flash.sh -r -k APP -G $IMAGE_NAME jetson-tx2 mmcblk0p1 # about 30 minutes
+
+# on host machine (not on the Vagrant VM!)
+ls -l $IMAGE_NAME # about 8GB
+time xz --verbose -e $IMAGE_NAME # about 1.5 hours
+COMPRESSED_IMAGE_NAME="$IMAGE_NAME.xz"
+ls -l --si  $COMPRESSED_IMAGE_NAME # ~5.2GB
+
+time rsync -aP $COMPRESSED_IMAGE_NAME autotest@autotest.ardupilot.org:APM/buildlogs/binaries/Companion/next/$COMPRESSED_IMAGE_NAME # about 11.5 hours

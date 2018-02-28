@@ -27,10 +27,19 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       vb.customize ["guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-set-start"]
       vb.customize ["guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-set-on-restore", "1"]
       vb.customize ["modifyvm", :id, "--usb", "on"]
+      # Nvidia TX1:
+      vb.customize ["modifyvm", :id, "--usbxhci", "on"]
       vb.customize ["usbfilter", "add", "0", 
                     "--target", :id, 
                     "--name", "nvidiatx1",
                     "--productid", "7721",
+                    "--vendorid", "0955",
+                   ]
+      # Nvidia TX2:
+      vb.customize ["usbfilter", "add", "0", 
+                    "--target", :id, 
+                    "--name", "nvidiatx2",
+                    "--productid", "7c18",
                     "--vendorid", "0955",
                    ]
   end
@@ -42,7 +51,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # In addition there are problems with px4-clean when using shared folders. Using rsync avoids this.
   # config.vm.synced_folder ".", "/vagrant", type: "rsync", rsync__auto: true
   
-   config.vm.provision :"shell", inline: <<-SHELL
+  config.vm.define "trusty64", autostart: false do |trusty64|
+    config.vm.provision :"shell", inline: <<-SHELL
         echo "[Jetson-TX1]: Starting install"
         sudo apt-get update
 	sudo apt-get install -y libgtk2.0 xterm
@@ -53,6 +63,23 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         ln -s /vagrant/jetpack_download
 	popd
     SHELL
-end
+  end
 
-#        sh /vagrant/JetPack-L4T-2.3.1-linux-x64.run
+  config.vm.define "xenial64", autostart: false do |xenial64|
+    config.ssh.username = "ubuntu"
+    config.vm.box = "ubuntu/xenial64"
+    config.disksize.size = '20GB'
+    config.vm.provision :"shell", inline: <<-SHELL
+        echo "[Jetson-TX2]: Starting install"
+        sudo apt-get update
+	sudo apt-get install -y libgtk2.0 xterm sshpass
+	mkdir JetPack
+ 	pushd JetPack
+        test -d /vagrant/jetpack_download || mkdir /vagrant/jetpack_download
+        ln -s /vagrant/jetpack_download
+        chown -R ubuntu.ubuntu .
+	popd
+    SHELL
+  end
+
+end

@@ -10,4 +10,9 @@ set -x
 
 . config.env
 
-perl -pe 's/ console=ttyS0,115200//' -i /boot/extlinux/extlinux.conf
+CONF=/boot/extlinux/extlinux.conf
+TIMESTAMP=`date '+%Y%m%d%H%M%S'`
+cp $CONF{,-$TIMESTAMP}
+# this is probably better done before flashing the image.
+FOO=`cat /proc/cmdline | perl -pe 's/ console=ttyS0[^\s]*//'`
+perl -pe "s%\\$\\{cbootargs\\}%$FOO%" -i $CONF
