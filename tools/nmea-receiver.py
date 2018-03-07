@@ -6,12 +6,24 @@ import json
 import socket
 from os import system
 
+# destination / output
 ip="127.0.0.1"
 portnum = 25100
-sockit = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sockit.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-sockit.setblocking(False)
-sockit.bind(('0.0.0.0', 27000))
+sockitOut = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sockitOut.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+sockitOut.setblocking(False)
+
+# UDP source
+sockitUdp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sockitUdp.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+sockitUdp.setblocking(False)
+sockitUdp.bind(('0.0.0.0', 27000))
+
+# Alternative TCP source
+sockitTcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sockitTcp.setblocking(False)
+sockitTcp.bind(('0.0.0.0', 27001))
+sockitTcp.listen(1)
 
 parser = pynmea2.NMEAStreamReader()
 
@@ -40,46 +52,71 @@ data_received = False
 gps_type_set = False
 last_output_t = 0;
 
+# wait for connection
+def waitConnection():
+	while True:
+	    try:
+		sockit, addr = sockitTcp.accept()
+		print("TCP connected!")
+                return sockit
+		break
+	    except:
+		print("TCP not connected, waiting for data")
+
+	    try:
+		sockitUdp.recvfrom(4096)
+		sockit = sockitUdp
+		print("UDP connected!")
+                return sockitUdp
+		break
+	    except:
+		print("UDP not connected, waiting for data")
+
+	    time.sleep(1) # 1 Hz update before connected
+
+sockit = waitConnection()
+
+# setup gps type parameter
+system('screen -S mavproxy -p 0 -X stuff "param set GPS_TYPE 14^M"')
+
 while True:
     
-    # Check at 1Hz until data is seen on the line, then check at 20Hz
-    if data_received:
-        if not gps_type_set:
-            system('screen -S mavproxy -p 0 -X stuff "param set GPS_TYPE 14^M"')
-            gps_type_set = True
-        time.sleep(0.05)
-    else:
-        print "waiting for data"
-        time.sleep(1)
-        
+    time.sleep(0.05) # 20 Hz update once connected
+
     try:
-        datagram,address = sockit.recvfrom(4096)
-        data_received = True
-        for byte in datagram:
-            for msg in parser.next(byte):
-                if msg.sentence_type == 'GGA':
-                    data['lat'] = msg.latitude * 1e7
-                    data['lon'] = msg.longitude * 1e7
-                    data['hdop'] = float(msg.horizontal_dil)
-                    data['alt'] = float(msg.altitude)
-                    data['satellites_visible'] = int(msg.num_sats)
-                elif msg.sentence_type == 'RMC':
-                    data['lat'] = msg.latitude * 1e7
-                    data['lon'] = msg.longitude * 1e7
-                elif msg.sentence_type == 'GLL':
-                    data['lat'] = msg.latitude * 1e7
-                    data['lon'] = msg.longitude * 1e7
-                elif msg.sentence_type == 'GNS':
-                    data['lat'] = msg.latitude * 1e7
-                    data['lon'] = msg.longitude * 1e7
-                    data['satellites_visible'] = int(msg.num_sats)
-                    data['hdop'] = float(msg.hdop)
-                    
-        if time.time() > last_output_t + 0.1:
-            last_output_t = time.time();
-            buf = json.dumps(data)
-            print("Sending: ", data)
-            sockit.sendto(buf, (ip, portnum))
+        datagram = sockit.recv(4096) # This blocks for UDP, for TCP, it will return None when remote hangs up
+
+        if not datagram: # TCP disconnect
+            print("Remote has hung up")
+            sockit.shutdown(socket.SHUT_RDWR)
+            sockit.close()
+            sockit = waitConnection()
+        else:
+            for byte in datagram:
+                for msg in parser.next(byte):
+                    if msg.sentence_type == 'GGA':
+                        data['lat'] = msg.latitude * 1e7
+                        data['lon'] = msg.longitude * 1e7
+                        data['hdop'] = float(msg.horizontal_dil)
+                        data['alt'] = float(msg.altitude)
+                        data['satellites_visible'] = int(msg.num_sats)
+                    elif msg.sentence_type == 'RMC':
+                        data['lat'] = msg.latitude * 1e7
+                        data['lon'] = msg.longitude * 1e7
+                    elif msg.sentence_type == 'GLL':
+                        data['lat'] = msg.latitude * 1e7
+                        data['lon'] = msg.longitude * 1e7
+                    elif msg.sentence_type == 'GNS':
+                        data['lat'] = msg.latitude * 1e7
+                        data['lon'] = msg.longitude * 1e7
+                        data['satellites_visible'] = int(msg.num_sats)
+                        data['hdop'] = float(msg.hdop)
+                        
+            if time.time() > last_output_t + 0.1:
+                last_output_t = time.time();
+                buf = json.dumps(data)
+                print("Sending: ", data)
+                sockitOut.sendto(buf, (ip, portnum))
             
     except socket.error as e:
         if e.errno == 11:
