@@ -10,6 +10,11 @@ if [ -z "$TELEM_SERIAL_PORT" ]; then
     exit 1
 fi
 
+if [ -z "$TELEM_SERIAL_BAUD" ]; then
+    echo 'TELEM_SERIAL_BAUD must be set (e.g. "921600" or "2000000")'
+    exit 1
+fi
+
 set -e
 set -x
 
@@ -33,6 +38,7 @@ cp autostart_cmavnode.sh \$CMAVNODE_HOME/
 cp cmavnode.conf \$CMAVNODE_HOME/
 cp log.conf \$CMAVNODE_HOME
 perl -pe 's%/dev/ttyUSB0%$TELEM_SERIAL_PORT%' -i \$CMAVNODE_HOME/cmavnode.conf
+perl -pe 's%921600%$TELEM_SERIAL_BAUD%' -i \$CMAVNODE_HOME/cmavnode.conf
 
 pushd ~/GitHub
  rm -rf cmavnode

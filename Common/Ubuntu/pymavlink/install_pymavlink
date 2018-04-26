@@ -7,11 +7,6 @@ if [ $(id -u) -ne 0 ]; then
    exit 1
 fi
 
-# if [ -z "$TELEM_SERIAL_PORT" ]; then
-#     echo 'TELEM_SERIAL_PORT must be set (e.g. "/dev/ttyS1" or "/dev/ttyMFD1")'
-#     exit 1
-# fi
-
 set -e
 set -x
 

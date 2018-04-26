@@ -10,6 +10,11 @@ if [ -z "$TELEM_SERIAL_PORT" ]; then
     exit 1
 fi
 
+if [ -z "$TELEM_SERIAL_BAUD" ]; then
+    echo 'TELEM_SERIAL_BAUD must be set (e.g. "921600" or "2000000")'
+    exit 1
+fi
+
 set -e
 set -x
 
@@ -32,6 +37,7 @@ cp start_mavlink-router.sh \$MAVLINK_ROUTER_HOME/
 cp autostart_mavlink-router.sh \$MAVLINK_ROUTER_HOME/
  cp mavlink-router.conf \$MAVLINK_ROUTER_HOME/
  perl -pe 's%/dev/ttyUSB0%$TELEM_SERIAL_PORT%' -i \$MAVLINK_ROUTER_HOME/mavlink-router.conf
+ perl -pe 's%921600%$TELEM_SERIAL_BAUD%' -i \$MAVLINK_ROUTER_HOME/mavlink-router.conf
 
 pushd ~/GitHub
  rm -rf mavlink-router

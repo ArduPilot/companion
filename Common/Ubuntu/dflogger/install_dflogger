@@ -18,6 +18,11 @@ if [ -z "$TELEM_SERIAL_PORT" ]; then
     exit 1
 fi
 
+if [ -z "$TELEM_SERIAL_BAUD" ]; then
+    echo 'TELEM_SERIAL_BAUD must be set (e.g. "921600" or "2000000")'
+    exit 1
+fi
+
 set -e
 set -x
 
@@ -54,6 +59,7 @@ if [ ! -d "\$DFLOGGER_HOME/dataflash" ]; then
 fi
 
 perl -pe 's%/dev/ttyTHS1%$TELEM_SERIAL_PORT%' -i \$DFLOGGER_HOME/dflogger.conf
+perl -pe 's%921600%$TELEM_SERIAL_BAUD%' -i \$DFLOGGER_HOME/dflogger.conf
 perl -pe 's%ubuntu%$NORMAL_USER%' -i \$DFLOGGER_HOME/dflogger.conf
 
 EOF
