@@ -9,7 +9,7 @@ Testing regime for new image:
 # ssh into device
 ssh apsync@10.0.1.128
 
-# Check "screen -list" includes cmavnode, DataFlashLogger, cherrypy:
+# Check "screen -list" includes mavlink-router, DataFlashLogger, cherrypy:
 screen -list
 
 screen -list
