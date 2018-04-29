@@ -172,6 +172,6 @@ time sudo ./flash.sh -r -k APP -G $IMAGE_NAME jetson-tx2 mmcblk0p1 # about 30 mi
 ls -l $IMAGE_NAME # about 8GB
 time xz --verbose -e $IMAGE_NAME # about 1.5 hours
 COMPRESSED_IMAGE_NAME="$IMAGE_NAME.xz"
-ls -l --si  $COMPRESSED_IMAGE_NAME # ~5.2GB
-
-time rsync -aP $COMPRESSED_IMAGE_NAME autotest@autotest.ardupilot.org:APM/buildlogs/binaries/Companion/next/$COMPRESSED_IMAGE_NAME # about 11.5 hours
+ls -l --si  $COMPRESSED_IMAGE_NAME # ~3.2GB
+BASE_COMPRESSED_IMAGE_NAME=$(basename "$COMPRESSED_IMAGE_NAME")
+time rsync -aP $COMPRESSED_IMAGE_NAME autotest@autotest.ardupilot.org:APM/buildlogs/binaries/Companion/next/$BASE_COMPRESSED_IMAGE_NAME # about 11.5 hours
