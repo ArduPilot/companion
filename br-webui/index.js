@@ -715,7 +715,17 @@ networking.on('connection', function(socket) {
 					if (stdout.indexOf("HANDSHAKE") > -1) {
 						socket.emit('wifi status', '<h4>Connecting: ' + ssid + '</h1>');
 					} else {
-						socket.emit('wifi status', '<h4 style="color:green;">Connected: ' + ssid + ip + '</h4>');
+						var ipString = ""
+						if (ip != undefined) {
+							ipString = ip
+						}
+						
+						var ssidString = ""
+						if (ssid != undefined) {
+							ssidString = ssid
+						}
+						
+						socket.emit('wifi status', '<h4 style="color:green;">Connected: ' + ssidString + ipString + '</h4>');
 					}
 				}
 			}
