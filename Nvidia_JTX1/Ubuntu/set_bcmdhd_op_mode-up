@@ -3,7 +3,8 @@
 # this script is put into 
 
 TIMESTAMP=$(date '+%Y%m%d%H%M%S')
-DEBUGFILE="/tmp/$0-$TIMESTAMP.env"
+EXENAME=$(basename $0)
+DEBUGFILE="/tmp/$EXENAME-$TIMESTAMP.env"
 set >$DEBUGFILE
 
 function set_opmode()
