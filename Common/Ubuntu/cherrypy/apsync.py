@@ -87,6 +87,9 @@ class APSync(object):
             if address.find('0.0.0.0') != -1:
                 # ignore anything broadcast
                 continue
+            if address.find('10.0.1.128') != -1:
+                # ignore anything broadcast
+                continue
             if address.find('.255') != -1:
                 # ignore any broadcast addresses
                 continue
