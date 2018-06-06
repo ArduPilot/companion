@@ -23,25 +23,21 @@ sudo screen -list
 There is a screen on:
 	1765.apweb	(12/08/2017 03:00:54 AM)	(Detached)
 
-apsync@apsync:~ $ sudo screen -list
-[sudo] password for apsync: 
-There is a screen on:
-	564.apweb	(07/09/17 11:35:36)	(Detached)
-
-
 # ensure mavproxy starts on the apsync image:
-mavproxy.py --master :14550
+mavproxy.py --master :14550 --source-system=56
 # make sure you can fetch parameters:
 param fetch
+param status
 
 # Can you connect using a GCS using the broadcast packets on port 14550?
 # on host machine:
-mavproxy.py --mav10 --master :14550
+mavproxy.py --mav10 --master :14550 --source-system=89
 # make sure you can fetch parameters:
 param fetch
 
 # ensure you can connect multiple GCS at the same time!
 
+# make sure LOG_BACKEND_TYPE is 2
 # make sure dflogger is creating dataflash logs:
 # arm the vehicle *and turn the safety off*, then:
 watch "ls dflogger/dataflash -lt | head"
@@ -58,8 +54,6 @@ watch "ls dflogger/dataflash -lt | head"
   QGC on Android
   Tower on Android (need to change setting!)
   Mission Planner on Windows
-
-
 
 # Video Streaming testing:
  Use a web browser to connect on port 8000; make sure start/stop work
