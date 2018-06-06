@@ -36,6 +36,7 @@ pushd ~/GitHub
  pushd APWeb
   git checkout apsync
   git submodule update --init
+  time (make clean | cat)
   time (make | cat)
   cp web_server \$APWEB_HOME
  popd
