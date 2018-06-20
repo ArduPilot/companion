@@ -18,7 +18,7 @@ pip3 install meson
 apt install ninja-build
 
 cd
-git submodule update --init --recursive
+git submodule foreach --recursive git pull
 cd Common/Ubuntu/adaptive-streaming/
 meson build
 cd build
