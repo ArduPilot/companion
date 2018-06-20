@@ -1,0 +1,3 @@
+[submodule "Common/Ubuntu/adaptitve-streaming"]
+	path = Common/Ubuntu/adaptitve-streaming
+	url = https://github.com/shortstheory/adaptive-streaming
