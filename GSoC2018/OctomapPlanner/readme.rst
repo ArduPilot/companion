@@ -1,15 +1,15 @@
-.. _arduplanner-gazebo-sitl:
+.. _OctomapPlanner-gazebo-sitl:
 
 ============
-ArduPlanner
+OctomapPlanner
 ============
 
-This article explains how to set up and use ArduPlanner to work with Gazebo SITL
+This article explains how to set up and use OctomapPlanner to work with Gazebo SITL
 
 Overview
 ===============
 
-Arduplanner is a library for autonomous mapping and planning specifically designed for ArduPilot Copter. It uses Octomap for 3D occupancy mapping and OMPL and FCL for goal-directed planning with collision avoidance.
+OctomapPlanner is a library for autonomous mapping and planning specifically designed for ArduPilot Copter. It uses Octomap for 3D occupancy mapping and OMPL and FCL for goal-directed planning with collision avoidance.
 
 .. warning::
 
@@ -85,12 +85,12 @@ OMPL
 
 	sudo apt install ros-kinetic-ompl
 
-Finally, build ArduPlanner and copy the iris model for gazebo to find
+Finally, build OctomapPlanner and copy the iris model for gazebo to find
 
 ::
 
-	git clone https://github.com/ayushgaud/arduplanner
-	cd arduplanner
+	git clone https://github.com/ardupilot/companion
+	cd GSoC2018/OctomapPlanner
 	mkdir build
 	cd build
 	cmake ..
@@ -115,7 +115,7 @@ On a seperate terminal start ArduCopter SITL
 Before launching the code you may want to edit a few parameters like start and goal location
 This can be done by editing the planner_params.yaml file inside the config folder
 
-Finally, launch the planner code by executing this from the arduplanner folder
+Finally, launch the planner code by executing this from the OctomapPlanner folder
 
 ::
 
