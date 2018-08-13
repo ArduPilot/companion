@@ -90,7 +90,7 @@ Finally, build OctomapPlanner and copy the iris model for gazebo to find
 ::
 
 	git clone https://github.com/ardupilot/companion
-	cd GSoC2018/OctomapPlanner
+	cd companion/GSoC2018/OctomapPlanner
 	mkdir build
 	cd build
 	cmake ..
