@@ -17,6 +17,7 @@ apt-get install -y \
 	v4l-utils \
 	usbutils \
 	tree \
-	wireless-tools
+	wireless-tools \
+	can-utils
 
 updatedb
