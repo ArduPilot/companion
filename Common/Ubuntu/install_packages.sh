@@ -34,6 +34,9 @@ apt-get -y install screen
 # install git
 apt-get -y install git
 
+# install autoconf and libtool
+apt-get -y install autoconf libtool
+
 # remove unused packages
 apt-get autoremove -y
 
