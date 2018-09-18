@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# install APStreamline to provide video streaming
+
+if [ $(id -u) -ne 0 ]; then
+   echo >&2 "Must be run as root"
+   exit 1
+fi
+
+set -e
+set -x
+
+apt-get install ninja-build libgstreamer-plugins-base1.0* libgstreamer1.0-dev libgstrtspserver-1.0-dev gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly python3-pip
+modprobe bcm2835-v4l2
+echo 'bcm2835-v4l2' >> /etc/modules
+
+#For building
+pip3 install meson
+
+sudo -u $NORMAL_USER -H bash <<EOF
+set -e
+set -x
+
+pushd ~/GitHub
+ git clone https://github.com/shortstheory/adaptive-streaming.git APStreamline
+ pushd APStreamline
+  meson build
+  pushd build
+   meson configure -Dprefix=$HOME/start_apstreamline/
+   time ninja
+   sudo ninja install
+  popd
+ popd
+popd
+
+EOF

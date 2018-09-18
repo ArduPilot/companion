@@ -13,7 +13,7 @@ fi
 set -e
 set -x
 
-pip install cherrypy jinja2
+pip install cherrypy==10.2.1 jinja2
 
 sudo -u $NORMAL_USER -H bash <<'EOF'
 set -e
