@@ -1,0 +1,12 @@
+<launch>
+
+    <node pkg="move_base" type="move_base" name="move_base" output="screen">
+        <param name="controller_frequency" value="10.0"/>
+        <rosparam file="$(find ap_navigation)/params/costmap_common_params.yaml" command="load" ns="global_costmap" />
+        <rosparam file="$(find ap_navigation)/params/costmap_common_params.yaml" command="load" ns="local_costmap" />
+        <rosparam file="$(find ap_navigation)/params/local_costmap_params.yaml" command="load" />
+        <rosparam file="$(find ap_navigation)/params/global_costmap_params.yaml" command="load" />
+        <rosparam file="$(find ap_navigation)/params/trajectory_planner.yaml" command="load" />
+    </node>
+
+</launch>
