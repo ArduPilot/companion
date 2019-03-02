@@ -15,7 +15,7 @@ set -x
 
 pip install cherrypy==17.4.0 
 pip install jinja2
-
+pip install more-itertools==5.0.0
 sudo -u $NORMAL_USER -H bash <<'EOF'
 set -e
 set -x
