@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -e
+set -x
+
+. config.env
+
+tput setaf 3
+echo "Remove unattended-upgrades"
+tput sgr0
+
+apt-get remove -y unattended-upgrades
