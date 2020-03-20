@@ -11,7 +11,7 @@ INSTALL_DIR=$PWD
 NVCC_PATH=/usr/local/cuda-10.0/bin/nvcc
 
 USE_CUDA=false
-s
+
 function usage
 {
     echo "usage: ./buildLibrealsense.sh [[-c ] | [-h]]"
@@ -49,7 +49,7 @@ echo ""
 
 if [ ! -d "$LIBREALSENSE_DIRECTORY" ] ; then
   # clone librealsense
-  cd ${HOME}
+  cd ${HOME}/GitHub
   echo "${green}Cloning librealsense${reset}"
   git clone https://github.com/IntelRealSense/librealsense.git
 fi
