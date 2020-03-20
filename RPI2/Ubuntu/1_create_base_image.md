@@ -1,22 +1,19 @@
 # RPi Ubuntu setup script for use as companion computer.
 
-These instructions are for the official Ubuntu LTS images.
+These instructions create an APSync image for the RPI4 based on the official Ubuntu 18.04 LTS images.
 
-Download Ubuntu LTS image at this time 18.04 is the recomended image, for RPi3 and RPi4 use the 64bit Image
-Even though the RPi3 has only a marginal difference between using 32bit vs 64bit, using the 64bit image provides
-Common ground between our images.
+Download Ubuntu LTS image from https://ubuntu.com/download/raspberry-pi.  18.04 is the recommended image, for RPi3 and RPi4 use the 64bit image because even though there are only marginal difference between using 32bit vs 64bit, using the 64bit image provides common ground between our images.
 
-https://ubuntu.com/download/raspberry-pi
+Flash image onto SD card using Balena Etcher which can be downloaded from https://www.balena.io/etcher/
 
-Flash image onto SD card using Balena Etcher which can be downloaded from
-https://www.balena.io/etcher/
+Note: these instructions require at least an 8GB card.  If building an image for general use an 8GB card so that the final image is kept as small as possible.
 
-NOTE: make sure you use at least a  16GB card, preferabbly use a 128GB card to allow enough space to install all software.
+Note: ensure a flight controller is not connected to the RPI or it may interrupt the boot process.  The IntelRealSense T265 camera should also be disconnected.
 
-Boot Raspberry Pi and follow the instructions for changing the password for the default user (User: ubuntu, Password: ubuntu)
+Boot Raspberry Pi and login using the username/password ubuntu/ubuntu.
+You will be asked to change the ubuntu password, we recommend changing it to "ardupilot"
 
-Setup is easier if you can ssh into the vehicle from an existing
-desktop environment.  Use the ethernet connection for this.
+Setup is easier if you can ssh into the vehicle from an existing desktop environment.  Use the ethernet connection for this.
 
 Once you log in for the first time you can find out the ip-address of the RPi by typing this command on the console (look for the number next to inet):
 ```console
@@ -43,105 +40,12 @@ lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
 
 ```
 
-with that ip-address you can now ssh into the RaspberryPi
-From the host machine:
+with this ip-address you can now ssh into the RaspberryPi from the host machine:
 ```console
 ssh ubuntu@ip-address
 ```
 
-Once you log in, clone this repository
-```console
-cd
-mkdir GitHub
-pushd GitHub
-git clone https://github.com/ardupilot/companion
-pushd companion/RPI2/Ubuntu
-```
-
-Update the package manager and upgrade everything to the latest versions
-```console
-sudo apt update
-sudo apt upgrade -y
-```
-
-Install some basic packages and create a user named apsync
-```console
-sudo apt install nano rsync
-sudo useradd -s /bin/bash -m -U -G sudo,netdev,users,dialout,video apsync
-echo "apsync:apsync" | chpasswd
-```
-
-Move all files to the apsync user folder
-```console
-sudo rsync -aPH --delete /home/ubuntu/ /home/apsync
-sudo chown -R apsync.apsync /home/apsync
-sudo rm -rf *
-```
-
-You have finished the first part, now you will need to logout and log back in using the apsync user
-If desired at this point you can copy your ssh keys to the RPi so that you dont need to enter the password everytime.
-
-To copy the SSH keys you need to have generated an RSA id on your host machine. Once you have an rsa_id you can copy the keys to the RPi
-on the host machine:
-```console
-ssh-copy-id apsync@ip-address-of-rpi
-```
-
-ssh into the RPi with the new user apsync
-```console
-ssh apsync@ip-address-of-rpi
-```
-
-Now go back to the companion repo folder and continue installing required software
-```console
-pushd /home/apsync/GitHub/companion/RPI2/Ubuntu
-sudo ./set-hostname  #set the hostname to apsync
-sudo apt autoremove -y # avoid repeated no-longer-required annoyance
-sudo ./remove-unattended-upgrades
-sudo ./ensure_rc_local.sh
-sudo ./disable_console.sh
-sudo reboot  #reboot for the changes to take effect
-```
-
-ssh back into the RPi and continue with the following:
-```console
-pushd /home/apsync/GitHub/companion/RPI2/Ubuntu
-sudo -E ./2_install_packages.sh # 20m
-sudo -E ./install_niceties || echo "Failed" # 20s
-sudo -E ./3_wifi_access_point.sh # 20s
-sudo reboot #reboot for the changes to take effect
-```
-
-Check to see if you can see a WiFi Network named `ardupilot`
-
-ssh back into the RPi and continue with these command:
-```console
-pushd /home/apsync/GitHub/companion/RPI2/Ubuntu
-sudo ./apstreamline.sh # 1m  This is optional
-sudo ./setup_master_mavlink-router.sh
-sudo ./7_dflogger.sh # ~210s
-sudo apt install -y libxml2-dev libxslt1.1 libxslt1-dev  python-lxml
-sudo -H pip install future # 4m
-sudo ./install_pymavlink # new version required for apweb #1m
-
-pushd /home/apsync/GitHub/pymavlink
-git config --global user.email "devel@ardupilot.org"
-git config --global user.name "ArduPilotCompanion"
-
-git stash
-git revert e1532c3fc306d83d03adf82fb559f1bb50860c03
-export MDEF=~/GitHub/mavlink/message_definitions
-python setup.py build install --user --force
-popd
-
-sudo ./install_apweb # 2m
-```
-
-At this point you have finished installing the necesary packages for the basic APSync image
-
-# Automated Scripts
-For convenience we have created 4 scripts that automate all the steps above. In order to use those you can do the following after loging into the cosole for the first time:
-
+Once you log in, clone the companion repository and run the 1st setup script
 ```console
 mkdir GitHub
 pushd GitHub
@@ -149,21 +53,22 @@ git clone https://github.com/ardupilot/companion
 pushd companion/RPI2/Ubuntu/automated
 sudo ./1_Setup_user_and_update.sh
 ```
-After the first script logout and log back in using the apsync user, then run the following:
+
+Reboot the RPI and log back in using the apsync user, then run the following:
 ```console
-pushd companion/RPI2/Ubuntu/automated
+pushd GitHub/companion/RPI2/Ubuntu/automated
 sudo ./2_Clone_Repo_Disable_console_sethost.sh
 ```
-After this the RPi will automatically reboot, log back in and continue with
+
+The RPi will automatically reboot. Log back in as apsync and run the following:
 ```console
-pushd companion/RPI2/Ubuntu/automated
+pushd GitHub/companion/RPI2/Ubuntu/automated
 sudo ./3_Setup_Network_and_Packages.sh
 sudo ./4_setup_apsync_components.sh
-```
-After completing step 4, the RPI will reboot to enable the swap file. By default this creates a 6GB swap file so make  sure you have enough space on the SD Card, if you dont have enough space you can modify the script to create a smaller file. Once it reboots log back in and run
-```console
 sudo ./5_setup_realsense.sh
+sudo ./6_setup_uhubctl.sh
 ```
+
 **(Warning, compiling the Intel Realsense Drivers on the RPi3 takes around 20hrs and requires a large swap file)**
 
 This completes the installation of AP Sync you are now ready to prepare the image for cloning.
