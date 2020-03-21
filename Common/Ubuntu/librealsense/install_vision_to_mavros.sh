@@ -4,10 +4,8 @@ set -e
 set -x
 
 tput setaf 3
-echo "Build latest version of librealsense"
+echo "Installing vision_to_mavros"
 tput sgr0
-
-time ./buildLibrealsense.sh
 
 pushd /home/$NORMAL_USER/GitHub
 sudo apt install python3-lxml
