@@ -23,7 +23,13 @@ cp t265_to_mavlink.py /home/$NORMAL_USER/start_t265_to_mavlink
 popd
 popd
 cp start_t265.sh /home/$NORMAL_USER/start_t265_to_mavlink
+cp stop_t265.sh /home/$NORMAL_USER/start_t265_to_mavlink
+cp view_log_t265.sh /home/$NORMAL_USER/start_t265_to_mavlink
 sudo cp t265.service /etc/systemd/system
+
+# add line to /etc/rc.local to start t265 service
+LINE="/bin/bash -c '~$NORMAL_USER/start_t265_to_mavlink/start_t265.sh'"
+perl -pe "s%^exit 0%$LINE\\n\\nexit 0%" -i /etc/rc.local
 
 tput setaf 2
 echo "Finished installing vision_to_mavros"
