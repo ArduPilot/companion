@@ -5,6 +5,13 @@
 
 # Jetson Nano; L4T 32.2.3
 
+set -e
+set -x
+
+tpub setaf 3
+echo "Build latest version of librealsense"
+tput sgr0
+
 LIBREALSENSE_DIRECTORY=${HOME}/GitHub/librealsense
 LIBREALSENSE_VERSION=v2.33.1
 INSTALL_DIR=$PWD
@@ -14,7 +21,7 @@ USE_CUDA=false
 
 function usage
 {
-    echo "usage: ./buildLibrealsense.sh [[-c ] | [-h]]"
+    echo "usage: ./install_librealsense.sh [[-c ] | [-h]]"
     echo "-nc | --build_with_cuda  Build no CUDA (Defaults to with CUDA)"
     echo "-h | --help  This message"
 }
@@ -142,5 +149,7 @@ echo " "
 echo " -----------------------------------------"
 echo " "
 
-
+tpub setaf 2
+echo "Finished installing librealsense"
+tput sgr0
 
