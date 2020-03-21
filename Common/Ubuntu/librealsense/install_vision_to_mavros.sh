@@ -8,7 +8,7 @@ echo "Installing vision_to_mavros"
 tput sgr0
 
 pushd /home/$NORMAL_USER/GitHub
-sudo apt install python3-lxml
+sudo apt -y install python3-lxml
 sudo -H pip3 install cython
 sudo -H pip3 install numpy --upgrade
 sudo -H pip3 install transformations
