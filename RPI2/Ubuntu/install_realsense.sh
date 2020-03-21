@@ -15,6 +15,7 @@ sudo -u $NORMAL_USER -H bash <<EOF
 . config.env
 
 pushd ../../Common/Ubuntu/librealsense
+ ./install_librealsense.sh
  ./install_vision_to_mavros.sh
 popd
 
