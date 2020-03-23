@@ -7,4 +7,4 @@ if [ $(id -u) -ne 0 ]; then
    exit 1
 fi
 
-sudo systemctl stop t265
+systemctl stop t265.service
