@@ -22,8 +22,6 @@ set -x
 adduser $NORMAL_USER dialout
 
 apt install autoconf automake libtool -y
-pip install future
-pip3 install future
 
 sudo -u $NORMAL_USER -H bash <<EOF
 set -e
@@ -50,6 +48,7 @@ tput setaf 3
 echo "Setting up mavlink-router service"
 tput sgr0
 
+rm -rf /etc/mavlink-router
 mkdir /etc/mavlink-router
 
 cp mavlink-router.conf /etc/mavlink-router/main.conf
