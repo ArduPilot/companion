@@ -7,4 +7,4 @@ if [ $(id -u) -ne 0 ]; then
    exit 1
 fi
 
-sudo journalctl -u t265.service -f
+journalctl -u t265.service -f
