@@ -8,7 +8,7 @@
 set -e
 set -x
 
-tpub setaf 3
+tput setaf 3
 echo "Build latest version of librealsense"
 tput sgr0
 
@@ -149,7 +149,7 @@ echo " "
 echo " -----------------------------------------"
 echo " "
 
-tpub setaf 2
+tput setaf 2
 echo "Finished installing librealsense"
 tput sgr0
 
