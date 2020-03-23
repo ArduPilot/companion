@@ -16,7 +16,7 @@ time ./setup_master_mavlink-router.sh
 time ./7_dflogger.sh # ~210s
 
 time apt-get install -y libxml2-dev libxslt1.1 libxslt1-dev
-time pip install future lxml # 4m
+
 time ./install_pymavlink # new version required for apweb #1m
 #Fix pymavlink for apweb install
 sudo -u $NORMAL_USER -H bash <<EOF
