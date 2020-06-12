@@ -20,6 +20,8 @@ sleep 5
 wifi-ap.config set wifi.ssid=ArduPilot
 wifi-ap.config set wifi.security-passphrase=ardupilot
 wifi-ap.config set wifi.address=10.0.1.128
+wifi-ap.config set wifi.channel=48
+wifi-ap.config set wifi.operation-mode=a
 wifi-ap.config set dhcp.range-start=10.0.1.129
 wifi-ap.config set dhcp.range-stop=10.0.1.138
 
