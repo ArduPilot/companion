@@ -13,13 +13,13 @@ set -x
 pushd /home/$NORMAL_USER/GitHub/companion/RPI2/Ubuntu
 time ./setup_mavlink_router.sh
 
-pushd /home/$NORMAL_USER/GitHub/companion/RPI2/Ubuntu/dflogger/
+pushd /home/$NORMAL_USER/GitHub/companion/Common/Ubuntu/dflogger/
 time ./install_dflogger # ~210s
 popd
 
 time apt-get install -y libxml2-dev libxslt1.1 libxslt1-dev
 
-pushd /home/$NORMAL_USER/GitHub/companion/RPI2/Ubuntu/pymavlink/
+pushd /home/$NORMAL_USER/GitHub/companion/Common/Ubuntu/pymavlink/
 time ./install_pymavlink # new version required for apweb #1m
 popd
 
@@ -39,7 +39,7 @@ sudo -u $NORMAL_USER -H bash <<EOF
  popd
 EOF
 
-pushd /home/$NORMAL_USER/GitHub/companion/RPI2/Ubuntu/apweb
+pushd /home/$NORMAL_USER/GitHub/companion/Common/Ubuntu/apweb
 time ./install_apweb # 2m
 popd
 
