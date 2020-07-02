@@ -50,23 +50,23 @@ Once you log in, clone the companion repository and run the 1st setup script
 mkdir GitHub
 pushd GitHub
 git clone https://github.com/ardupilot/companion
-pushd companion/RPI2/Ubuntu/automated
+pushd companion/RPI2/Ubuntu
 sudo ./1_Setup_user_and_update.sh
 ```
 
 Reboot the RPI and log back in using the apsync user, then run the following:
 ```console
-pushd GitHub/companion/RPI2/Ubuntu/automated
+pushd GitHub/companion/RPI2/Ubuntu
 sudo ./2_Clone_Repo_Disable_console_sethost.sh
 ```
 
 The RPi will automatically reboot. Log back in as apsync and run the following:
 ```console
-pushd GitHub/companion/RPI2/Ubuntu/automated
+pushd GitHub/companion/RPI2/Ubuntu
 sudo ./3_Setup_Network_and_Packages.sh
 sudo ./4_setup_apsync_components.sh
-sudo ./5_setup_realsense.sh
-sudo ./6_setup_uhubctl.sh
+sudo ./5_setup_uhubctl.sh
+sudo ./6_setup_realsense.sh
 ```
 
 **(Warning, compiling the Intel Realsense Drivers on the RPi3 takes around 20hrs and requires a large swap file)**
