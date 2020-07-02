@@ -11,13 +11,18 @@ set -x
 . config.env
 
 pushd /home/$NORMAL_USER/GitHub/companion/RPI2/Ubuntu
-time ./setup_master_mavlink-router.sh
+time ./setup_mavlink_router.sh
 
-time ./7_dflogger.sh # ~210s
+pushd /home/$NORMAL_USER/GitHub/companion/RPI2/Ubuntu/dflogger/
+time ./install_dflogger # ~210s
+popd
 
 time apt-get install -y libxml2-dev libxslt1.1 libxslt1-dev
 
+pushd /home/$NORMAL_USER/GitHub/companion/RPI2/Ubuntu/pymavlink/
 time ./install_pymavlink # new version required for apweb #1m
+popd
+
 #Fix pymavlink for apweb install
 sudo -u $NORMAL_USER -H bash <<EOF
  set -e
@@ -34,7 +39,9 @@ sudo -u $NORMAL_USER -H bash <<EOF
  popd
 EOF
 
+pushd /home/$NORMAL_USER/GitHub/companion/RPI2/Ubuntu/apweb
 time ./install_apweb # 2m
+popd
 
 tput setaf 2
 echo "Finished installing APSync Components"
