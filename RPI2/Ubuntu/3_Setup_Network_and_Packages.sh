@@ -27,11 +27,11 @@ tput sgr0
 apt install avahi-daemon -y
 
 # install packages common to all
-pushd /home/$NORMAL_USER/Common/Ubuntu
+pushd /home/$NORMAL_USER/GitHub/companion/Common/Ubuntu
 time ./install_packages.sh
 popd
 
-pushd /home/$NORMAL_USER/Common/Ubuntu
+pushd /home/$NORMAL_USER/GitHub/companion/Common/Ubuntu
 time ./install_niceties
 popd
 
