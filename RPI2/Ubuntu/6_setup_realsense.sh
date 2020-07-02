@@ -10,8 +10,10 @@ set -x
 
 . config.env
 
-pushd /home/$NORMAL_USER/GitHub/companion/RPI2/Ubuntu
-time ./install_realsense.sh
+pushd /home/$NORMAL_USER/GitHub/companion/RPI2/Ubuntu/librealsense
+time ./install_librealsense.sh
+time ./install_vision_to_mavros.sh
+popd
 
 tput setaf 2
 echo "Finished installing Intel Realsense Drivers and Pose Scripts"
