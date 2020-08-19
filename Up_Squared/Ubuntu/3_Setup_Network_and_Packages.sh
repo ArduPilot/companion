@@ -14,7 +14,7 @@ tput setaf 3
 echo "Part 3 of apsync installation"
 tput sgr0
 
-pushd /home/$NORMAL_USER/GitHub/companion/RPI2/Ubuntu
+pushd /home/$NORMAL_USER/GitHub/companion/Up_Squared/Ubuntu
 
 tput setaf 3
 echo "removing modem manager"

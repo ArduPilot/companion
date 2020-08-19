@@ -10,7 +10,7 @@ set -x
 
 . config.env
 
-pushd /home/$NORMAL_USER/GitHub/companion/RPI2/Ubuntu
+pushd /home/$NORMAL_USER/GitHub/companion/Up_Squared/Ubuntu
 time ./setup_mavlink_router.sh
 
 pushd /home/$NORMAL_USER/GitHub/companion/Common/Ubuntu/dflogger/

@@ -14,7 +14,7 @@ tput setaf 3
 echo "Cloning Companion Repo"
 tput sgr0
 
-pushd /home/$NORMAL_USER/GitHub/companion/RPI2/Ubuntu
+pushd /home/$NORMAL_USER/GitHub/companion/Up_Squared/Ubuntu
 
 tput setaf 3
 echo "Running Scripts"
@@ -37,10 +37,10 @@ echo "Setting up rc.local"
 tput sgr0
 ./ensure_rc_local.sh
 
-tput setaf 3
-echo "Disabling TTY console on serial port"
-tput sgr0
-./disable_console.sh
+# tput setaf 3
+# echo "Disabling TTY console on serial port"
+# tput sgr0
+# ./disable_console.sh
 
 tput setaf 2
 echo "Rebooting in 5 sec to Finish changes"

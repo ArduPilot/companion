@@ -25,7 +25,7 @@ The general instructions can be found [here](https://wiki.up-community.org/Ubunt
 
 - Insert the USB in an empty port of the UP2. Boot up the UP2 and follow the normal Ubuntu installation.
 
-> Note: In all of the follow-up sections, we assume the login username/password is `up2/ubuntu`.
+> Note: In all of the follow-up sections, we assume the login username/password is `up2/ubuntu`. If you use a different username, change `STD_USER` accordingly in the `config.env` file.
 
 - Enable [SSH on Ubuntu 18.04](https://linuxize.com/post/how-to-enable-ssh-on-ubuntu-18-04/) on the UP2 itself. Monitor, keyboard + mouse, internet connection are required. 
   - Open a terminal and run:
@@ -70,6 +70,7 @@ ssh up2@ip-address
 
 Once you log in, clone the companion repository and run the 1st setup script
 ```console
+sudo apt install git
 mkdir GitHub
 pushd GitHub
 git clone https://github.com/ardupilot/companion
@@ -77,8 +78,9 @@ pushd companion/Up_Squared/Ubuntu
 sudo ./1_Setup_user_and_update.sh
 ```
 
-Reboot the UP2 and log back in using the apsync user, then run the following:
+Reboot the UP2 and log back in using the username/password `apsync/apsync`, then run the following:
 ```console
+ssh apsync@ip-address # SSH into the UP2 from the host computer
 pushd GitHub/companion/Up_Squared/Ubuntu
 sudo ./2_Clone_Repo_Disable_console_sethost.sh
 ```
@@ -88,8 +90,7 @@ The UP2 will automatically reboot. Log back in as apsync and run the following:
 pushd GitHub/companion/Up_Squared/Ubuntu
 sudo ./3_Setup_Network_and_Packages.sh
 sudo ./4_setup_apsync_components.sh
-sudo ./5_setup_uhubctl.sh
-sudo ./6_setup_realsense.sh
+sudo ./5_setup_realsense.sh
 ```
 
 This completes the installation of AP Sync you are now ready to prepare the image for cloning.
