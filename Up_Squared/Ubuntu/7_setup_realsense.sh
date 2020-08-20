@@ -11,7 +11,7 @@ set -x
 . config.env
 
 pushd /home/$NORMAL_USER/GitHub/companion/Common/Ubuntu/librealsense
-# time ./install_librealsense.sh
+time ./install_librealsense.sh
 time ./install_vision_to_mavros.sh
 popd
 
