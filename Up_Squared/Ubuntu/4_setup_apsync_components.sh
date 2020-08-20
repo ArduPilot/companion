@@ -25,18 +25,18 @@ popd
 
 #Fix pymavlink for apweb install
 sudo -u $NORMAL_USER -H bash <<EOF
- set -e
- set -x
+   set -e
+   set -x
 
- pushd /home/$NORMAL_USER/GitHub/pymavlink
- git config --global user.email "devel@ardupilot.org"
- git config --global user.name "ArduPilotCompanion"
+   pushd /home/$NORMAL_USER/GitHub/pymavlink
+   git config --global user.email "devel@ardupilot.org"
+   git config --global user.name "ArduPilotCompanion"
 
- git stash
- git revert e1532c3fc306d83d03adf82fb559f1bb50860c03
- export MDEF=~/GitHub/mavlink/message_definitions
- python setup.py build install --user --force
- popd
+   git stash
+   git revert e1532c3fc306d83d03adf82fb559f1bb50860c03
+   export MDEF=~/GitHub/mavlink/message_definitions
+   python setup.py build install --user --force
+   popd
 EOF
 
 pushd /home/$NORMAL_USER/GitHub/companion/Common/Ubuntu/apweb

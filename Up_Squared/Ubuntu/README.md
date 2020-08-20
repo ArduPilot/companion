@@ -21,7 +21,7 @@ The general instructions can be found [here](https://wiki.up-community.org/Ubunt
 
 > Note: these instructions require at least an 8GB USB. If building an image for general, use an 8GB USB so that the final image is kept as small as possible.
 
-- Provide internet connection to the UP2, either with ethernet cable / USB wifi dongle / wifi adapter card.
+- Provide network connection to the UP2, either with ethernet cable / USB wifi dongle / wifi adapter card.
 
 - Insert the USB in an empty port of the UP2. Boot up the UP2 and follow the normal Ubuntu installation.
 
@@ -68,30 +68,46 @@ ssh up2@ip-address
 
 ## 2. Install the packages and other components
 
-Once you log in, clone the companion repository and run the 1st setup script
+- Once you log in, clone the companion repository:
 ```console
 sudo apt install git
+cd ~
 mkdir GitHub
 pushd GitHub
 git clone https://github.com/ardupilot/companion
-pushd companion/Up_Squared/Ubuntu
+```
+- Change the default values for current username and serial connection to the FCU:
+```
+pushd GitHub/companion/Up_Squared/Ubuntu
+
+nano config.env
+# STD_USER, TELEM_SERIAL_PORT, TELEM_SERIAL_BAUD can be modified according to your setup.
+# NORMAL_USER should NOT be changed (apsync).
+
+nano mavlink-rounter.conf
+# Modify [UartEndpoint to_fc] according to your setup.
+```
+
+- Run the 1st setup script:
+```
 sudo ./1_Setup_user_and_update.sh
 ```
 
-Reboot the UP2 and log back in using the username/password `apsync/apsync`, then run the following:
+- Reboot the UP2 and log back in using the username/password `apsync/apsync`, then run the following:
 ```console
 ssh apsync@ip-address # SSH into the UP2 from the host computer
 pushd GitHub/companion/Up_Squared/Ubuntu
 sudo ./2_Clone_Repo_Disable_console_sethost.sh
 ```
 
-The UP2 will automatically reboot. Log back in as apsync and run the following:
+- The UP2 will automatically reboot. Log back in as apsync and run the following:
 ```console
 pushd GitHub/companion/Up_Squared/Ubuntu
 sudo ./3_Setup_Network_and_Packages.sh
 sudo ./4_setup_apsync_components.sh
-sudo ./5_setup_realsense.sh
+sudo ./5_setup_mavproxy.sh
+sudo ./6_setup_uhubctl.sh
+sudo ./7_setup_realsense.sh
 ```
 
 This completes the installation of AP Sync you are now ready to prepare the image for cloning.
-

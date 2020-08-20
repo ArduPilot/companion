@@ -11,12 +11,16 @@ set -x
 . config.env
 
 pushd /home/$NORMAL_USER/GitHub/companion/Common/Ubuntu/librealsense
-time ./install_librealsense.sh
+# time ./install_librealsense.sh
 time ./install_vision_to_mavros.sh
 popd
 
 tput setaf 2
-echo "Finished installing Intel Realsense Drivers and Pose Scripts"
+if [ $SETUP_DEPTH_CAMERA -eq 1 ]; then
+   echo 'Finished installing Intel Realsense Drivers, Pose and Depth Scripts'
+else
+   echo 'Finished installing Intel Realsense Drivers and Pose Script'
+fi
 tput sgr0
 popd
 
