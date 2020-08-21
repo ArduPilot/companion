@@ -14,6 +14,6 @@ pushd /home/$NORMAL_USER/GitHub/companion/Common/Ubuntu/uhubctl
 time ./install_uhubctl.sh
 
 tput setaf 2
-echo "Finished installing uhubctl"
+echo "Success! Finished part 6"
 tput sgr0
 popd
