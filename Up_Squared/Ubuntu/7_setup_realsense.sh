@@ -17,9 +17,9 @@ popd
 
 tput setaf 2
 if [ $SETUP_DEPTH_CAMERA -eq 1 ]; then
-   echo 'Finished installing Intel Realsense Drivers, Pose and Depth Scripts'
+   echo 'Success! Finished part 7: installing Intel Realsense Drivers, Pose and Depth Scripts'
 else
-   echo 'Finished installing Intel Realsense Drivers and Pose Script'
+   echo 'Success! Finished part 7: installing Intel Realsense Drivers and Pose Script'
 fi
 tput sgr0
 popd

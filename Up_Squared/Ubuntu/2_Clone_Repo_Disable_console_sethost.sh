@@ -43,6 +43,10 @@ tput sgr0
 # ./disable_console.sh
 
 tput setaf 2
+echo "Success! Finished part 2"
+tput sgr0
+
+tput setaf 2
 echo "Rebooting in 5 sec to Finish changes"
 tput sgr0
 

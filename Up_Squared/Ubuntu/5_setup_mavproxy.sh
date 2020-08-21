@@ -8,3 +8,7 @@ set -x
 pushd ../../Common/Ubuntu/mavproxy
  ./setup_mavproxy.sh
 popd
+
+tput setaf 2
+echo "Success! Finished part 5"
+tput sgr0

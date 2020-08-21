@@ -44,7 +44,6 @@ time ./install_apweb # 2m
 popd
 
 tput setaf 2
-echo "Finished installing APSync Components"
-
+echo "Success! Finished part 4"
 tput sgr0
 popd
