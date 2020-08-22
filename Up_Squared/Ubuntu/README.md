@@ -1,8 +1,6 @@
-# UP Squared Ubuntu setup script for use as companion computer.
+# UP Squared (Ubuntu 18.04) setup scripts for use as companion computer
 
 These instructions create an APSync image for the [UP Squared board](https://up-board.org/upsquared/specifications/) (UP2) based on the official Ubuntu 18.04 LTS images.
-
-> Note: ensure the flight controller as well as any cameras (Realsense T265/D4xx specifically) are not connected to the UP2 until all installation steps are completed.
 
 ## 1. Back-up the existing system (Optional)
 
@@ -24,9 +22,11 @@ The **software** components on the companion computer include:
 - Automatically launch the `t265_to_mavlink.py` and `d4xx_to_mavlink.py` scripts,
 - Real-time video streaming of the RGB image from the Realsense camera on the drone to the ground station.
 
-> The following configuration and installation steps should be modified/removed according to your actual system and requirements.
+> **Note**: ensure the flight controller as well as the cameras (Realsense T265/D4xx specifically) are not connected to the UP2 until all installation steps are completed.
 
-## 3. Install the OS and prerequisite
+The following configuration and installation steps should be modified/removed according to your actual system and requirements.
+
+## 3. Install the OS and prerequisites
 
 The general instructions can be found [here](https://wiki.up-community.org/Ubuntu_18.04). In short, the steps are:
 
@@ -91,7 +91,7 @@ pushd GitHub
 git clone https://github.com/thien94/companion.git # TO-DO: Change back to https://github.com/ardupilot/companion before pushing the PR
 ```
 - Change the configurations according to your hardware system:
-```
+```console
 # System configuration
 # - Change STD_USER to the current username
 # - Change SETUP_DEPTH_CAMERA=0 if not using depth camera
@@ -105,7 +105,7 @@ nano mavlink-rounter.conf
 ```
 
 - Run the 1st setup script: 
-```
+```console
 sudo ./1_Setup_user_and_update.sh
 ```
 
@@ -128,7 +128,7 @@ sudo ./7_setup_realsense.sh             # librealsense, T265 (default, always us
 ```
 
 - Setup the Wifi access point
-```
+```console
 # First change IFNAME to your system's network interface (example: wlxe0b94d193b9e is my Wifi USB dongle)
 nano install_wifi_access_point.h
 # Then run the script to setup wifi hotspot
@@ -158,7 +158,7 @@ First, setup gstreamer feed in Mission Planner:
 - Installation of [`gstreamer 1.0`](https://gstreamer.freedesktop.org/download/) is required, but should be done automatically by MP.
 - On MP: right-click the HUD > `Video` > `Set GStreamer Source`.
   - Test MP's gstreamer by passing the test pipeline in the Gstreamer url window:
-    ```
+    ```console
     videotestsrc ! video/x-raw, width=1280, height=720,framerate=25/1 ! clockoverlay ! videoconvert ! video/x-raw,format=BGRA ! appsink name=outsink
     ```
   - You should see something similar to this:
@@ -166,7 +166,7 @@ First, setup gstreamer feed in Mission Planner:
 
 The script `d4xx_to_mavlink.py` has an option `RTSP_STREAMING_ENABLE`. If enabled (`True`), a video stream of the RGB image from the depth camera will be available at `rtsp://10.0.1.128:8554/d4xx`:
 - Pass the following pipeline into the Gstreamer url window. Change the ip address if need to:
-``` 
+```console
 rtspsrc location=rtsp://10.0.1.128:8554/d4xx caps=“application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264” latency=100 ! queue ! rtph264depay ! avdec_h264 ! videoconvert ! video/x-raw,format=BGRA ! appsink name=outsink
 ```
 - You should see the RGB image overlay on the HUD.
