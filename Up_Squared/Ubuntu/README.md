@@ -146,6 +146,7 @@ Following the description in the [APSync main wiki](https://ardupilot.org/dev/do
 
 - If Wifi hotspot is enabled, connect to the network `ardupilot` with password `ardupilot`. If you have trouble connecting, consider disabling the password requirement. Once connected to the WiFi network it would be possible to:
   - Connect to AP Web server via the URL `http://10.0.1.128`. Details of available actions on the AP Web server can be found [here](https://ardupilot.org/dev/docs/apsync-intro.html#wifi-access-point-dataflash-logging).
+  ![test_webap](https://i.imgur.com/tO0ATYT.png)
   - ssh to `10.0.1.128` username: `apsync`, password: `apsync`.
 
 - In Mission Planner or other ground station:
@@ -169,5 +170,5 @@ The script `d4xx_to_mavlink.py` has an option `RTSP_STREAMING_ENABLE`. If enable
 ```console
 rtspsrc location=rtsp://10.0.1.128:8554/d4xx caps=“application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264” latency=100 ! queue ! rtph264depay ! avdec_h264 ! videoconvert ! video/x-raw,format=BGRA ! appsink name=outsink
 ```
-- You should see the RGB image overlay on the HUD.
+- You should see the RGB image overlay on the HUD. Additionally, open the Proximity View (`Ctrl-F` > `Proximity`) to visualize the obstacle avoidance data.
   ![img](https://i.imgur.com/NtVY49b.png)
