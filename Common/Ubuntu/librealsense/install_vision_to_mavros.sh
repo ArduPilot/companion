@@ -28,6 +28,8 @@ sudo -H pip3 install pyserial
 if [ $SETUP_DEPTH_CAMERA -eq 1 ]; then
     sudo -H pip3 install numba
     sudo apt -y install python3-opencv
+    sudo apt -y install python3-gst-1.0 gir1.2-gst-rtsp-server-1.0 \
+        gstreamer1.0-plugins-base gstreamer1.0-plugins-ugly libx264-dev
 fi
 
 pushd /home/$NORMAL_USER/GitHub
@@ -56,6 +58,7 @@ if [ $SETUP_DEPTH_CAMERA -eq 1 ]; then
     mkdir /home/$NORMAL_USER/start_d4xx_to_mavlink
     pushd vision_to_mavros/scripts
     cp d4xx_to_mavlink.py /home/$NORMAL_USER/start_d4xx_to_mavlink
+    rm -rf /home/$NORMAL_USER/cfg
     mkdir /home/$NORMAL_USER/cfg
     cp ../cfg/*.json /home/$NORMAL_USER/cfg
     popd
