@@ -35,11 +35,6 @@ pushd /home/$NORMAL_USER/GitHub/companion/Common/Ubuntu
 time ./install_niceties
 popd
 
-# setup wifi access point
-pushd /home/$NORMAL_USER/GitHub/companion/Up_Squared/Ubuntu
-./wifi_access_point.sh
-popd
-
 tput setaf 2
 echo "Success! Finished part 3"
 tput sgr0
