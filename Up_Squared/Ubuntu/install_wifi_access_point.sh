@@ -18,11 +18,10 @@ apt-get -y install wpasupplicant
 sudo systemctl disable dnsmasq
 
 # Create Access Point
-APNAME="WiFiAP"
 SSID="ardupilot"
 KEY="ardupilot"
-IFNAME=wlan0
-# IFNAME=wlxe0b94d193b9e
+# IFNAME=wlan0
+IFNAME=wlxe0b94d193b9e
 
 # add IP address range to /etc/dnsmasq.conf
 dd of=/etc/dnsmasq.d/$APNAME.conf <<EOF
@@ -32,12 +31,10 @@ EOF
 
 sudo systemctl disable dnsmasq
 
-nmcli connection add type wifi ifname $IFNAME con-name $APNAME ssid $SSID
-nmcli connection modify $APNAME connection.autoconnect yes
-nmcli connection modify $APNAME 802-11-wireless.mode ap
-nmcli connection modify $APNAME 802-11-wireless.band bg
-nmcli connection modify $APNAME ipv4.method shared
-nmcli connection modify $APNAME wifi-sec.key-mgmt wpa-psk
-nmcli connection modify $APNAME ipv4.addresses 10.0.1.128/24
-nmcli connection modify $APNAME wifi-sec.psk "$KEY"
-nmcli connection up $APNAME
+nmcli dev wifi hotspot ifname $IFNAME ssid $SSID password $KEY
+nmcli connection modify Hotspot connection.autoconnect yes
+nmcli connection modify Hotspot 802-11-wireless.mode ap
+nmcli connection modify Hotspot 802-11-wireless.band bg
+nmcli connection modify Hotspot ipv4.method shared
+nmcli connection modify Hotspot wifi-sec.key-mgmt wpa-psk
+nmcli connection modify Hotspot ipv4.addresses 10.0.1.128/24
