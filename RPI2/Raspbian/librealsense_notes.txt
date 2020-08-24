@@ -1,0 +1,170 @@
+# These are some notes for building librealsense from source for Raspbian, tested on Raspberry pi 4
+
+# Raise swap memory for being able to compile with four cores
+
+sudo nano /etc/dphys-swapfile
+
+# Raise this value inside that text file
+
+CONF_SWAPSIZE=2048
+
+# Make the changes above efective
+
+sudo /etc/init.d/dphys-swapfile restart swapon -s
+
+# install some dependencies for librealsense
+
+sudo apt-get install -y libdrm-amdgpu1 libdrm-amdgpu1-dbgsym libdrm-dev libdrm-exynos1 libdrm-exynos1-dbgsym libdrm-freedreno1 libdrm-freedreno1-dbgsym libdrm-nouveau2 libdrm-nouveau2-dbgsym libdrm-omap1 libdrm-omap1-dbgsym libdrm-radeon1 libdrm-radeon1-dbgsym libdrm-tegra0 libdrm-tegra0-dbgsym libdrm2 libdrm2-dbgsym
+
+sudo apt-get install -y libglu1-mesa libglu1-mesa-dev glusterfs-common libglu1-mesa libglu1-mesa-dev libglui-dev libglui2c2
+
+sudo apt-get install -y libglu1-mesa libglu1-mesa-dev mesa-utils mesa-utils-extra xorg-dev libgtk-3-dev libusb-1.0-0-dev
+
+# clone librealsense repo and update udev rule 
+
+cd ~
+git clone https://github.com/IntelRealSense/librealsense.git
+cd librealsense
+sudo cp config/99-realsense-libusb.rules /etc/udev/rules.d/ 
+sudo udevadm control --reload-rules && sudo udevadm trigger 
+
+# install cmake
+
+sudo apt-get install cmake
+
+# install autoconf and libtool dependency for protobuf
+
+sudo apt-get install autoconf
+
+sudo apt-get install libtool
+
+# build and install protobuf
+
+git clone https://github.com/google/protobuf.git
+
+cd protobuf
+
+git checkout v3.9.2
+
+./autogen.sh
+
+./configure
+
+make -j4
+
+sudo make install
+
+cd python 
+
+export LD_LIBRARY_PATH=../src/.libs
+
+python3 setup.py build --cpp_implementation 
+
+# this test don't pass on ARM, but the error is apparently only on the test code, so we should be good to go
+
+python3 setup.py test --cpp_implementation
+
+# -------------------------------------------------------------------------
+
+sudo python3 setup.py install --cpp_implementation
+
+export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=cpp
+
+export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION_VERSION=3
+
+sudo ldconfig
+
+# check it has been properly installed
+
+protoc --version
+
+# intall tbb
+
+cd ~
+
+wget https://github.com/PINTO0309/TBBonARMv7/raw/master/libtbb-dev_2018U2_armhf.deb
+
+sudo dpkg -i ~/libtbb-dev_2018U2_armhf.deb
+
+sudo ldconfig
+
+rm libtbb-dev_2018U2_armhf.deb
+
+# opencv, remove old one first in case there is a native opencv package installed
+
+sudo apt install libopencv-dev
+
+# build and install librealsense ( we should have the repo from the first step )
+
+cd ~/librealsense
+
+mkdir  build  && cd build
+
+cmake .. -DBUILD_EXAMPLES=true -DCMAKE_BUILD_TYPE=Release -DFORCE_LIBUVC=true
+
+make -j4
+
+sudo make install
+
+# build and install pyrealsense2
+
+cd ~/librealsense/build
+
+# for python2 ( untested )
+cmake .. -DBUILD_PYTHON_BINDINGS=bool:true -DPYTHON_EXECUTABLE=$(which python)
+
+# for python3, tested
+cmake .. -DBUILD_PYTHON_BINDINGS=bool:true -DPYTHON_EXECUTABLE=$(which python3)
+
+make -j4
+sudo make install
+
+# add python path to bashrc
+
+nano ~/.bashrc
+
+export PYTHONPATH=$PYTHONPATH:/usr/local/lib
+
+source ~/.bashrc
+
+# enable gl
+
+sudo apt-get install python-opengl
+sudo -H pip3 install pyopengl
+sudo -H pip3 install pyopengl_accelerate
+sudo raspi-config
+
+# select:  "7.Advanced Options" - "A7 GL Driver" - "G2 GL (Fake KMS)"
+
+sudo reboot
+
+# opencv for python
+
+sudo pip3 install opencv-contrib-python==4.1.0.25
+
+# python librealsense libraries are in the wrong path, need to move them one level up
+
+cd /usr/lib/python3/dist-packages/pyrealsense2
+
+sudo cp * ../
+
+# some python dependenceis 
+
+pip3 install transformations
+pip3 install dronekit
+pip3 install apscheduler
+
+# Install serial packages for serial connection
+sudo pip3 install pyserial
+
+# Remember to return swapsize to original value after proceeding
+
+sudo nano /etc/dphys-swapfile
+
+# modify the line
+
+CONF_SWAPSIZE=100
+
+# Make the changes above efective
+
+sudo /etc/init.d/dphys-swapfile restart swapon -s
