@@ -133,7 +133,7 @@ sudo ./7_setup_realsense.sh             # librealsense, T265 (default, always us
 # First change IFNAME to your system's network interface (example: wlxe0b94d193b9e is my Wifi USB dongle)
 nano install_wifi_access_point.h
 # Then run the script to setup wifi hotspot
-sudo ./install_wifi_access_point.sh     # Setup a wifi hotspot with ssid/password ardupilot/ardupilot
+sudo ./install_wifi_access_point.sh     # Setup a wifi hotspot with ssid/password ArduPilot/ardupilot
 ```
 
 This completes the installation of AP Sync you are now ready to prepare the image for cloning.
@@ -143,7 +143,7 @@ This completes the installation of AP Sync you are now ready to prepare the imag
 ### 5.1 Main components
 Following the description in the [APSync main wiki](https://ardupilot.org/dev/docs/apsync-intro.html) to test the main components. The data flows are described [here](https://ardupilot.org/dev/docs/apsync-intro.html#how-flight-controller-data-is-routed-to-various-programs).
 
-- If Wifi hotspot is enabled, connect to the network `ardupilot` with password `ardupilot`. If you have trouble connecting, consider disabling the password requirement. Once connected to the WiFi network it would be possible to:
+- If Wifi hotspot is enabled, connect to the network `ArduPilot` with password `ardupilot`. If you have trouble connecting, consider disabling the password requirement. Once connected to the WiFi network it would be possible to:
   - Connect to AP Web server via the URL `http://10.0.1.128`. Details of available actions on the AP Web server can be found [here](https://ardupilot.org/dev/docs/apsync-intro.html#wifi-access-point-dataflash-logging).
   ![test_webap](https://i.imgur.com/tO0ATYT.png)
   - ssh to `10.0.1.128` username: `apsync`, password: `apsync`.
