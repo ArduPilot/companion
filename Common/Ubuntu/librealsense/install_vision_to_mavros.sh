@@ -26,7 +26,6 @@ sudo -H pip3 install apscheduler
 sudo -H pip3 install dronekit
 sudo -H pip3 install pyserial
 if [ $SETUP_DEPTH_CAMERA -eq 1 ]; then
-    sudo -H pip3 install numba
     sudo apt -y install python3-opencv
     sudo apt -y install python3-gst-1.0 gir1.2-gst-rtsp-server-1.0 \
         gstreamer1.0-plugins-base gstreamer1.0-plugins-ugly libx264-dev
