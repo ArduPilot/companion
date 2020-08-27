@@ -88,7 +88,7 @@ sudo apt install git
 cd ~
 mkdir GitHub
 pushd GitHub
-git clone https://github.com/thien94/companion.git # TO-DO: Change back to https://github.com/ardupilot/companion before pushing the PR
+git clone https://github.com/ardupilot/companion
 ```
 - Change the configurations according to your hardware system:
 ```console
@@ -117,7 +117,7 @@ pushd GitHub/companion/Up_Squared/Ubuntu
 sudo ./2_Clone_Repo_Disable_console_sethost.sh
 ```
 
-- The UP2 will automatically reboot. Log back in as `apsync` and run the rest of the scripts to complete the installation.
+- The UP2 will automatically reboot. You need to log back in as `apsync` and run the rest of the scripts to complete the installation. For each script, I suggest skimming through to get the idea behind, decide whether it applies to your case and skip any deemed unnecessary.
 ```console
 pushd GitHub/companion/Up_Squared/Ubuntu
 sudo ./3_Setup_Network_and_Packages.sh  # Common packages and wifi hotspot
@@ -126,6 +126,7 @@ sudo ./5_setup_mavproxy.sh              # MavProxy running on the companion comp
 sudo ./6_setup_uhubctl.sh               # Auto cycle the USB hub, if there is one
 sudo ./7_setup_realsense.sh             # librealsense, T265 (default, always used) and D4xx (optional) cameras
 ```
+> Note: The installation of `librealsense` may take 2-3 hours to finish.
 
 - Setup the Wifi access point
 ```console
@@ -134,8 +135,6 @@ nano install_wifi_access_point.h
 # Then run the script to setup wifi hotspot
 sudo ./install_wifi_access_point.sh     # Setup a wifi hotspot with ssid/password ardupilot/ardupilot
 ```
-
-- For each script, I suggest skimming through to figure out if it applies to your case and skip any deemed unnecessary.
 
 This completes the installation of AP Sync you are now ready to prepare the image for cloning.
 
