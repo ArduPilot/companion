@@ -18,7 +18,7 @@ apt-get -y install wpasupplicant
 sudo systemctl disable dnsmasq
 
 # Create Access Point
-SSID="ardupilot"
+SSID="ArduPilot"
 KEY="ardupilot"
 # IFNAME=wlan0
 IFNAME=wlxe0b94d193b9e
