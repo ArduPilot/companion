@@ -11,7 +11,7 @@ echo "Build latest version of librealsense"
 tput sgr0
 
 LIBREALSENSE_DIRECTORY=${HOME}/GitHub/librealsense
-LIBREALSENSE_VERSION=v2.35.2
+LIBREALSENSE_VERSION=v2.36.0
 INSTALL_DIR=$PWD
 NVCC_PATH=/usr/local/cuda-10.0/bin/nvcc
 
