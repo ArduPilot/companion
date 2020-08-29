@@ -18,5 +18,3 @@ popd
 tput setaf 2
 echo "Finished installing Intel Realsense Drivers and Pose Scripts"
 tput sgr0
-popd
-
