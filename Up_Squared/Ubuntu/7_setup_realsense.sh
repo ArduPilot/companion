@@ -22,5 +22,3 @@ else
    echo 'Success! Finished part 7: installing Intel Realsense Drivers and Pose Script'
 fi
 tput sgr0
-popd
-
