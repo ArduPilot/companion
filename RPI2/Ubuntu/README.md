@@ -4,7 +4,7 @@ These instructions create an APSync image for the RPI4 based on the official Ubu
 
 Download Ubuntu LTS image from https://ubuntu.com/download/raspberry-pi.  18.04 is the recommended image, for RPi3 and RPi4 use the 64bit image because even though there are only marginal difference between using 32bit vs 64bit, using the 64bit image provides common ground between our images.
 
-Flash image onto SD card using Balena Etcher which can be downloaded from https://www.balena.io/etcher/
+Flash image onto SD card using Balena Etcher which can be downloaded from https://www.balena.io/etcher/.   This steps takes about 10min.
 
 Note: these instructions require at least an 8GB card.  If building an image for general use an 8GB card so that the final image is kept as small as possible.
 
@@ -45,7 +45,7 @@ with this ip-address you can now ssh into the RaspberryPi from the host machine:
 ssh ubuntu@ip-address
 ```
 
-Once you log in, clone the companion repository and run the 1st setup script
+Once you log in, clone the companion repository and run the 1st setup script (this step takes about 20min)
 ```console
 mkdir GitHub
 pushd GitHub
@@ -54,7 +54,7 @@ pushd companion/RPI2/Ubuntu
 sudo ./1_Setup_user_and_update.sh
 ```
 
-Reboot the RPI and log back in using the apsync user, then run the following:
+Reboot the RPI and log back in using the apsync user, then run the following: (this step takes about 5min)
 ```console
 pushd GitHub/companion/RPI2/Ubuntu
 sudo ./2_Clone_Repo_Disable_console_sethost.sh
@@ -63,10 +63,10 @@ sudo ./2_Clone_Repo_Disable_console_sethost.sh
 The RPi will automatically reboot. Log back in as apsync and run the following:
 ```console
 pushd GitHub/companion/RPI2/Ubuntu
-sudo ./3_Setup_Network_and_Packages.sh
-sudo ./4_setup_apsync_components.sh
-sudo ./5_setup_uhubctl.sh
-sudo ./6_setup_realsense.sh
+sudo ./3_Setup_Network_and_Packages.sh  (this steps takes about 20min)
+sudo ./4_setup_apsync_components.sh     (this steps takes about 10min)
+sudo ./5_setup_uhubctl.sh               (this steps takes about 1min)
+sudo ./6_setup_realsense.sh             (this steps takes about 90min)
 ```
 
 **(Warning, compiling the Intel Realsense Drivers on the RPi3 takes around 20hrs and requires a large swap file)**
