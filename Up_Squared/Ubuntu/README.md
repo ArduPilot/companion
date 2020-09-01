@@ -124,7 +124,8 @@ sudo ./3_Setup_Network_and_Packages.sh  # Common packages and wifi hotspot
 sudo ./4_setup_apsync_components.sh     # Web-based user interface
 sudo ./5_setup_mavproxy.sh              # MavProxy running on the companion computer
 sudo ./6_setup_uhubctl.sh               # Auto cycle the USB hub, if there is one
-sudo ./7_setup_realsense.sh             # librealsense, T265 (default, always used) and D4xx (optional) cameras
+sudo ./7_setup_realsense.sh             # librealsense driver installation
+sudo ./8_setup_vision_to_mavros.sh      # vision_to_mavros scripts for T265 (default, always used) and D4xx (optional) cameras
 ```
 > Note: The installation of `librealsense` may take 2-3 hours to finish.
 
