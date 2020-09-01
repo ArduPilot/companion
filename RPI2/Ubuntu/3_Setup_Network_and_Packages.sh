@@ -22,6 +22,11 @@ tput sgr0
 apt remove modemmanager
 
 tput setaf 3
+echo "removing cloud-init"
+tput sgr0
+apt remove cloud-init
+
+tput setaf 3
 echo "installing avahi-daemon"
 tput sgr0
 apt install avahi-daemon -y
