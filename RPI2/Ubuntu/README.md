@@ -67,6 +67,7 @@ sudo ./3_Setup_Network_and_Packages.sh  (this steps takes about 20min)
 sudo ./4_setup_apsync_components.sh     (this steps takes about 10min)
 sudo ./5_setup_uhubctl.sh               (this steps takes about 1min)
 sudo ./6_setup_realsense.sh             (this steps takes about 90min)
+sudo ./7_setup_vision_to_mavros.sh      (this steps takes about 5min)
 ```
 
 **(Warning, compiling the Intel Realsense Drivers on the RPi3 takes around 20hrs and requires a large swap file)**
