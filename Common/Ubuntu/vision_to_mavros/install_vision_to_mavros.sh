@@ -41,15 +41,13 @@ pushd vision_to_mavros/scripts
 cp t265_to_mavlink.py /home/$NORMAL_USER/start_t265_to_mavlink
 popd
 popd
-cp autostart_t265.sh /home/$NORMAL_USER/start_t265_to_mavlink
 cp start_t265.sh /home/$NORMAL_USER/start_t265_to_mavlink
 cp stop_t265.sh /home/$NORMAL_USER/start_t265_to_mavlink
 cp view_log_t265.sh /home/$NORMAL_USER/start_t265_to_mavlink
 sudo cp t265.service /etc/systemd/system
 
-# add line to /etc/rc.local to start t265 service
-LINE="/bin/bash -c '~$NORMAL_USER/start_t265_to_mavlink/autostart_t265.sh'"
-sudo perl -pe "s%^exit 0%$LINE\\n\\nexit 0%" -i /etc/rc.local
+# enable t265 service to start automatically
+systemctl enable t265.service
 
 if [ $SETUP_DEPTH_CAMERA -eq 1 ]; then
     pushd /home/$NORMAL_USER/GitHub
@@ -62,15 +60,13 @@ if [ $SETUP_DEPTH_CAMERA -eq 1 ]; then
     cp ../cfg/*.json /home/$NORMAL_USER/cfg
     popd
     popd
-    cp autostart_d4xx.sh /home/$NORMAL_USER/start_d4xx_to_mavlink
     cp start_d4xx.sh /home/$NORMAL_USER/start_d4xx_to_mavlink
     cp stop_d4xx.sh /home/$NORMAL_USER/start_d4xx_to_mavlink
     cp view_log_d4xx.sh /home/$NORMAL_USER/start_d4xx_to_mavlink
     sudo cp d4xx.service /etc/systemd/system
 
-    # add line to /etc/rc.local to start d4xx service
-    LINE="/bin/bash -c '~$NORMAL_USER/start_d4xx_to_mavlink/autostart_d4xx.sh'"
-    sudo perl -pe "s%^exit 0%$LINE\\n\\nexit 0%" -i /etc/rc.local
+    # enable d4xx service to start automatically
+    systemctl enable d4xx.service
 fi
 
 tput setaf 2
