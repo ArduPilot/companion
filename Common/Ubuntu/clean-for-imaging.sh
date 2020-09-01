@@ -17,5 +17,7 @@ rm -f /home/$NORMAL_USER/.ssh/authorized_keys
 rm -f /home/$NORMAL_USER/dflogger/dataflash/*
 rm -f /home/$NORMAL_USER/start*/screenlog.0
 rm -f /home/$NORMAL_USER/start*/start_*.log
+rm -f /var/log/*
+history -c
 apt-get autoremove -y
 apt-get clean
