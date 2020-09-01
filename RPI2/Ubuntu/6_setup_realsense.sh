@@ -12,9 +12,8 @@ set -x
 
 pushd /home/$NORMAL_USER/GitHub/companion/Common/Ubuntu/librealsense
 time ./install_librealsense.sh
-time ./install_vision_to_mavros.sh
 popd
 
 tput setaf 2
-echo "Finished installing Intel Realsense Drivers and Pose Scripts"
+echo "Finished installing Intel Realsense Drivers"
 tput sgr0
