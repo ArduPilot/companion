@@ -1,0 +1,26 @@
+#!/bin/bash
+
+set -e
+set -x
+
+function fail() {
+    echo "Fail: $*"
+    exit 1
+}
+
+STREAM_TO_IP=$1
+if test -z "$STREAM_TO_IP"; then
+    fail "Need an IP to stream to"
+fi
+shift
+
+
+# Load the RPi Camera V4L2 Driver
+sudo modprobe bcm2835-v4l2
+
+# For getting a stream which automatically adjusts the quality according to the 
+# connection quality. Use the following gst-launch command to make it work:
+# gst-launch-1.0 -v rtpbin latency=0 name=rtpbin udpsrc caps="application/x-rtp,media=(string)video,clock-rate=(int)90000,encoding-name=(string)H264,payload=96" port=5000 !  rtpbin.recv_rtp_sink_0 rtpbin. ! rtph264depay ! h264parse ! avdec_h264 ! autovideosink udpsrc port=5001 ! rtpbin.recv_rtcp_sink_0 rtpbin.send_rtcp_src_0 ! udpsink port=5001 sync=false async=false host=10.0.1.128
+# By default, port 5000 is used for RTP and port 5001 is used for RTCP
+
+adaptive_streaming /dev/video0 $STREAM_TO_IP raw
