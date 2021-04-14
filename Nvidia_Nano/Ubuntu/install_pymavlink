@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# install pymavlink from github
+
+if [ $(id -u) -ne 0 ]; then
+   echo >&2 "Must be run as root"
+   exit 1
+fi
+
+set -e
+set -x
+
+sudo -u $NORMAL_USER -H bash <<EOF
+set -e
+set -x
+
+pushd ~/GitHub
+ rm -rf mavlink
+ git clone --recurse-submodules https://github.com/ardupilot/mavlink
+
+ rm -rf pymavlink
+ git clone --recurse-submodules https://github.com/ardupilot/pymavlink
+ pushd pymavlink
+  export MDEF=~/GitHub/mavlink/message_definitions
+  python setup.py build install --user --force
+ popd
+popd
+
+EOF
