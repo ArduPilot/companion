@@ -209,6 +209,20 @@ time ./install_pymavlink # new version required for apweb #1m
 # Install jetson-stats utility and Adafruit I2C python display driver
 pip install jetson-stats
 pip install Adafruit_SSD1306
+pip install pillow
+
+cp -r start_display $HOME/
+
+# Install pioled display stats service
+pushd $HOME/start_display
+./create_stats_service.py
+sudo mv jetbot_stats.service /lib/systemd/system/
+sudo systemctl enable jetbot_stats.service
+popd
+
+# Build CUDA enabled OpenCV
+time ./build_opencv.sh 4.5.2
+
 
 if [ $companion == "TX2" ]; then
     cp ./mavlink-router-TX2.conf /home/$NORMAL_USER/start_mavlink-router/mavlink-router.conf
