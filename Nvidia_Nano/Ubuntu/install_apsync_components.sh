@@ -31,6 +31,7 @@ function shouldSetCompanion
     echo "   TX2"
     echo "   Xavier"
     echo "   Nano"
+    echo "   XavierNX"
     echo ""
     echo "Aborting installation"
 }
@@ -72,6 +73,8 @@ for companion in "${companion[@]}"; do
   elif [[ $companion == "Nano" ]]; then
     hasCompanion=true
     break
+  elif [[ $companion == "XavierNX" ]]; then
+    hasCompanion=true
   fi
 done
 
@@ -107,7 +110,11 @@ set -e
 set -x
 
 # Set the nvpmodel to MAXN
-nvpmodel -m 0
+if [[ $companion != "XavierNX" ]]; then
+   nvpmodel -m 0
+else
+   nvpmodel -m 2
+fi
 
 . ./config.env
 
@@ -209,6 +216,8 @@ elif [ $companion == "Xavier" ]; then
     cp ./mavlink-router-Xavier.conf /home/$NORMAL_USER/start_mavlink-router/mavlink-router.conf
 elif  [ $companion == "Nano" ]; then
     cp ./mavlink-router-Nano.conf /home/$NORMAL_USER/start_mavlink-router/mavlink-router.conf
+elif [ $companion == "XavierNX" ]; then
+    cp ./mavlink-router-Xavier.conf /home/$NORMAL_USER/start_mavlink-router/mavlink-router.conf
 fi
 
 # Build & Install librealsense from source 2.44.0 as of Apr 1, 2021
