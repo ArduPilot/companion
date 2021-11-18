@@ -215,13 +215,13 @@ cp -r start_display $HOME/
 
 # Install pioled display stats service
 pushd $HOME/start_display
-./create_stats_service.py
+python3 create_stats_service.py
 sudo mv jetbot_stats.service /lib/systemd/system/
 sudo systemctl enable jetbot_stats.service
 popd
 
 # Build CUDA enabled OpenCV
-time ./build_opencv.sh 4.5.4pip
+time ./build_opencv.sh 4.5.4
 
 
 if [ $companion == "TX2" ]; then
