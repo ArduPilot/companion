@@ -203,7 +203,7 @@ export START_UDP_STREAM_SCRIPT="$PWD/start_udp_stream"
 
 time ./install_cherrypy # 11s  This is optional
 
-time apt-get install -y libxml2-dev libxslt1.1 libxslt1-dev
+time apt-get install -y libxml2-dev libxslt1.1 libxslt1-dev libjpeg-dev
 time ./install_pymavlink # new version required for apweb #1m
 
 # Install jetson-stats utility and Adafruit I2C python display driver
@@ -221,7 +221,7 @@ sudo systemctl enable jetbot_stats.service
 popd
 
 # Build CUDA enabled OpenCV
-time ./build_opencv.sh 4.5.2
+time ./build_opencv.sh 4.5.4pip
 
 
 if [ $companion == "TX2" ]; then

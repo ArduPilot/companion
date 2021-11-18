@@ -126,4 +126,4 @@ fi
 
 export LS_COLORS="di=96:ex=92:"
 
-export PATH=$PATH:/home/apsync/start_mavproxy
+export PATH=$PATH:/home/jaime/start_mavproxy
