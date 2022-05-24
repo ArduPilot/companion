@@ -16,6 +16,7 @@ function usage
     echo "                                      TX2"
     echo "                                      Xavier"
     echo "                                      Nano"
+    echo "                                      XavierNX"
     echo "-ap | --wifiap <ssid> Enable WiFi access point"
     echo "                      none = leave WiFi config unchanged"
     echo "                      ssid-name = type the desired ssid name"
@@ -125,6 +126,7 @@ cp ./bashrc-final /home/$NORMAL_USER/.bashrc
 apt update -y
 apt upgrade -y
 
+apt install apt-utils -y
 apt install rsync -y
 apt install nano -y
 apt -y autoremove # avoid repeated no-longer-required annoyance
@@ -174,7 +176,7 @@ systemctl disable dnsmasq
 # add IP address range to /etc/dnsmasq.conf
 dd of=/etc/NetworkManager/dnsmasq.d/$wifi.conf <<EOF
 interface=wlan0
-dhcp-range=192.168.13.129,192.168.13.138,12h
+dhcp-range=10.0.10.100,10.0.10.140,12h
 EOF
 
 sudo systemctl disable dnsmasq
@@ -189,7 +191,7 @@ nmcli connection modify $wifi 802-11-wireless.band a
 nmcli connection modify $wifi ipv4.method shared
 nmcli connection modify $wifi ipv6.method ignore
 nmcli connection modify $wifi wifi-sec.key-mgmt wpa-psk
-nmcli connection modify $wifi ipv4.addresses 192.168.13.128/24
+nmcli connection modify $wifi ipv4.addresses 10.0.10.1/24
 nmcli connection modify $wifi wifi-sec.psk "ardupilot"
 nmcli connection modify $wifi 802-11-wireless-security.group ccmp
 nmcli connection modify $wifi 802-11-wireless-security.pairwise ccmp
@@ -201,7 +203,7 @@ time ./setup_mavproxy.sh
 
 export START_UDP_STREAM_SCRIPT="$PWD/start_udp_stream"
 
-time ./install_cherrypy # 11s  This is optional
+# time ./install_cherrypy # 11s  This is optional
 
 time apt-get install -y libxml2-dev libxslt1.1 libxslt1-dev libjpeg-dev
 time ./install_pymavlink # new version required for apweb #1m
@@ -235,7 +237,8 @@ elif [ $companion == "XavierNX" ]; then
 fi
 
 # Build & Install librealsense from source 2.44.0 as of Apr 1, 2021
-time ./buildLibrealsense.sh
+# TODO make this a commandline option
+# time ./buildLibrealsense.sh
 
 sudo systemctl enable mavlink-router.service 
 
