@@ -76,6 +76,7 @@ time sudo ./8_red_balloon_finder.sh || echo "Failed" # 18s
 time sudo ./5_setup_mavproxy.sh # 2s
 time sudo ./install_pymavlink # new version required for apweb # 3m
 time sudo ./install_apweb # 2m33s
+time sudo ./install_apstreamline
 time sudo ./resize_filesystem_on_next_boot
 popd
 

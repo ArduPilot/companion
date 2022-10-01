@@ -5,5 +5,5 @@
 
 set -e
 set -x
-
+export PATH="$PATH:/home/apsync/start_apstreamline/bin"
 ./web_server -p 80 -f 14755

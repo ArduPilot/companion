@@ -32,9 +32,8 @@ cp autostart_apweb.sh \$APWEB_HOME/
 
 pushd ~/GitHub
  rm -rf APWeb
- git clone --recurse-submodules https://github.com/peterbarker/APWeb
+ git clone --recurse-submodules -b video_streaming https://github.com/shortstheory/APWeb.git
  pushd APWeb
-  git checkout apsync
   git submodule update --init
   time (make | cat)
   cp web_server \$APWEB_HOME
