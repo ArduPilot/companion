@@ -1,0 +1,5 @@
+numpy==1.24.1
+opencv-python==4.7.0.68
+opencv-contrib-python==4.7.0.68
+matplotlib==3.6.2
+pyexiv2==2.8.1
