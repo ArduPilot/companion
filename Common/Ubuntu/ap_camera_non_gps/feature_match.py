@@ -150,12 +150,10 @@ def offset_latlng(lat,lng,ofs_north,ofs_east):
     lng = wrap_longitude(dlng+lng)
     print("New Lat & Lng: ",lat,lng)
 
-def MAX(one, two):
-    return one if one > two else two
 
 def longitude_scale(lat):
     scale = math.cos(lat * (1.0e-7 * (math.pi/180)))
-    return MAX(scale, 0.01)
+    return max(scale, 0.01)
 
 
 def limit_lattitude(lat):
